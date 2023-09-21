@@ -1,0 +1,300 @@
+ body {
+  margin: 0;
+ }
+ /************************************************ */
+/* BARRA DE NAVEGACIÓN */
+
+ /* Navbar container */
+.barranav {
+  overflow: hidden;
+  background-color: #333;
+  font-family: Arial;
+}
+
+/* Links inside the navbar */
+.barranav a {
+  float: left;
+  font-size: 16px;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+/* The dropdown container */
+.menu-desplegable {
+  float: left;
+  overflow: hidden;
+}
+
+/* Dropdown button */
+.menu-desplegable .dropboton {
+  font-size: 16px;
+  border: none;
+  outline: none;
+  color: white;
+  padding: 14px 16px;
+  background-color: inherit;
+  font-family: inherit; /* Important for vertical align on mobile phones */
+  margin: 0; /* Important for vertical align on mobile phones */
+}
+
+/* Add a red background color to navbar links on hover */
+.barranav a:hover, .menu-desplegable:hover .dropboton {
+  background-color: red;
+}
+
+/* Dropdown content (hidden by default) */
+.menu-desplegable-content {
+  display: none;
+  position: absolute;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  z-index: 1;
+}
+
+/* Links inside the dropdown */
+.menu-desplegable-content a {
+  float: none;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+  text-align: left;
+}
+
+/* Add a grey background color to dropdown links on hover */
+.menu-desplegable-content a:hover {
+  background-color: #ddd;
+  text-decoration: none;
+}
+
+/* Show the dropdown menu on hover */
+.menu-desplegable:hover .menu-desplegable-content {
+  display: block;
+} 
+
+
+
+ /************************************************ */
+/* MENÚ DE CONFIGURACIÓN DE LA DERECHA */
+
+ /* Style the tab */
+ .pestanas {
+  overflow-x: scroll; /*Permite scroll pestañas al redimensionar ventana*/
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+
+  display: flex;
+  justify-content: space-around;
+
+  /*-webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  white-space: nowrap;*/
+
+  position: sticky;
+  top: 0;
+}
+
+/* Style the buttons that are used to open the tab content */
+.pestanas button {
+  background-color: inherit;
+  /*float: left;Redundante*/
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+
+  position: sticky;
+}
+
+/* Change background color of buttons on hover */
+.pestanas button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.pestanas button.active {
+  background-color: #ccc;
+}
+
+/* Style the tab content */
+.pestana-content {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+
+  /*overflow: auto; Redundante*/
+  /*height:max-content; Impide overflow*/
+} 
+
+.menu-derecha {
+  display: block;
+  /*float: right;Redundante*/
+  width: 27%;
+  height: calc(100vh - 52px); /*100% - barra nav*/
+  overflow: auto; 
+
+  min-width: 225px;
+}
+ /************************************************ */
+/* ELEMENTOS DEL MENÚ DE CONFIGURACIÓN DE LA DERECHA */
+
+.boton {
+  width: 100%;
+  /*height: 24px; Conflicto con Bootstrap si simultáneo*/
+}
+
+.fila {
+  display: flex;
+  align-items: center;
+}
+
+.fila button, .update-boton, .valid-boton{
+  min-width: 10%;
+  height: 37px;
+}
+
+.positions > .fila button:nth-of-type(1) { /*Posible menor especificidad*/
+  width: 10%;
+}
+
+.positions > .fila button:nth-of-type(2) {
+  width: 95%;
+}
+
+.layers {
+  display: flex;
+  width: 100%;
+  min-height: 200px;
+  border: 0.3px lightgray solid;
+}
+
+.layers-botones > .fila button {
+  width: 100%;
+}
+
+.layers-botones {
+  width: 25%;
+}
+
+.layers-nombre {
+  width: 75%;
+  /*border: 1px solid #ccc;*/
+  margin: 0;
+  /*padding-left: 7px;*/
+}
+
+#layers-nombre {
+  border: none;
+}
+
+.layers-nombreopt { /*Altura de los nombres (opciones)*/
+  height: 37px;
+}
+
+.select {
+  width: 100%;
+  /*height: 35vh;*/
+}
+
+.select-elements, .select-compounds {
+  height: 35vh;
+}
+
+.panel {
+  padding: 10px;
+}
+
+hr {
+  background-color: black;
+  height: 1px;
+}
+
+/************************************************ */
+/* BARRAS DE DESLIZADOR (MENÚ DE LA DERECHA)*/
+.centered {
+  text-align: center;
+}
+
+.slider-input {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: auto;
+}
+
+.slider-input .value {
+  font-size: 18px;
+  font-weight: 600;
+  margin: auto;
+}
+
+.slider-input .boton {
+  width: 85%;
+}
+
+.slider-box {
+ text-align: center;
+ display: flex;
+ align-items: center;
+ justify-content: center;
+ max-width: 150px;
+ width: 200px;
+ margin: auto;
+}
+
+/************************************************ */
+/* DISPOSICIÓN DEL CONTENIDO PRINCIPAL */
+
+/* Contenido del menú de la derecha */
+.contenido {
+  display: flex;
+  flex-direction: row-reverse;
+}
+
+/* Aspecto del canvas*/
+#canvas1 {
+  /*position: absolute;*/
+  background: black;
+  /*width: 69%; Lo he puesto desde JS
+  height: 100%;/*Ya está en*/
+  border: 3px solid #333;
+  overflow: hidden;
+  height: calc(100vh - 53px); /*100% del alto - barra de navegación - bordes */
+  width: 65%;
+}
+
+/************************************************ */
+/* MENÚ DE LA IZQUIERDA */
+#menu-izquierda {
+  width: 8%;
+  display: none;
+}
+
+#menu-izquierda > h2 {
+  text-align: center;
+}
+
+.color-canvas {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border: solid 1px black;
+}
+
+#openColorCanvas {
+  margin: auto;
+  display: block;
+}
+
+#barra-color {
+  margin: auto;
+  padding-top: 5px;
+  display: block;
+  height: 80vh;
+  width: 100px;
+}

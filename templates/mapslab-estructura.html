@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="es">
+	<head>
+		<meta charset="utf-8">
+		<title>MapsLab</title>
+
+		<!-- Librería para iconos-->
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <!-- CSS Personalizado de Laura-->
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mapslab-aspecto.css') }}">
+        <!-- Framework CSS: Bootstrap-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+        <!-- Responsive para móviles. Necesario si Bootstrap -->
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+		<!-- Importación de Three.js al proyecto-->
+		<script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+		<script type="importmap">
+		  {
+			"imports": {
+			  "three": "https://unpkg.com/three@v0.155.0/build/three.module.js",
+			  "three/addons/": "https://unpkg.com/three@v0.155.0/examples/jsm/"
+			}
+		  }
+		</script> <!-- Fin Three.js -->
+	</head>
+	<body>
+        <!-- Ventanas modales de toda la aplicación -->
+        <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="infoModal" aria-hidden="true"> <!-- Ventana modal de pestaña "Help > Info" -->
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="infoModal">Info</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"> <!-- Contenido del modal (información) -->
+                        <h5>General information</h5>
+                        <p>XMapsLab v1.0.0 28.08.23</p>
+                        <p>Created by Domingo Martín <a href="mailto:dmartin.ugr.es">(dmartin@ugr.es)</a></p>
+                        <p>This application is part of a research project. All the information is at: <a href="https://xmapslab.org">https://xmapslab.org</a></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Finish</button>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Fin ventana modal de pestaña "Help > Info" -->
+
+        <div class="modal fade" id="colorModal" tabindex="-1" role="dialog" aria-labelledby="colorModal" aria-hidden="true"> <!-- Ventana modal de "openColor" -->
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalTitle">Pick a color</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body"> <!-- Contenido del modal (selector de color)-->
+                        <canvas id="colorCanvas" class="color-canvas" width="450px" height="200px"></canvas>
+                        <hr/> <!-- Separador horizontal -->
+                        <canvas id="showColor" class="color-canvas" width="90px" height="40px"></canvas>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" id="cancel-color">Cancel</button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal" id="ok-color">Ok</button>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- Fin ventana modal de "openColor" -->
+
+        <!-- Alertas de toda la aplicación -->
+        <div class="alert alert-danger alert-dismissible fade show" role="alert" id="alertMaterialUndefined" style="display: none">
+            ¡El material de esta capa <strong>no</strong> está definido aún!
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+		<header>
+            <nav> <!-- Barra de navegación -->
+                <div class="barranav">
+                    <div class="menu-desplegable"> <!-- Menú "File" de la barra de navegación -->
+                        <button class="dropboton">File
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="menu-desplegable-content"> <!-- Contenido menú "File" -->
+                            <a href="#">Load project data</a>
+                            <a href="#">Close project</a>
+                            <a href="#">Save map image</a>
+                            <a href="#">Save all map images</a>
+                            <a href="#">Options</a>
+                            <a href="#">Exit</a>
+                        </div>
+                    </div>
+                    <div class="menu-desplegable"> <!-- Menú "View" de la barra de navegación -->
+                        <button class="dropboton">View
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="menu-desplegable-content dropright"> <!-- Contenido menú "View" -->
+                            <a>
+                                <input type="checkbox" class="" id="">
+                                <label class="form-check-label" for="">
+                                    Show positions
+                                </label>
+                            </a>
+                            <a class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Show triangulation</a> <!-- Submenú desplegable -->
+                            <div class="dropdown-menu"> <!-- Contenido submenú "Show triangulation" desplegable -->
+                                <a class="dropdown-item">
+                                    <input type="checkbox" class="" id="">
+                                    <label class="form-check-label" for="">
+                                        Show triangulation normal
+                                    </label>
+                                </a>
+                                <a class="dropdown-item">
+                                    <input type="checkbox" class="" id="">
+                                    <label class="form-check-label" for="">
+                                        Show triangulation with corners
+                                    </label>
+                                </a>
+                            </div> <!-- Fin de contenido del submenú desplegable "Show triangulation" -->
+                        </div>
+                    </div>
+                    <div class="menu-desplegable"> <!-- Menú "Help" de la barra de navegación -->
+                        <button class="dropboton">Help
+                            <i class="fa fa-caret-down"></i>
+                        </button>
+                        <div class="menu-desplegable-content"> <!-- Contenido menú "Help" -->
+                            <a href="#" id="openInfo" data-toggle="modal" data-target="#infoModal">Info</a> <!-- Botón trigger modal -->
+                        </div>
+                    </div>
+                </div> <!-- Fin de la barra de navegación personalizada -->
+            </nav> <!-- Fin de la barra de navegación -->
+        </header> <!-- Fin de la cabecera -->
+
+		<main class="contenido"> <!-- Contenido: todo aquello que no es la barra de navegación -->
+            <div class="menu-derecha"> <!-- Menú de configuración de la derecha -->
+                <div class="pestanas"> <!-- Tab links / Botones de las pestañas -->
+                    <button class="pestana-link" onclick="openTab(event, 'Positions')">Positions</button>
+                    <button class="pestana-link" onclick="openTab(event, 'Layers')">Layers</button>
+                    <button class="pestana-link" onclick="openTab(event, 'XRF')">XRF</button>
+                    <button class="pestana-link" onclick="openTab(event, 'Compounds')">Compounds</button>
+                    <button class="pestana-link" onclick="openTab(event, 'XRD')">XRD</button>
+                </div>
+                
+                <div id="Positions" class="pestana-content"> <!-- Position Tab content / Contenido de la pestaña "Positions"-->
+                    <h3>Positions</h3>
+                    <button onclick="clickCheckPositions()" class="valid-boton boton">Valid</button>
+                    
+					<div class="positions" id="positions">
+						<div class="fila">
+							<button>1</button>
+							<button onclick="clickCheckPosition('Position1')" class="">
+								<i class="fa fa-solid fa-check" id="Position1"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>2</button>
+							<button onclick="clickCheckPosition('Position2')" class="">
+								<i class="fa fa-solid fa-check" id="Position2"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>3</button>
+							<button onclick="clickCheckPosition('Position3')" class="">
+								<i class="fa fa-solid fa-check" id="Position3"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>4</button>
+							<button onclick="clickCheckPosition('Position4')" class="">
+								<i class="fa fa-solid fa-check" id="Position4"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>5</button>
+							<button onclick="clickCheckPosition('Position5')" class="">
+								<i class="fa fa-solid fa-check" id="Position5"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>6</button>
+							<button onclick="clickCheckPosition('Position6')" class="">
+								<i class="fa fa-solid fa-check" id="Position6"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>7</button>
+							<button onclick="clickCheckPosition('Position7')" class="">
+								<i class="fa fa-solid fa-check" id="Position7"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>8</button>
+							<button onclick="clickCheckPosition('Position8')">
+								<i class="fa fa-solid fa-check" id="Position8"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>9</button>
+							<button onclick="clickCheckPosition('Position9')" class="">
+								<i class="fa fa-solid fa-check" id="Position9"></i>
+							</button>
+						</div>
+						<div class="fila">
+							<button>10</button>
+							<button onclick="clickCheckPosition('Position10')" class="">
+								<i class="fa fa-solid fa-check" id="Position10"></i>
+							</button>
+						</div>
+					</div>
+
+                    <hr/> <!-- Divisor horizontal -->
+
+                    <button class="update-boton boton">Update data</button>
+                </div> <!-- Fin del contenido de la pestaña "Positions" -->
+
+                <div id="Layers" class="pestana-content"> <!-- Contenido de la pestaña "Layers" -->
+                    <h3>Layers</h3>
+                    <div class="layers" id="layer-selector">
+                        <div class="layers-botones" id="layers-botones"> <!-- Filas de botones de las capas / layers -->
+                            <strong>View</strong>
+                            <div class="fila" id="fila-capa1">
+                                <button>1</button>
+                                <button onclick="clickCheckLayer('Layer1')">
+                                    <i class="fa fa-eye" id="Layer1"></i>
+                                </button>
+                            </div>
+            
+                            <div class="fila" id="fila-capa2">
+                                <button>2</button>
+                                <button onclick="clickCheckLayer('Layer2')">
+                                    <i class="fa fa-eye-slash" id="Layer2"></i>
+                                </button>
+                            </div>
+
+                            <div class="fila" id="fila-capa3">
+                                <button>3</button>
+                                <button onclick="clickCheckLayer('Layer3')">
+                                    <i class="fa fa-eye-slash" id="Layer3"></i>
+                                </button>
+                            </div>
+            
+                        </div> <!-- Fin de las filas de botones de las capas / layers -->
+
+                        <div class="layers-nombre"> <!-- Nombre de las capas (7 seleccionables) -->
+                            <strong>Name</strong>
+                            <select size="7" class="select" id="layers-nombre"> 
+                                <option value="layer0" class="layers-nombreopt">vis_visible_0</option>
+                                <option value="layer1" class="layers-nombreopt">vis_visible_1_Ti</option>
+                                <option value="layer2" class="layers-nombreopt">vis_visible_2_Hg</option>
+                            </select>
+                        </div>
+                    </div> <!-- Fin de las capas (botones + nombres elegibles) -->
+
+                    <div class="panel">
+                        <div class="centered boton">
+                            <label for="slide-transparency" class="form-label">Transparency</label>
+                            <input type="number" class="slider-box" id="transparency-value" value="0"/>
+                            <div class="slider-input">
+                                <div class="value left">0</div>
+                                <input type="range" min="0" max="1" value="0" step=".001" class="boton" id="slide-transparency"/>
+                                <div class="value right">1</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="centered border border-secondary" id="color-mixing"> <!-- Subpanel de Color Mixing -->
+                        <label class="form-label">Color mixing</label>
+                        <div class="panel">
+                            <div class="centered boton form-control">
+                                <label for="slide-min-threshold" class="form-label">Min threshold</label>
+                                <div class="slider-input">
+                                    <div class="value left">0</div>
+                                    <input type="range" min="0" max="1" value="0" step=".001" class="boton" id="slide-min-threshold"/>
+                                    <div class="value right">1</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="centered boton form-control">
+                                <label for="slide-max-threshold" class="form-label">Max threshold</label>
+                                <div class="slider-input">
+                                    <div class="value left">0</div>
+                                    <input type="range" min="0" max="1" value="1" step=".001" class="boton" id="slide-max-threshold"/>
+                                    <div class="value right">1</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="boton form-control">
+                                <label for="data-type" class="form-label">Data type print</label>
+                                <select id="data-type" class="form-control">
+                                    <option value="integer">Integer</option>
+                                    <option value="float">Float</option>
+                                    <option value="scientific">Scientific</option>
+                                    <option value="percent">Per cent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div> <!-- Fin de subpanel Color Mixing -->
+
+                    <div class="centered border border-secondary" id="difference-gaussians" style="display: block"> <!-- Subpanel de Difference of Gaussians -->
+                        <div class="panel">
+                            <input type="checkbox" id="pixel-transparency" value=""/>
+                            <label for="pixel-transparency">Pixel transparency</label>
+                        </div>
+
+                        <div class="panel">
+                            <div class="centered boton form-control">
+                                <label for="gaussian-threshold" class="form-label">Gaussian threshold</label>
+                                <input type="number" class="slider-box" id="gaussian-threshold-value" value="250"/>
+                                <div class="slider-input">
+                                    <div class="value left">0</div>
+                                    <input type="range" min="0" max="255" value="250" step="1" class="boton" id="gaussian-threshold"/>
+                                    <div class="value right">255</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="centered boton form-control">
+                                <label for="big-gaussian-size" class="form-label">Big gaussian size</label>
+                                <input type="number" class="slider-box" id="big-gaussian-value" value="25"/>
+                                <div class="slider-input">
+                                    <div class="value left">5</div>
+                                    <input type="range" min="5" max="151" value="25" step="1" class="boton" id="big-gaussian-size"/>
+                                    <div class="value right">151</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel">
+                            <div class="centered boton form-control">
+                                <label for="small-gaussian-size" class="form-label">Small gaussian size</label>
+                                <input type="number" class="slider-box" id="small-gaussian-value" value="13"/>
+                                <div class="slider-input">
+                                    <div class="value left">3</div>
+                                    <input type="range" min="3" max="151" value="13" step="1" class="boton" id="small-gaussian-size"/>
+                                    <div class="value right">151</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- Fin de subpanel de Difference of Gaussians -->
+
+                    <hr/> <!-- Divisor horizontal -->
+                    
+                    <div class="panel">
+                        <select class="boton form-control" id="add-aux-layers">
+                            <option value="add-layers" class="">Add auxiliary layers</option>
+                            <option value="diff-gauss">Difference of Gaussians</option>
+                        </select>
+                    </div>
+                    
+                    <button class="boton" id="remove-selected-layer">Remove selected layer</button> 
+                    <button class="boton" id="remove-all-layers">Remove all layers</button>
+                </div> <!-- Fin del contenido de la pestaña "Layers" -->
+                
+                <div id="XRF" class="pestana-content"> <!-- Contenido de la pestaña "XRF" -->
+                    <h3>XRF</h3>
+                    <p>Elements</p>
+                    <form action="" method="get">
+                        <select class="select select-elements" id="select-elements" multiple required>
+                            <option value="As" class="">As</option>
+                            <option value="Ba" class="">Ba</option>
+                            <option value="Ca" class="">Ca</option>
+                            <option value="Cd" class="">Cd</option>
+                            <option value="Co" class="">Co</option>
+                            <option value="Cr" class="">Cr</option>
+                            <option value="Cu" class="">Cu</option>
+                            <option value="Fe">Fe</option>
+                            <option value="Hg">Hg</option>
+                            <option value="K">K</option>
+                            <option value="Mn">Mn</option>
+                            <option value="Ni">Ni</option>
+                            <option value="Pb">Pb</option>
+                            <option value="Sb">Sb</option>
+                            <option value="Se">Se</option>
+                            <option value="Sn">Sn</option>
+                            <option value="Ti">Ti</option>
+                            <option value="Zn">Zn</option>
+                        </select>
+    
+                        <div class="panel">
+                            <label for="view-name-xrf">View name:</label>
+                            <input type="text" id="view-name-xrf" placeholder="view1">
+                        </div>
+    
+                        
+                        <div class="panel">
+                            <label for="interpolation">Interpolation type</label>
+                            <select id="interpolation" class="form-control">
+                                <option value="min-hypercube-distance">Minimum Hypercube Distance</option>
+                                <option value="min-cartesian-distance">Minimum 2D Cartesian Distance</option>
+                                <option value="rbf">RBF</option>
+                                <option value="triangulation">Triangulation</option>
+                            </select>
+                        </div>
+    
+                        <div class="panel">
+                            <input type="checkbox" id="normalization" value=""/>
+                            <label for="normalization">Normalization</label>
+                        </div>
+    
+                        <div class="panel">
+                            <label for="pos-normalization">Pos. normalization</label>
+                            <select id="pos-normalization" class="form-control">
+                                <option value="homogeneous">Homogeneous</option>
+                                <option value="heterogeneous">Heterogeneous</option>
+                            </select>
+                        </div>
+    
+                        <div class="panel">
+                            <label for="probe-xrf">Probe</label>
+                            <select id="probe-xrf" class="form-control">
+                                <option value="1x1">1x1</option>
+                                <option value="3x3">3x3</option>
+                                <option value="5x5">5x5</option>
+                                <option value="7x7">7x7</option>
+                                <option value="9x9">9x9</option>
+                                <option value="11x11">11x11</option>
+                                <option value="13x13">13x13</option>
+                                <option value="15x15">15x15</option>
+                                <option value="25x25">25x25</option>
+                                <option value="49x49">49x49</option>
+                            </select>
+                        </div>
+    
+                        <div class="panel">
+                            <label for="palette-xrf">Palette</label>
+                            <select id="palette-xrf" class="form-control">
+                                <option value="disc-tone-2">Discrete_tone_2_interval</option>
+                                <option value="disc-tone-3">Discrete_tone_3_interval</option>
+                                <option value="disc-tone-4">Discrete_tone_4_interval</option>
+                                <option value="disc-tone-5">Discrete_tone_5_interval</option>
+                                <option value="disc-color-2">Discrete_color_2_interval</option>
+                                <option value="disc-color-3">Discrete_color_3_interval</option>
+                                <option value="disc-color-4">Discrete_color_4_interval</option>
+                                <option value="disc-color-5">Discrete_color_5_interval</option>
+                                <option value="cont-color-1">Continuous_color_1_interval</option>
+                                <option value="cont-color-2">Continuous_color_2_interval</option>
+                                <option value="cont-color-3">Continuous_color_3_interval</option>
+                                <option value="cont-color-4">Continuous_color_4_interval</option>
+                                <option value="cont-color-5">Continuous_color_5_interval</option>
+                                <option value="cont-tone-2">Continuous_tone_2_interval</option>
+                                <option value="cont-tone-3">Continuous_tone_3_interval</option>
+                                <option value="cont-tone-4">Continuous_tone_4_interval</option>
+                                <option value="cont-tone-5">Continuous_tone_5_interval</option>
+                            </select>
+                        </div>
+                    </form>
+
+                    <hr/> <!-- Divisor horizontal -->
+
+                    <button class="boton" id="create-some-maps">Create some maps</button> 
+                    <button class="boton" id="create-all-maps">Create all the maps</button>
+                </div> <!-- Fin del contenido de la pestaña "XRF" -->
+                
+                <div id="Compounds" class="pestana-content"> <!-- Contenido de la pestaña "Compounds" -->
+                    <h3>Compounds</h3>
+
+                    <select class="select select-compounds" multiple>
+                        <option value="cad-red">Cadmiun_red</option>
+                        <option value="cad-yellow">Cadmiun_yellow</option>
+                        <option value="chr-yellow">Chromium_yellow</option>
+                        <option value="cinnabar">Cinnabar</option>
+                        <option value="cob-blue">Cobalt_blue</option>
+                        <option value="egi-blue">Egiptian_blue</option>
+                        <option value="lapizlazuli">Lapizlazuli</option>
+                        <option value="lea-yellow">Lead_tin_yellow</option>
+                        <option value="oropiment">Oropiment</option>
+                    </select>
+
+                    <div class="panel">
+                        <label for="view-name-compounds">View name:</label>
+                        <input type="text" id="view-name-compounds" placeholder="view1">
+                    </div>
+                    
+                    <div class="panel">
+                        <label for="probe-compounds">Probe</label>
+                        <select id="probe-compounds" class="form-control">
+                            <option value="1x1">1x1</option>
+                            <option value="3x3">3x3</option>
+                            <option value="5x5">5x5</option>
+                            <option value="7x7">7x7</option>
+                            <option value="9x9">9x9</option>
+                            <option value="11x11">11x11</option>
+                            <option value="13x13">13x13</option>
+                            <option value="15x15">15x15</option>
+                            <option value="25x25">25x25</option>
+                            <option value="49x49">49x49</option>
+                        </select>
+                    </div>
+                    
+                    <div class="panel">
+                        <label for="palette-compounds">Palette</label>
+                        <select id="palette-compounds" class="form-control">
+                            <option value="disc-tone-2">Discrete_tone_2_interval</option>
+                            <option value="disc-tone-3">Discrete_tone_3_interval</option>
+                            <option value="disc-tone-4">Discrete_tone_4_interval</option>
+                            <option value="disc-tone-5">Discrete_tone_5_interval</option>
+                            <option value="disc-color-2">Discrete_color_2_interval</option>
+                            <option value="disc-color-3">Discrete_color_3_interval</option>
+                            <option value="disc-color-4">Discrete_color_4_interval</option>
+                            <option value="disc-color-5">Discrete_color_5_interval</option>
+                            <option value="cont-color-1">Continuous_color_1_interval</option>
+                            <option value="cont-color-2">Continuous_color_2_interval</option>
+                            <option value="cont-color-3">Continuous_color_3_interval</option>
+                            <option value="cont-color-4">Continuous_color_4_interval</option>
+                            <option value="cont-color-5">Continuous_color_5_interval</option>
+                            <option value="cont-tone-2">Continuous_tone_2_interval</option>
+                            <option value="cont-tone-3">Continuous_tone_3_interval</option>
+                            <option value="cont-tone-4">Continuous_tone_4_interval</option>
+                            <option value="cont-tone-5">Continuous_tone_5_interval</option>
+                        </select>
+                    </div>
+
+                    <hr/> <!-- Divisor horizontal -->
+                    
+                    <button class="boton">Create combination maps</button> 
+                    <button class="boton">Create all individual maps</button>
+                </div> <!-- Fin del contenido de la pestaña "Compounds" -->
+                    
+                <div id="XRD" class="pestana-content"> <!-- Contenido de la pestaña "XRD" -->
+                    <h3>XRD</h3>
+                    <p>El contenido de XRD no es visible en XMapsLab</p>
+                </div>
+            </div>   <!-- Fin del menu de la derecha --> 
+			
+			<canvas id="canvas1"></canvas> <!-- Lienzo de la imagen central -->
+
+            <div class="menu-izquierda" id="menu-izquierda"> <!-- Menú de la izquierda -->
+                <h2></h2>
+
+                <button type="button" id="openColorCanvas" class="btn" data-toggle="modal" data-target="#colorModal">Pick a color</button> <!-- Botón trigger modal "openColor" -->
+
+                <canvas id="barra-color" width="100px" height="600px"></canvas>
+
+            </div> <!-- Fin menú de la izquierda-->
+        </main> <!-- Fin de contenido -->
+
+
+
+		<!-- JavaScript personalizado de Laura -->
+		<script type="module" src="{{ url_for('static', filename='js/mapslab-comportamiento.js') }}"></script>
+
+		<!-- Optional JavaScript for Bootstrap -->
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	</body>
+</html>
