@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Open project - {% endblock %}
+
+{% block header %}
+
+<div class="container container-fluid"> <!-- Contenedor para centrar el contenido -->
+    <header>
+        <nav class="navbar navbar-expand-lg bg-light"> <!-- Barra de navegación -->
+            <div class="container-fluid"> <!-- Contenedor de la barra de navegación -->
+                <a class="navbar-brand" href="/">Abrir un proyecto</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+
+                <div class="collapse navbar-collapse" id="navbarSupportedContent"> <!-- Parte izquierda de la barra de navegación -->
+                </div>
+
+                <div class="btn-group btn-group-toggle" data-toggle="buttons"> <!-- Parte derecha de la barra de navegación -->
+                    <ul class="navbar-nav me-right mb-2 mb-lg-0"> <!-- Campo para iniciar sesión o mostrar el nombre del usuario logueado -->
+                        {% if logged %}
+                        <li class="nav-item">
+                            <a class="nav-link link-dark">Bienvenido {{ myusername }} !!!</a>
+                        </li>
+                        <li class="nav-item"><a class="active nav-link link-dark" aria-current="page" href="">Cerrar sesión</a></li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="active link-dark nav-link" aria-current="page" href="">
+                                Iniciar sesión</a>
+                            </li>
+                        {% endif %} 
+                    </ul>        
+            
+                    <form class="d-flex" role="search"> <!-- Campo de búsqueda -->
+                        <input name="busqueda" class="form-control me-2" type="search" placeholder="por ej. 'Transfiguración'" aria-label="Search"/>
+                        <button class="btn btn-outline-success" type="submit">Búsqueda</button>
+                    </form>
+                </div> <!-- Fin de la parte derecha de la barra de navegación personalizada -->
+            </div> <!-- Fin contenedor de la barra de navegación -->
+        </nav> <!-- Fin de la barra de navegación -->
+    </header> <!-- Fin de la cabecera -->
+</div><!-- Fin del contenedor que centra el contenido -->
+
+{% endblock %}
+
+{% block content %}
+
+<div class="container container-fluid"> <!-- Contenedor para centrar el contenido -->
+    <h2 class="text-dark">Lista de proyectos</h2>
+    
+    <a type="button" class="btn btn-primary" href="">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
+            Subir nuevo proyecto
+    </a>
+
+    <table class="table table-hover table-striped table-bordered"> <!-- Tabla con el contenido de todos los proyectos almacenados -->
+        <thead> <!-- Cabecera de la tabla -->
+            <tr>
+                <th scope="col">Foto</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Autor</th>
+                <th scope="col">Operación</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider"> <!-- Contenido de la tabla -->
+            {% for obra in obras %}
+                <tr>
+                    <th scope="row" width="200" height=""> <!-- Imagen del proyecto -->
+                        <a href="{{ url_for('static', filename= obra.url) }}" target="_blank">
+                            <img src="{{ url_for('static', filename= obra.url ) }}" class="row-image" >
+                        </a>
+                    </th>
+
+                    <td><a href="/app" target="_blank">{{obra.nombre}}</td>
+                    <td>{{ obra.autor }}</td>
+                    <td>
+                        <a type="button" class="btn btn-warning" href="/app">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
+                                <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168l10-10zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207 11.207 2.5zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293l6.5-6.5zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325z"/>
+                            </svg>
+                            Modificar
+                        </a>
+                        <a type="button" class="btn btn-danger" href="">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                            </svg>
+                            Eliminar
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div> <!-- Fin del contenedor que centra el contenido -->
+{% endblock %}

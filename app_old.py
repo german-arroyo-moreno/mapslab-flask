@@ -18,24 +18,17 @@ def open_project(logged=False):
     obras = [
         {
             "nombre": "La transfiguración",
-            "autor": "Rafael Sanzio", 
-            "url": "images/transfiguracion.png"
+            "autor": "Rafael" 
         },
         {
             "nombre": "Niños comiendo uvas y melón",
-            "autor": "Bartolomé Esteban Murillo",
-            "url": "images/uvasmelon.jpg"
-        },
-        {
-            "nombre": "La escuela de Atenas",
-            "autor": "Rafael Sanzio",
-            "url": "images/escuelaatenas.webp"
+            "autor": "Murillo"
         }
     ]
-    return render_template('open-create.html', logged=logged, myusername=myusername, obras=obras)
+    return render_template('open-create.html', myusername, logged, obras)
 
 @app.route("/app")
-def main_app():
+def app():
     return render_template('main-app.html')
 
 # @app.route("/")

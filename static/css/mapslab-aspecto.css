@@ -298,3 +298,13 @@ hr {
   height: 80vh;
   width: 100px;
 }
+
+/************************************************ */
+/* PÁGINA INICIAL DE LISTA DE PROYECTOS open-create.html */
+.row-image {
+  width: 100%;
+  height: auto;
+  max-width: 220px;
+  max-height: 220px;
+  display: block;
+}
