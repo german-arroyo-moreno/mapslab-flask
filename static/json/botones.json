@@ -1,87 +1,87 @@
 [
     {
-        "Pestaña": "Positions",
-        "Elementos": [
+        "Tab": "Positions",
+        "Container": [
             {
-                "tipo": "boton",
-                "nombre": "valid"
+                "type": "boton",
+                "name": "valid"
             },
             {
-                "tipo": "fila-position",
-                "nombre": "fila-position",
-                "ncomponentes": 2
+                "type": "fila-position",
+                "name": "fila-position",
+                "n-components": 2
             },
             {
-                "tipo": "boton",
-                "nombre": "update-data"
+                "type": "boton",
+                "name": "update-data"
             }
         ]
     },
     {
-        "Pestaña": "Layers",
-        "Elementos": [
+        "Tab": "Layers",
+        "Container": [
             {
-                "tipo": "selector-capa",
-                "nombre": "selector-capa",
-                "ncomponentes": 3
+                "type": "selector-capa",
+                "name": "selector-capa",
+                "n-components": 3
             },
             {
-                "tipo": "slider-and-input",
-                "nombre": "transparency",
+                "type": "slider-and-input",
+                "name": "transparency",
                 "min": 0,
                 "max": 1,
                 "default-value": 0
             },
             {
-                "tipo": "panel",
-                "nombre": "color-mixing",
-                "componentes": [
+                "type": "panel",
+                "name": "color-mixing",
+                "components": [
                     {
-                        "tipo": "slider-without-input",
-                        "nombre": "min-threshold",
+                        "type": "slider-without-input",
+                        "name": "min-threshold",
                         "min": 0,
                         "max": 1,
                         "default-value": 0
                     },
                     {
-                        "tipo": "slider-without-input",
-                        "nombre": "max-threshold",
+                        "type": "slider-without-input",
+                        "name": "max-threshold",
                         "min": 0,
                         "max": 1,
                         "default-value": 1
                     },
                     {
-                        "tipo": "select-one",
-                        "nombre": "data-type-print",
-                        "valores": ["Integer", "Float", "Scientific", "Per cent"]
+                        "type": "select-one",
+                        "name": "data-type-print",
+                        "values": ["Integer", "Float", "Scientific", "Per cent"]
                     }
                 ]
             },
             {
-                "tipo": "panel",
-                "nombre": "difference-of-gaussians",
-                "componentes": [
+                "type": "panel",
+                "name": "difference-of-gaussians",
+                "components": [
                     {
-                        "tipo": "checkbox",
-                        "nombre": "pixel-transparency"
+                        "type": "checkbox",
+                        "name": "pixel-transparency"
                     },
                     {
-                        "tipo": "slider-and-input",
-                        "nombre": "gaussian-threshold",
+                        "type": "slider-and-input",
+                        "name": "gaussian-threshold",
                         "min": 0,
                         "max": 255,
                         "default-value": 250
                     },
                     {
-                        "tipo": "slider-and-input",
-                        "nombre": "big-gaussian-size",
+                        "type": "slider-and-input",
+                        "name": "big-gaussian-size",
                         "min": 5,
                         "max": 151,
                         "default-value": 25
                     },
                     {
-                        "tipo": "slider-and-input",
-                        "nombre": "small-gaussian-size",
+                        "type": "slider-and-input",
+                        "name": "small-gaussian-size",
                         "min": 3,
                         "max": 151,
                         "default-value": 13
@@ -89,106 +89,106 @@
                 ]
             },
             {
-                "tipo": "select-one",
-                "nombre": "add-auxiliary-layers",
-                "valores": ["Add auxiliary layers", "Difference of Gaussians"]
+                "type": "select-one",
+                "name": "add-auxiliary-layers",
+                "values": ["Add auxiliary layers", "Difference of Gaussians"]
             },
             {
-                "tipo": "boton",
-                "nombre": "remove-selected-layer"
+                "type": "boton",
+                "name": "remove-selected-layer"
             },
             {
-                "tipo": "boton",
-                "nombre": "remove-all-layers"
+                "type": "boton",
+                "name": "remove-all-layers"
             }
         ]
     },
     {
-        "Pestaña": "XRF",
-        "Elementos":[
+        "Tab": "XRF",
+        "Container":[
             {
-                "tipo": "select-multiple",
-                "nombre": "selector-elementos",
-                "valores": ["As", "Ba", "Ca", "Cd", "Co", "Cr", "Cu", "Fe", "Hg", "K", "Mn", "Ni", "Pb", "Sb", "Se", "Sn", "Ti", "Zn"]
+                "type": "select-multiple",
+                "name": "selector-elementos",
+                "values": ["As", "Ba", "Ca", "Cd", "Co", "Cr", "Cu", "Fe", "Hg", "K", "Mn", "Ni", "Pb", "Sb", "Se", "Sn", "Ti", "Zn"]
             },
             {
-                "tipo": "text-input",
-                "nombre": "view-name"
+                "type": "text-input",
+                "name": "view-name"
             },
             {
-                "tipo": "select-one",
-                "nombre": "interpolation-type",
-                "valores": ["Minimum Hypercube Distance", "Minimum 2D Cartesian Distance", "RBF", "Triangulation"]
+                "type": "select-one",
+                "name": "interpolation-type",
+                "values": ["Minimum Hypercube Distance", "Minimum 2D Cartesian Distance", "RBF", "Triangulation"]
             },
             {
-                "tipo": "checkbox",
-                "nombre": "normalization"
+                "type": "checkbox",
+                "name": "normalization"
             },
             {
-                "tipo": "select-one",
-                "nombre": "pos-normalization",
-                "valores": ["Homogeneous", "Heterogeneous"]
+                "type": "select-one",
+                "name": "pos-normalization",
+                "values": ["Homogeneous", "Heterogeneous"]
             },
             {
-                "tipo": "select-one",
-                "nombre": "probe",
-                "valores": ["1x1", "3x3", "5x5", "7x7", "9x9", "11x11", "13x13", "15x15", "25x25", "49x49"]
+                "type": "select-one",
+                "name": "probe",
+                "values": ["1x1", "3x3", "5x5", "7x7", "9x9", "11x11", "13x13", "15x15", "25x25", "49x49"]
             },
             {
-                "tipo": "select-one",
-                "nombre": "palette",
-                "valores": ["Discrete_tone_2_interval", "Discrete_tone_3_interval", "Discrete_tone_4_interval","Discrete_tone_5_interval", 
+                "type": "select-one",
+                "name": "palette",
+                "values": ["Discrete_tone_2_interval", "Discrete_tone_3_interval", "Discrete_tone_4_interval","Discrete_tone_5_interval", 
                             "Discrete_color_2_interval", "Discrete_color_3_interval", "Discrete_color_4_interval", "Discrete_color_5_interval", 
                             "Continuous_color_1_interval", "Continuous_color_2_interval", "Continuous_color_3_interval", "Continuous_color_4_interval", "Continuous_color_5_interval", 
                             "Continuous_tone_2_interval", "Continuous_tone_3_interval", "Continuous_tone_4_interval", "Continuous_tone_5_interval"]
             },
             {
-                "tipo": "boton",
-                "nombre": "create-some-maps"
+                "type": "boton",
+                "name": "create-some-maps"
             },
             {
-                "tipo": "boton",
-                "nombre": "create-all-maps"
+                "type": "boton",
+                "name": "create-all-maps"
             }
         ]
     },
     {
-        "Pestaña": "Compounds",
-        "Elementos":[
+        "Tab": "Compounds",
+        "Container":[
             {
-                "tipo": "select-multiple",
-                "nombre": "selector-compounds",
-                "valores":["Cadmium red", "Cadmium yellow", "Chromium yellow", "Cinnabar", "Cobalt blue", "Egiptian blue", "Lapizlazuli", "Lead tin yellow", "Oropiment"]
+                "type": "select-multiple",
+                "name": "selector-compounds",
+                "values":["Cadmium red", "Cadmium yellow", "Chromium yellow", "Cinnabar", "Cobalt blue", "Egiptian blue", "Lapizlazuli", "Lead tin yellow", "Oropiment"]
             },
             {
-                "tipo": "text-input",
-                "nombre": "view-name"
+                "type": "text-input",
+                "name": "view-name"
             },
             {
-                "tipo": "select-one",
-                "nombre": "probe",
-                "valores": ["1x1", "3x3", "5x5", "7x7", "9x9", "11x11", "13x13", "15x15", "25x25", "49x49"]
+                "type": "select-one",
+                "name": "probe",
+                "values": ["1x1", "3x3", "5x5", "7x7", "9x9", "11x11", "13x13", "15x15", "25x25", "49x49"]
             },
             {
-                "tipo": "select-one",
-                "nombre": "palette",
-                "valores": ["Discrete_tone_2_interval", "Discrete_tone_3_interval", "Discrete_tone_4_interval","Discrete_tone_5_interval", 
+                "type": "select-one",
+                "name": "palette",
+                "values": ["Discrete_tone_2_interval", "Discrete_tone_3_interval", "Discrete_tone_4_interval","Discrete_tone_5_interval", 
                             "Discrete_color_2_interval", "Discrete_color_3_interval", "Discrete_color_4_interval", "Discrete_color_5_interval", 
                             "Continuous_color_1_interval", "Continuous_color_2_interval", "Continuous_color_3_interval", "Continuous_color_4_interval", "Continuous_color_5_interval", 
                             "Continuous_tone_2_interval", "Continuous_tone_3_interval", "Continuous_tone_4_interval", "Continuous_tone_5_interval"]
             },
             {
-                "tipo": "boton",
-                "nombre": "create-combination-maps"
+                "type": "boton",
+                "name": "create-combination-maps"
             },
             {
-                "tipo": "boton",
-                "nombre": "create-all-individual-maps"
+                "type": "boton",
+                "name": "create-all-individual-maps"
             }
         ]
     },
     {
-        "Pestaña": "XRD",
-        "Elementos": []
+        "Tab": "XRD",
+        "Container": []
     }
 ]
