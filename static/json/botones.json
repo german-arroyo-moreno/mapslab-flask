@@ -1,0 +1,194 @@
+[
+    {
+        "Pestaña": "Positions",
+        "Elementos": [
+            {
+                "tipo": "boton",
+                "nombre": "valid"
+            },
+            {
+                "tipo": "fila-position",
+                "nombre": "fila-position",
+                "ncomponentes": 2
+            },
+            {
+                "tipo": "boton",
+                "nombre": "update-data"
+            }
+        ]
+    },
+    {
+        "Pestaña": "Layers",
+        "Elementos": [
+            {
+                "tipo": "selector-capa",
+                "nombre": "selector-capa",
+                "ncomponentes": 3
+            },
+            {
+                "tipo": "slider-and-input",
+                "nombre": "transparency",
+                "min": 0,
+                "max": 1,
+                "default-value": 0
+            },
+            {
+                "tipo": "panel",
+                "nombre": "color-mixing",
+                "componentes": [
+                    {
+                        "tipo": "slider-without-input",
+                        "nombre": "min-threshold",
+                        "min": 0,
+                        "max": 1,
+                        "default-value": 0
+                    },
+                    {
+                        "tipo": "slider-without-input",
+                        "nombre": "max-threshold",
+                        "min": 0,
+                        "max": 1,
+                        "default-value": 1
+                    },
+                    {
+                        "tipo": "select-one",
+                        "nombre": "data-type-print",
+                        "valores": ["Integer", "Float", "Scientific", "Per cent"]
+                    }
+                ]
+            },
+            {
+                "tipo": "panel",
+                "nombre": "difference-of-gaussians",
+                "componentes": [
+                    {
+                        "tipo": "checkbox",
+                        "nombre": "pixel-transparency"
+                    },
+                    {
+                        "tipo": "slider-and-input",
+                        "nombre": "gaussian-threshold",
+                        "min": 0,
+                        "max": 255,
+                        "default-value": 250
+                    },
+                    {
+                        "tipo": "slider-and-input",
+                        "nombre": "big-gaussian-size",
+                        "min": 5,
+                        "max": 151,
+                        "default-value": 25
+                    },
+                    {
+                        "tipo": "slider-and-input",
+                        "nombre": "small-gaussian-size",
+                        "min": 3,
+                        "max": 151,
+                        "default-value": 13
+                    }
+                ]
+            },
+            {
+                "tipo": "select-one",
+                "nombre": "add-auxiliary-layers",
+                "valores": ["Add auxiliary layers", "Difference of Gaussians"]
+            },
+            {
+                "tipo": "boton",
+                "nombre": "remove-selected-layer"
+            },
+            {
+                "tipo": "boton",
+                "nombre": "remove-all-layers"
+            }
+        ]
+    },
+    {
+        "Pestaña": "XRF",
+        "Elementos":[
+            {
+                "tipo": "select-multiple",
+                "nombre": "selector-elementos",
+                "valores": ["As", "Ba", "Ca", "Cd", "Co", "Cr", "Cu", "Fe", "Hg", "K", "Mn", "Ni", "Pb", "Sb", "Se", "Sn", "Ti", "Zn"]
+            },
+            {
+                "tipo": "text-input",
+                "nombre": "view-name"
+            },
+            {
+                "tipo": "select-one",
+                "nombre": "interpolation-type",
+                "valores": ["Minimum Hypercube Distance", "Minimum 2D Cartesian Distance", "RBF", "Triangulation"]
+            },
+            {
+                "tipo": "checkbox",
+                "nombre": "normalization"
+            },
+            {
+                "tipo": "select-one",
+                "nombre": "pos-normalization",
+                "valores": ["Homogeneous", "Heterogeneous"]
+            },
+            {
+                "tipo": "select-one",
+                "nombre": "probe",
+                "valores": ["1x1", "3x3", "5x5", "7x7", "9x9", "11x11", "13x13", "15x15", "25x25", "49x49"]
+            },
+            {
+                "tipo": "select-one",
+                "nombre": "palette",
+                "valores": ["Discrete_tone_2_interval", "Discrete_tone_3_interval", "Discrete_tone_4_interval","Discrete_tone_5_interval", 
+                            "Discrete_color_2_interval", "Discrete_color_3_interval", "Discrete_color_4_interval", "Discrete_color_5_interval", 
+                            "Continuous_color_1_interval", "Continuous_color_2_interval", "Continuous_color_3_interval", "Continuous_color_4_interval", "Continuous_color_5_interval", 
+                            "Continuous_tone_2_interval", "Continuous_tone_3_interval", "Continuous_tone_4_interval", "Continuous_tone_5_interval"]
+            },
+            {
+                "tipo": "boton",
+                "nombre": "create-some-maps"
+            },
+            {
+                "tipo": "boton",
+                "nombre": "create-all-maps"
+            }
+        ]
+    },
+    {
+        "Pestaña": "Compounds",
+        "Elementos":[
+            {
+                "tipo": "select-multiple",
+                "nombre": "selector-compounds",
+                "valores":["Cadmium red", "Cadmium yellow", "Chromium yellow", "Cinnabar", "Cobalt blue", "Egiptian blue", "Lapizlazuli", "Lead tin yellow", "Oropiment"]
+            },
+            {
+                "tipo": "text-input",
+                "nombre": "view-name"
+            },
+            {
+                "tipo": "select-one",
+                "nombre": "probe",
+                "valores": ["1x1", "3x3", "5x5", "7x7", "9x9", "11x11", "13x13", "15x15", "25x25", "49x49"]
+            },
+            {
+                "tipo": "select-one",
+                "nombre": "palette",
+                "valores": ["Discrete_tone_2_interval", "Discrete_tone_3_interval", "Discrete_tone_4_interval","Discrete_tone_5_interval", 
+                            "Discrete_color_2_interval", "Discrete_color_3_interval", "Discrete_color_4_interval", "Discrete_color_5_interval", 
+                            "Continuous_color_1_interval", "Continuous_color_2_interval", "Continuous_color_3_interval", "Continuous_color_4_interval", "Continuous_color_5_interval", 
+                            "Continuous_tone_2_interval", "Continuous_tone_3_interval", "Continuous_tone_4_interval", "Continuous_tone_5_interval"]
+            },
+            {
+                "tipo": "boton",
+                "nombre": "create-combination-maps"
+            },
+            {
+                "tipo": "boton",
+                "nombre": "create-all-individual-maps"
+            }
+        ]
+    },
+    {
+        "Pestaña": "XRD",
+        "Elementos": []
+    }
+]
