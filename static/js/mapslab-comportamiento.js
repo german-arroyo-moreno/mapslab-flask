@@ -165,6 +165,19 @@ window.clickCheckPositions = function () {
     }
 };
 
+// Función que devuelve el elemento HTML de una fila de una posición
+function createFilaPosition (position) {
+    // Crear botón de posición (Creando todo el html directamente con función auxiliar)
+    var newRowString =  `<div class="fila">
+                            <button>${position}</button>
+                            <button onclick="clickCheckPosition('Position${position}')">
+                                <i class="fa fa-solid fa-check" id="Position${position}"></i>
+                            </button>
+                        </div>`;
+    return (htmlToElement(newRowString));
+}
+
+
 //Crear tantos botones como posiciones haya
 function fillPositions () {
     // Obtener nº de posiciones a crear
@@ -175,14 +188,8 @@ function fillPositions () {
         // Cuál será el número del siguiente botón de posición
         var nextPosition = document.getElementById("positions").childElementCount + 1;
 
-        // Crear botón de posición (Creando todo el html directamente con función auxiliar)
-        var newRowString =  `<div class="fila">
-                                <button>${nextPosition}</button>
-                                <button onclick="clickCheckPosition('Position${nextPosition}')">
-                                    <i class="fa fa-solid fa-check" id="Position${nextPosition}"></i>
-                                </button>
-                            </div>`;
-        var newRowHtml = htmlToElement(newRowString);
+        // Obtener el elemento HTML de la fila con la posición indicada
+        var newRowHtml = createFilaPosition(nextPosition);
 
         // Crear el nuevo botón añadiéndolo debajo de los anteriores
         document.getElementById("positions").appendChild(newRowHtml); 
@@ -190,6 +197,7 @@ function fillPositions () {
 }
 
 fillPositions();
+
 
 
 /************************************************ */
