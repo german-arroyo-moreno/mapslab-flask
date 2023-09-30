@@ -1,4 +1,8 @@
 "use strict";
+////////////////////////////////////////////////////////////////////////////////////
+/////////     1.ELEMENTOS COMUNES A TODA LA APLICACIÓN      ////////////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
 /************************************************ */
 // TIPO ENUMERADO PARA LOS COLORES DE LOS ELEMENTOS
 var ElementColor = {
@@ -116,6 +120,88 @@ class DOGLayer extends BackgroundLayer {
     }
 }
 
+/************************************************ */
+// FUNCIONES PARA CREAR TODOS LOS TIPOS DE BOTONES DE LA APLICACIÓN
+
+// Función auxiliar para transformar string en HTML
+function htmlToElement(html) {
+    let template = document.createElement('template');
+    template.innerHTML = html.trim();
+    return template.content.firstChild;
+}
+
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO botón
+function createHtmlBoton (name, otherClasses=" ", id=" ", onclick=" ") {
+    // Crear botón (Creando todo el html directamente con función auxiliar)
+    var newBotonString =  `<button onclick="${onclick}" class="${otherClasses} boton" id="${id}>${name}</button>`;
+    return (htmlToElement(newBotonString));
+}
+
+// Crear botón Valid
+var validBoton = createHtmlBoton("Valid", "valid-boton", onclick="clickCheckPositions()");
+// Crear botón Update Data
+var updateDataBoton = createHtmlBoton("Update data", "update-boton");
+// Crear botón Remove selected layer
+var removeSelectedLayerBoton = createHtmlBoton("Remove selected layer", " ", "remove-selected-layer");
+// Crear botón Remove all layers
+var removeAllLayersBoton = createHtmlBoton("Remove all layers", " ", "remove-all-layers");
+// Crear botón Create some maps
+var createSomeMapsBoton = createHtmlBoton("Create some maps", " ", "create-some-maps");
+// Crear botón Create all the maps
+var createAllMapsBoton = createHtmlBoton("Create all the maps", " ", "create-all-maps");
+// Crear botón Create combination maps
+var createCombinationMapsBoton = createHtmlBoton("Create combination maps");
+// Crear botón Create all individual maps
+var createAllIndividualMapsBoton = createHtmlBoton("Create all individual maps");
+
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO selector-capa
+function createHtmlSelectorCapa () {
+    var newSelectorCapa =   `<div class="layers" id="layer-selector">
+                                <div class="layers-botones" id="layers-botones"> <!-- Filas de botones de las capas / layers -->
+                                    <strong>View</strong>
+                                    <div class="fila" id="fila-capa1">
+                                        <button>1</button>
+                                        <button onclick="clickCheckLayer('Layer1')">
+                                            <i class="fa fa-eye" id="Layer1"></i>
+                                        </button>
+                                    </div>
+                                </div> <!-- Fin de las filas de botones de las capas / layers -->
+
+                                <div class="layers-nombre"> <!-- Nombre de las capas (7 seleccionables) -->
+                                    <strong>Name</strong>
+                                    <select size="7" class="select" id="layers-nombre"> 
+                                        <option value="layer0" class="layers-nombreopt">vis_visible_0</option>
+                                    </select>
+                                </div>
+                            </div> <!-- Fin de las capas (botones + nombres elegibles) -->`;
+    return htmlToElement(newSelectorCapa);
+}
+
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO slider-and-input (deslizador con caja de texto input)
+function createHtmlSliderAndInput (title, slider_id, id, default_value, min, max, step) {
+    var newSliderAndInput = `<div class="panel">
+                                <div class="centered boton form-control">
+                                    <label for="${slider_id}" class="form-label">${title}</label>
+                                    <input type="number" class="slider-box" id="${id}" value="${default_value}"/>
+                                    <div class="slider-input">
+                                        <div class="value left">${min}</div>
+                                        <input type="range" min="${min}" max="${max}" value="${default_value}" step="${step}" class="boton" id="${slider-id}"/>
+                                        <div class="value right">${max}</div>
+                                    </div>
+                                </div>
+                            </div>`;
+    return htmlToElement(newSliderAndInput);
+}
+
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO panel
+
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO slider-without-input (fusionar con el andInput, sólo añade una línea)
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO
+
+
+////////////////////////////////////////////////////////////////////////////////////
+/////////       2.FUNCIONES PARA CADA PESTAÑA (EN ORDEN)      //////////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 /************************************************ */
 // COMPORTAMIENTO PESTAÑAS EN EL MENÚ DE LA DERECHA. Mostrar y ocultar. Navegabilidad
@@ -166,7 +252,7 @@ window.clickCheckPositions = function () {
 };
 
 // Función que devuelve el elemento HTML de una fila de una posición
-function createFilaPosition (position) {
+function createHtmlFilaPosition (position) {
     // Crear botón de posición (Creando todo el html directamente con función auxiliar)
     var newRowString =  `<div class="fila">
                             <button>${position}</button>
@@ -189,7 +275,7 @@ function fillPositions () {
         var nextPosition = document.getElementById("positions").childElementCount + 1;
 
         // Obtener el elemento HTML de la fila con la posición indicada
-        var newRowHtml = createFilaPosition(nextPosition);
+        var newRowHtml = createHtmlFilaPosition(nextPosition);
 
         // Crear el nuevo botón añadiéndolo debajo de los anteriores
         document.getElementById("positions").appendChild(newRowHtml); 
@@ -387,13 +473,6 @@ document.getElementById("remove-all-layers").onclick = function () {
 
 /************************************************ */
 // PESTAÑA XRF: Botón Create Some Maps
-// Función auxiliar para transformar string en HTML
-function htmlToElement(html) {
-    let template = document.createElement('template');
-    template.innerHTML = html.trim();
-    return template.content.firstChild;
-}
-
 function addNewLayer (element) {
     //If está todo el formulario de la pestaña XRF relleno y señalado:
     //else
@@ -500,6 +579,11 @@ document.getElementById("create-all-maps").onclick = function () {
         addNewLayer(document.getElementById("select-elements").options[i].value);
     }
 };
+
+
+////////////////////////////////////////////////////////////////////////////////////
+/////////      3.FUNCIONES PARA CANVAS PRINCIPAL (THREE.JS)      ///////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 /************************************************ */
 // FUNCIONALIDADES PARA EL CANVAS
@@ -636,6 +720,10 @@ function onWindowResize( event ) {
     renderer.render( scene, camera );   
 }
 
+
+////////////////////////////////////////////////////////////////////////////////////
+/////////      4.FUNCIONES DEL MENÚ DE LA IZQUIERDA (BARRA DE COLOR)    ////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 /************************************************ */
 // MENÚ IZQUIERDA
