@@ -53,7 +53,24 @@
                     {
                         "type": "select-one",
                         "name": "data-type-print",
-                        "values": ["Integer", "Float", "Scientific", "Per cent"]
+                        "values": [
+                            {
+                                "value-id": "integer",
+                                "value-name": "Integer"
+                            },
+                            {
+                                "value-id": "float",
+                                "value-name": "Float"
+                            },
+                            {
+                                "value-id": "scientific",
+                                "value-name": "Scientific"
+                            },
+                            {
+                                "value-id": "percent",
+                                "value-name": "Per cent"
+                            }
+                        ]
                     }
                 ]
             },
@@ -91,7 +108,16 @@
             {
                 "type": "select-one",
                 "name": "add-auxiliary-layers",
-                "values": ["Add auxiliary layers", "Difference of Gaussians"]
+                "values": [
+                    {
+                        "value-id": "add-layers",
+                        "value-name": "Add auxiliary layers"
+                    }, 
+                    {
+                        "value-id": "diff-gauss",
+                        "value-name": "Difference of Gaussians"
+                    }
+                ]
             },
             {
                 "type": "boton",
@@ -109,7 +135,80 @@
             {
                 "type": "select-multiple",
                 "name": "selector-elementos",
-                "values": ["As", "Ba", "Ca", "Cd", "Co", "Cr", "Cu", "Fe", "Hg", "K", "Mn", "Ni", "Pb", "Sb", "Se", "Sn", "Ti", "Zn"]
+                "values": [
+                    {
+                        "value-id": "As",
+                        "value-name": "As"
+                    },
+                    {
+                        "value-id": "Ba",
+                        "value-name": "Ba"
+                    },
+                    {
+                        "value-id": "Ca",
+                        "value-name": "Ca"
+                    },
+                    {
+                        "value-id": "Cd",
+                        "value-name": "Cd"
+                    },
+                    {
+                        "value-id": "Co",
+                        "value-name": "Co"
+                    },
+                    {
+                        "value-id": "Cr",
+                        "value-name": "Cr"
+                    },
+                    {
+                        "value-id": "Cu",
+                        "value-name": "Cu"
+                    },
+                    {
+                        "value-id": "Fe",
+                        "value-name": "Fe"
+                    },
+                    {
+                        "value-id": "Hg",
+                        "value-name": "Hg"
+                    },
+                    {
+                        "value-id": "K",
+                        "value-name": "K"
+                    },
+                    {
+                        "value-id": "Mn",
+                        "value-name": "Mn"
+                    },
+                    {
+                        "value-id": "Ni",
+                        "value-name": "Ni"
+                    },
+                    {
+                        "value-id": "Pb",
+                        "value-name": "Pb"
+                    },
+                    {
+                        "value-id": "Sb",
+                        "value-name": "Sb"
+                    },
+                    {
+                        "value-id": "Se",
+                        "value-name": "Se"
+                    },
+                    {
+                        "value-id": "Sn",
+                        "value-name": "Sn"
+                    },
+                    {
+                        "value-id": "Ti",
+                        "value-name": "Ti"
+                    },
+                    {
+                        "value-id": "Zn",
+                        "value-name": "Zn"
+                    }
+                ]
             },
             {
                 "type": "text-input",
@@ -118,7 +217,24 @@
             {
                 "type": "select-one",
                 "name": "interpolation-type",
-                "values": ["Minimum Hypercube Distance", "Minimum 2D Cartesian Distance", "RBF", "Triangulation"]
+                "values": [
+                    {
+                        "value-id": "min-hypercube-distance", 
+                        "value-name": "Minimum Hypercube Distance"
+                    }, 
+                    {
+                        "value-id": "min-cartesian-distance",
+                        "value-name": "Minimum 2D Cartesian Distance"
+                    },
+                    {
+                        "value-id": "rbf",
+                        "value-name": "RBF"
+                    },
+                    {
+                        "value-id": "triangulation",
+                        "value-name": "Triangulation"
+                    } 
+                ]
             },
             {
                 "type": "checkbox",
@@ -127,20 +243,136 @@
             {
                 "type": "select-one",
                 "name": "pos-normalization",
-                "values": ["Homogeneous", "Heterogeneous"]
+                "values": [
+                    {
+                        "value-id": "homogeneous",
+                        "value-name": "Homogeneous"
+                    }, 
+                    {
+                        "value-id": "heterogeneous",
+                        "value-name": "Heterogeneous"
+                    }
+                ]
             },
             {
                 "type": "select-one",
                 "name": "probe",
-                "values": ["1x1", "3x3", "5x5", "7x7", "9x9", "11x11", "13x13", "15x15", "25x25", "49x49"]
+                "values": [
+                    {
+                        "value-id": "1x1",
+                        "value-name": "1x1"
+                    },
+                    {
+                        "value-id": "3x3",
+                        "value-name": "3x3"
+                    }, 
+                    {
+                        "value-id": "5x5",
+                        "value-name": "5x5"
+                    }, 
+                    {
+                        "value-id": "7x7",
+                        "value-name": "7x7"
+                    }, 
+                    {
+                        "value-id": "9x9",
+                        "value-name": "9x9"
+                    }, 
+                    {
+                        "value-id": "11x11",
+                        "value-name": "11x11"
+                    }, 
+                    {
+                        "value-id": "13x13",
+                        "value-name": "13x13"
+                    },
+                    {
+                        "value-id": "15x15",
+                        "value-name": "15x15"
+                    },
+                    {
+                        "value-id": "25x25",
+                        "value-name": "25x25"
+                    },
+                    {
+                        "value-id": "49x49",
+                        "value-name": "49x49"
+                    }
+                ]
             },
             {
                 "type": "select-one",
                 "name": "palette",
-                "values": ["Discrete_tone_2_interval", "Discrete_tone_3_interval", "Discrete_tone_4_interval","Discrete_tone_5_interval", 
-                            "Discrete_color_2_interval", "Discrete_color_3_interval", "Discrete_color_4_interval", "Discrete_color_5_interval", 
-                            "Continuous_color_1_interval", "Continuous_color_2_interval", "Continuous_color_3_interval", "Continuous_color_4_interval", "Continuous_color_5_interval", 
-                            "Continuous_tone_2_interval", "Continuous_tone_3_interval", "Continuous_tone_4_interval", "Continuous_tone_5_interval"]
+                "values": [
+                    {
+                        "value-id": "disc-tone-2",
+                        "value-name": "Discrete_tone_2_interval"
+                    },
+                    {
+                        "value-id": "disc-tone-3",
+                        "value-name": "Discrete_tone_3_interval"
+                    },
+                    {
+                        "value-id": "disc-tone-4",
+                        "value-name": "Discrete_tone_4_interval"
+                    },
+                    {
+                        "value-id": "disc-tone-5",
+                        "value-name": "Discrete_tone_5_interval"
+                    },
+                    {
+                        "value-id": "disc-color-2",
+                        "value-name": "Discrete_color_2_interval"
+                    },
+                    {
+                        "value-id": "disc-color-3",
+                        "value-name": "Discrete_color_3_interval"
+                    },
+                    {
+                        "value-id": "disc-color-4",
+                        "value-name": "Discrete_color_4_interval"
+                    },
+                    {
+                        "value-id": "disc-color-5",
+                        "value-name": "Discrete_color_5_interval"
+                    },
+                    {
+                        "value-id": "cont-color-1",
+                        "value-name": "Continuous_color_1_interval"
+                    },
+                    {
+                        "value-id": "cont-color-2",
+                        "value-name": "Continuous_color_2_interval"
+                    },
+                    {
+                        "value-id": "cont-color-3",
+                        "value-name": "Continuous_color_3_interval"
+                    },
+                    {
+                        "value-id": "cont-color-4",
+                        "value-name": "Continuous_color_4_interval"
+                    },
+                    {
+                        "value-id": "cont-color-5",
+                        "value-name": "Continuous_color_5_interval"
+                    },
+                    {
+                        "value-id": "cont-tone-2",
+                        "value-name": "Continuous_tone_2_interval"
+                    },
+                    {
+                        "value-id": "cont-tone-3",
+                        "value-name": "Continuous_tone_3_interval"
+                    },
+                    {
+                        "value-id": "cont-tone-4",
+                        "value-name": "Continuous_tone_4_interval"
+                    },
+                    {
+                        "value-id": "cont-tone-5",
+                        "value-name": "Continuous_tone_5_interval"
+                    }
+                ]
             },
             {
                 "type": "boton",
@@ -158,7 +390,44 @@
             {
                 "type": "select-multiple",
                 "name": "selector-compounds",
-                "values":["Cadmium red", "Cadmium yellow", "Chromium yellow", "Cinnabar", "Cobalt blue", "Egiptian blue", "Lapizlazuli", "Lead tin yellow", "Oropiment"]
+                "values":[
+                    {
+                        "value-id": "cad-red",
+                        "value-name": "Cadmium red"
+                    },
+                    {
+                        "value-id": "cad-yellow",
+                        "value-name": "Cadmium yellow"
+                    },
+                    {
+                        "value-id": "chr-yellow",
+                        "value-name": "Chromium yellow"
+                    },
+                    {
+                        "value-id": "cinnabar",
+                        "value-name": "Cinnabar"
+                    },
+                    {
+                        "value-id": "cob-blue",
+                        "value-name": "Cobalt blue"
+                    },
+                    {
+                        "value-id": "egi-blue",
+                        "value-name": "Egiptian blue"
+                    },
+                    {
+                        "value-id": "lapizlazuli",
+                        "value-name": "Lapizlazuli"
+                    },
+                    {
+                        "value-id": "lea-yellow",
+                        "value-name": "Lead tin yellow"
+                    },
+                    {
+                        "value-id": "oropiment",
+                        "value-name": "Oropiment"
+                    }
+                ]
             },
             {
                 "type": "text-input",
@@ -167,15 +436,122 @@
             {
                 "type": "select-one",
                 "name": "probe",
-                "values": ["1x1", "3x3", "5x5", "7x7", "9x9", "11x11", "13x13", "15x15", "25x25", "49x49"]
+                "values": [
+                    {
+                        "value-id": "1x1",
+                        "value-name": "1x1"
+                    },
+                    {
+                        "value-id": "3x3",
+                        "value-name": "3x3"
+                    }, 
+                    {
+                        "value-id": "5x5",
+                        "value-name": "5x5"
+                    }, 
+                    {
+                        "value-id": "7x7",
+                        "value-name": "7x7"
+                    }, 
+                    {
+                        "value-id": "9x9",
+                        "value-name": "9x9"
+                    }, 
+                    {
+                        "value-id": "11x11",
+                        "value-name": "11x11"
+                    }, 
+                    {
+                        "value-id": "13x13",
+                        "value-name": "13x13"
+                    },
+                    {
+                        "value-id": "15x15",
+                        "value-name": "15x15"
+                    },
+                    {
+                        "value-id": "25x25",
+                        "value-name": "25x25"
+                    },
+                    {
+                        "value-id": "49x49",
+                        "value-name": "49x49"
+                    }
+                ]
             },
             {
                 "type": "select-one",
                 "name": "palette",
-                "values": ["Discrete_tone_2_interval", "Discrete_tone_3_interval", "Discrete_tone_4_interval","Discrete_tone_5_interval", 
-                            "Discrete_color_2_interval", "Discrete_color_3_interval", "Discrete_color_4_interval", "Discrete_color_5_interval", 
-                            "Continuous_color_1_interval", "Continuous_color_2_interval", "Continuous_color_3_interval", "Continuous_color_4_interval", "Continuous_color_5_interval", 
-                            "Continuous_tone_2_interval", "Continuous_tone_3_interval", "Continuous_tone_4_interval", "Continuous_tone_5_interval"]
+                "values": [
+                    {
+                        "value-id": "disc-tone-2",
+                        "value-name": "Discrete_tone_2_interval"
+                    },
+                    {
+                        "value-id": "disc-tone-3",
+                        "value-name": "Discrete_tone_3_interval"
+                    },
+                    {
+                        "value-id": "disc-tone-4",
+                        "value-name": "Discrete_tone_4_interval"
+                    },
+                    {
+                        "value-id": "disc-tone-5",
+                        "value-name": "Discrete_tone_5_interval"
+                    },
+                    {
+                        "value-id": "disc-color-2",
+                        "value-name": "Discrete_color_2_interval"
+                    },
+                    {
+                        "value-id": "disc-color-3",
+                        "value-name": "Discrete_color_3_interval"
+                    },
+                    {
+                        "value-id": "disc-color-4",
+                        "value-name": "Discrete_color_4_interval"
+                    },
+                    {
+                        "value-id": "disc-color-5",
+                        "value-name": "Discrete_color_5_interval"
+                    },
+                    {
+                        "value-id": "cont-color-1",
+                        "value-name": "Continuous_color_1_interval"
+                    },
+                    {
+                        "value-id": "cont-color-2",
+                        "value-name": "Continuous_color_2_interval"
+                    },
+                    {
+                        "value-id": "cont-color-3",
+                        "value-name": "Continuous_color_3_interval"
+                    },
+                    {
+                        "value-id": "cont-color-4",
+                        "value-name": "Continuous_color_4_interval"
+                    },
+                    {
+                        "value-id": "cont-color-5",
+                        "value-name": "Continuous_color_5_interval"
+                    },
+                    {
+                        "value-id": "cont-tone-2",
+                        "value-name": "Continuous_tone_2_interval"
+                    },
+                    {
+                        "value-id": "cont-tone-3",
+                        "value-name": "Continuous_tone_3_interval"
+                    },
+                    {
+                        "value-id": "cont-tone-4",
+                        "value-name": "Continuous_tone_4_interval"
+                    },
+                    {
+                        "value-id": "cont-tone-5",
+                        "value-name": "Continuous_tone_5_interval"
+                    }
+                ]
             },
             {
                 "type": "boton",

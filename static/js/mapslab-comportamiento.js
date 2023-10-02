@@ -177,27 +177,65 @@ function createHtmlSelectorCapa () {
     return htmlToElement(newSelectorCapa);
 }
 
-// FUNCIÓN PARA CREAR ELEMENTO DE TIPO slider-and-input (deslizador con caja de texto input)
-function createHtmlSliderAndInput (title, slider_id, id, default_value, min, max, step) {
-    var newSliderAndInput = `<div class="panel">
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO slider-and-input Y slider-without-input (deslizador con o sin caja de texto input)
+function createHtmlSlider (title, slider_id, id, default_value, min, max, type, step) {
+    var newSlider = `<div class="panel">
                                 <div class="centered boton form-control">
-                                    <label for="${slider_id}" class="form-label">${title}</label>
-                                    <input type="number" class="slider-box" id="${id}" value="${default_value}"/>
-                                    <div class="slider-input">
+                                    <label for="${slider_id}" class="form-label">${title}</label>`;
+    if (type.includes("and-input")) {
+        newSlider +=               `<input type="number" class="slider-box" id="${id}" value="${default_value}"/>`;
+    }
+    newSlider +=                   `<div class="slider-input">
                                         <div class="value left">${min}</div>
                                         <input type="range" min="${min}" max="${max}" value="${default_value}" step="${step}" class="boton" id="${slider-id}"/>
                                         <div class="value right">${max}</div>
                                     </div>
                                 </div>
                             </div>`;
-    return htmlToElement(newSliderAndInput);
+    return htmlToElement(newSlider);
 }
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO panel
 
-// FUNCIÓN PARA CREAR ELEMENTO DE TIPO slider-without-input (fusionar con el andInput, sólo añade una línea)
-// FUNCIÓN PARA CREAR ELEMENTO DE TIPO
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO select-one Y select-multiple 
+function createHtmlSelect (title, select_id, ownClass=" ", values) {
+    var newSelect = `<div class="panel">
+                        <div class="boton form-control">`;
+    if (type.includes("one")) {
+        newSelect +=           `<label for="${select_id}" class="form-label">${title}</label>`;
+    }
+    newSelect +=               `<select id="${select_id}" class="form-control ${ownClass}" `;
+    if (type.inclues("multiple")) {
+        newSelect += `multiple`;
+    }
+    newSelect += `>`;
+    for (var value of values) {
+        newSelect +=            `<option value="${value.value-id}">${value.value-title}</option>`;
+    }
+    newSelect +=            `</select>
+                        </div>
+                    </div>`;
+    return htmlToElement(newSelect);
+}
 
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO checkbox
+function createHtmlCheckbox (title, checkbox_id) {
+    var newCheckbox = `<div class="panel">
+                            <input type="checkbox" id=${checkbox_id} value=""/>
+                            <label for=${checkbox_id}>${title}</label>
+                        </div>`;
+    return htmlToElement(newCheckbox);
+}
+
+
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO text-input
+function createHtmlTextInput (title, input_id, placeholder) {
+    var newTextInput = `<div class="panel">
+                            <label for=${input_id}>${title}:</label>
+                            <input type="text" id=${input_id} placeholder=${placeholder}>
+                        </div>`;
+    return htmlToElement(newTextInput);
+}
 
 ////////////////////////////////////////////////////////////////////////////////////
 /////////       2.FUNCIONES PARA CADA PESTAÑA (EN ORDEN)      //////////////////////
