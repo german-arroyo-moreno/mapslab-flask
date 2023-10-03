@@ -120,9 +120,12 @@ class DOGLayer extends BackgroundLayer {
     }
 }
 
-/************************************************ */
-// FUNCIONES PARA CREAR TODOS LOS TIPOS DE BOTONES DE LA APLICACIÓN
 
+////////////////////////////////////////////////////////////////////////////////////
+//////  2.FUNCIONES PARA CREAR TODOS LOS TIPOS DE BOTONES DE LA APLICACIÓN  /////////
+////////////////////////////////////////////////////////////////////////////////////
+
+/************************************************ */
 // Función auxiliar para transformar string en HTML
 function htmlToElement(html) {
     let template = document.createElement('template');
@@ -130,32 +133,80 @@ function htmlToElement(html) {
     return template.content.firstChild;
 }
 
-// FUNCIÓN PARA CREAR ELEMENTO DE TIPO botón
-function createHtmlBoton (name, otherClasses=" ", id=" ", onclick=" ") {
-    // Crear botón (Creando todo el html directamente con función auxiliar)
-    var newBotonString =  `<button onclick="${onclick}" class="${otherClasses} boton" id="${id}>${name}</button>`;
-    return (htmlToElement(newBotonString));
+// Función asíncrona para cargar el archivo JSON desde una localización
+async function loadJSON (url) {
+    const res = await fetch(url);
+    return await res.json();
 }
 
+loadJSON('../json/botones.json').then(jsonData => {
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO botón
+function createHtmlBoton (element) {
+    // Crear botón (Creando todo el html directamente con función auxiliar)
+    var newBotonString =  `<button onclick="${element.onclick == undefined ? "" : element.onclick}" class="${element.ownclass== undefined ? "" : element.ownclass} boton" `;
+    if (element.id !== undefined) {
+        newBotonString += `id="${element.id}"`;
+    }
+    newBotonString+= `>${element.name}</button>`;
+    return htmlToElement(newBotonString);
+}
 // Crear botón Valid
-var validBoton = createHtmlBoton("Valid", "valid-boton", onclick="clickCheckPositions()");
+var validBoton = createHtmlBoton(jsonData[0].Container[0]);
+
+document.getElementById("positions").appendChild(validBoton);
+});
+//console.log(validBoton);
 // Crear botón Update Data
-var updateDataBoton = createHtmlBoton("Update data", "update-boton");
-// Crear botón Remove selected layer
-var removeSelectedLayerBoton = createHtmlBoton("Remove selected layer", " ", "remove-selected-layer");
-// Crear botón Remove all layers
-var removeAllLayersBoton = createHtmlBoton("Remove all layers", " ", "remove-all-layers");
-// Crear botón Create some maps
-var createSomeMapsBoton = createHtmlBoton("Create some maps", " ", "create-some-maps");
-// Crear botón Create all the maps
-var createAllMapsBoton = createHtmlBoton("Create all the maps", " ", "create-all-maps");
-// Crear botón Create combination maps
-var createCombinationMapsBoton = createHtmlBoton("Create combination maps");
-// Crear botón Create all individual maps
-var createAllIndividualMapsBoton = createHtmlBoton("Create all individual maps");
+// var updateDataBoton = createHtmlBoton("Update data", "update-boton");
+// // Crear botón Remove selected layer
+// var removeSelectedLayerBoton = createHtmlBoton("Remove selected layer", " ", "remove-selected-layer");
+// // Crear botón Remove all layers
+// var removeAllLayersBoton = createHtmlBoton("Remove all layers", " ", "remove-all-layers");
+// // Crear botón Create some maps
+// var createSomeMapsBoton = createHtmlBoton("Create some maps", " ", "create-some-maps");
+// // Crear botón Create all the maps
+// var createAllMapsBoton = createHtmlBoton("Create all the maps", " ", "create-all-maps");
+// // Crear botón Create combination maps
+// var createCombinationMapsBoton = createHtmlBoton("Create combination maps");
+// // Crear botón Create all individual maps
+// var createAllIndividualMapsBoton = createHtmlBoton("Create all individual maps");
+
+// FUNCIÓN PARA CREAR ELEMENTO HTML DE TIPO fila-position
+function createHtmlFilaPosition (position) {
+    // Crear botón de posición (Creando todo el html directamente con función auxiliar)
+    var newRowString =  `<div class="fila">
+                            <button>${position}</button>
+                            <button onclick="clickCheckPosition('Position${position}')">
+                                <i class="fa fa-solid fa-check" id="Position${position}"></i>
+                            </button>
+                        </div>`;
+    return htmlToElement(newRowString);
+}
+
+
+//Crear tantos botones fila-position como posiciones haya
+function fillPositions () {
+    // Obtener nº de posiciones a crear
+    var positions = 155;
+
+    // Tantas posiciones como haya, crear un botón
+    for (var i=0; i < positions; i++) {
+        // Cuál será el número del siguiente botón de posición
+        var nextPosition = document.getElementById("positions").childElementCount + 1;
+
+        // Obtener el elemento HTML de la fila con la posición indicada
+        var newRowHtml = createHtmlFilaPosition(nextPosition);
+
+        // Crear el nuevo botón añadiéndolo debajo de los anteriores
+        document.getElementById("positions").appendChild(newRowHtml); 
+    }
+    //document.getElementById("positions").appendChild(updateDataBoton);
+}
+fillPositions();
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO selector-capa
 function createHtmlSelectorCapa () {
+    // Definir un string con el contenido
     var newSelectorCapa =   `<div class="layers" id="layer-selector">
                                 <div class="layers-botones" id="layers-botones"> <!-- Filas de botones de las capas / layers -->
                                     <strong>View</strong>
@@ -178,39 +229,52 @@ function createHtmlSelectorCapa () {
 }
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO slider-and-input Y slider-without-input (deslizador con o sin caja de texto input)
-function createHtmlSlider (title, slider_id, id, default_value, min, max, type, step) {
+function createHtmlSlider (element) {
+    // Definir un string con el contenido
     var newSlider = `<div class="panel">
                                 <div class="centered boton form-control">
-                                    <label for="${slider_id}" class="form-label">${title}</label>`;
-    if (type.includes("and-input")) {
-        newSlider +=               `<input type="number" class="slider-box" id="${id}" value="${default_value}"/>`;
+                                    <label for="${element.sliderid}" class="form-label">${element.name}</label>`;
+    if (element.type.includes("and-input")) {
+        newSlider +=               `<input type="number" class="slider-box" id="${element.inputid}" value="${element.default-value}"/>`;
     }
     newSlider +=                   `<div class="slider-input">
-                                        <div class="value left">${min}</div>
-                                        <input type="range" min="${min}" max="${max}" value="${default_value}" step="${step}" class="boton" id="${slider-id}"/>
-                                        <div class="value right">${max}</div>
+                                        <div class="value left">${element.min}</div>
+                                        <input type="range" min="${element.min}" max="${element.max}" value="${element.default-value}" step="${element.step}" class="boton" id="${element.sliderid}"/>
+                                        <div class="value right">${element.max}</div>
                                     </div>
                                 </div>
                             </div>`;
     return htmlToElement(newSlider);
 }
 
-// FUNCIÓN PARA CREAR ELEMENTO DE TIPO panel
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO panel !!!!! provisional
+function createHtmlPanel (element) {
+    var newPanelString =   `<div class="centered border border-secondary" id="${element.panelid}"> <!-- Subpanel de ${element.name} -->`;
+    if (element.name !== undefined) {
+        newPanelString += `<label class="form-label">${element.name}</label>`;
+    }
+    // var newPanelHtml = htmlToElement(newPanelString);
+    // Llamar a la función padre que crea objetos
+    newPanelString += `</div> <!-- Fin de subpanel ${element.name} -->`;
+
+    return htmlToElement(newPanelString);
+} 
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO select-one Y select-multiple 
-function createHtmlSelect (title, select_id, ownClass=" ", values) {
+function createHtmlSelect (element) {
+    // Definir un string con el contenido
     var newSelect = `<div class="panel">
                         <div class="boton form-control">`;
-    if (type.includes("one")) {
-        newSelect +=           `<label for="${select_id}" class="form-label">${title}</label>`;
+    if (element.type.includes("one")) {
+        newSelect +=           `<label for="${element.selectid}" class="form-label">${element.name}</label>`;
     }
-    newSelect +=               `<select id="${select_id}" class="form-control ${ownClass}" `;
-    if (type.inclues("multiple")) {
+    newSelect +=               `<select id="${element.selectid}" class="form-control ${element.ownclass==undefined ? "" : element.ownclass}" `;
+    if (element.type.inclues("multiple")) {
         newSelect += `multiple`;
     }
     newSelect += `>`;
-    for (var value of values) {
-        newSelect +=            `<option value="${value.value-id}">${value.value-title}</option>`;
+    for (var value of element.values) {
+        newSelect +=            `<option value="${value.value-id}">${value.value-name}</option>`;
     }
     newSelect +=            `</select>
                         </div>
@@ -219,26 +283,28 @@ function createHtmlSelect (title, select_id, ownClass=" ", values) {
 }
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO checkbox
-function createHtmlCheckbox (title, checkbox_id) {
+function createHtmlCheckbox (element) {
+    // Definir un string con el contenido
     var newCheckbox = `<div class="panel">
-                            <input type="checkbox" id=${checkbox_id} value=""/>
-                            <label for=${checkbox_id}>${title}</label>
+                            <input type="checkbox" id=${element.checkboxid} value=""/>
+                            <label for=${element.checkboxid}>${element.name}</label>
                         </div>`;
     return htmlToElement(newCheckbox);
 }
 
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO text-input
-function createHtmlTextInput (title, input_id, placeholder) {
+function createHtmlTextInput (element) {
+    // Definir un string con el contenido
     var newTextInput = `<div class="panel">
-                            <label for=${input_id}>${title}:</label>
-                            <input type="text" id=${input_id} placeholder=${placeholder}>
+                            <label for=${element.inputid}>${element.name}:</label>
+                            <input type="text" id=${element.inputid} placeholder=${element.placeholder}>
                         </div>`;
     return htmlToElement(newTextInput);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
-/////////       2.FUNCIONES PARA CADA PESTAÑA (EN ORDEN)      //////////////////////
+/////////       3.FUNCIONES PARA CADA PESTAÑA (EN ORDEN)      //////////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 /************************************************ */
@@ -288,40 +354,6 @@ window.clickCheckPositions = function () {
         clickCheckPosition(string);
     }
 };
-
-// Función que devuelve el elemento HTML de una fila de una posición
-function createHtmlFilaPosition (position) {
-    // Crear botón de posición (Creando todo el html directamente con función auxiliar)
-    var newRowString =  `<div class="fila">
-                            <button>${position}</button>
-                            <button onclick="clickCheckPosition('Position${position}')">
-                                <i class="fa fa-solid fa-check" id="Position${position}"></i>
-                            </button>
-                        </div>`;
-    return (htmlToElement(newRowString));
-}
-
-
-//Crear tantos botones como posiciones haya
-function fillPositions () {
-    // Obtener nº de posiciones a crear
-    var positions = 155;
-
-    // Tantas posiciones como haya, crear un botón
-    for (var i=0; i < positions; i++) {
-        // Cuál será el número del siguiente botón de posición
-        var nextPosition = document.getElementById("positions").childElementCount + 1;
-
-        // Obtener el elemento HTML de la fila con la posición indicada
-        var newRowHtml = createHtmlFilaPosition(nextPosition);
-
-        // Crear el nuevo botón añadiéndolo debajo de los anteriores
-        document.getElementById("positions").appendChild(newRowHtml); 
-    }
-}
-
-fillPositions();
-
 
 
 /************************************************ */
@@ -620,7 +652,7 @@ document.getElementById("create-all-maps").onclick = function () {
 
 
 ////////////////////////////////////////////////////////////////////////////////////
-/////////      3.FUNCIONES PARA CANVAS PRINCIPAL (THREE.JS)      ///////////////////
+/////////      4.FUNCIONES PARA CANVAS PRINCIPAL (THREE.JS)      ///////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 /************************************************ */
@@ -760,7 +792,7 @@ function onWindowResize( event ) {
 
 
 ////////////////////////////////////////////////////////////////////////////////////
-/////////      4.FUNCIONES DEL MENÚ DE LA IZQUIERDA (BARRA DE COLOR)    ////////////
+/////////      5.FUNCIONES DEL MENÚ DE LA IZQUIERDA (BARRA DE COLOR)    ////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
 /************************************************ */
