@@ -138,8 +138,9 @@ async function loadJSON (url) {
     const res = await fetch(url);
     return await res.json();
 }
+// Se cargará el JSON 1 sóla vez y se almacena en esta variable
+var botonesPromise = loadJSON("/json/botones.json");
 
-loadJSON('../json/botones.json').then(jsonData => {
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO botón
 function createHtmlBoton (element) {
     // Crear botón (Creando todo el html directamente con función auxiliar)
@@ -151,10 +152,9 @@ function createHtmlBoton (element) {
     return htmlToElement(newBotonString);
 }
 // Crear botón Valid
-var validBoton = createHtmlBoton(jsonData[0].Container[0]);
+//var validBoton = createHtmlBoton(jsonData[0].Container[0]);
 
-document.getElementById("positions").appendChild(validBoton);
-});
+// document.getElementById("positions").appendChild(validBoton);
 //console.log(validBoton);
 // Crear botón Update Data
 // var updateDataBoton = createHtmlBoton("Update data", "update-boton");
@@ -200,7 +200,6 @@ function fillPositions () {
         // Crear el nuevo botón añadiéndolo debajo de los anteriores
         document.getElementById("positions").appendChild(newRowHtml); 
     }
-    //document.getElementById("positions").appendChild(updateDataBoton);
 }
 fillPositions();
 
@@ -247,15 +246,22 @@ function createHtmlSlider (element) {
     return htmlToElement(newSlider);
 }
 
-// FUNCIÓN PARA CREAR ELEMENTO DE TIPO panel !!!!! provisional
-function createHtmlPanel (element) {
+// FUNCIÓN PARA CREAR ELEMENTO DE TIPO panel
+function createHtmlPanel (element, ...createFunctions) {
+    // Definir un string con el contenido
     var newPanelString =   `<div class="centered border border-secondary" id="${element.panelid}"> <!-- Subpanel de ${element.name} -->`;
+
+    // Añadir el nombre como título del panel (si tiene)
     if (element.name !== undefined) {
         newPanelString += `<label class="form-label">${element.name}</label>`;
     }
-    // var newPanelHtml = htmlToElement(newPanelString);
-    // Llamar a la función padre que crea objetos
     newPanelString += `</div> <!-- Fin de subpanel ${element.name} -->`;
+
+    // Convertir el string hasta ahora almacenado en HTML
+    var newPanelHtml = htmlToElement(newPanelString);
+
+    // Añadir el contenido a ese panel llamando a las funciones de los objetos contenidos en él
+    document.getElementById(element.panelid).append(createFunctions);
 
     return htmlToElement(newPanelString);
 } 
@@ -302,6 +308,24 @@ function createHtmlTextInput (element) {
                         </div>`;
     return htmlToElement(newTextInput);
 }
+
+// FUNCIÓN PARA CREAR TODOS LOS ELEMENTOS DE LAS PESTAÑAS DEL MENÚ DE LA DERECHA
+async function appendAllElements() {
+    // Esperar a que se cargue el archivo JSON con la información de los elementos / botones
+    let botones = await botonesPromise;
+    console.log(botones);
+    // Según el tipo de elemento que sea, así se llamará a su función correspondiente
+    switch (element.type) {
+        case 'boton': 
+            console.log('Creando boton');
+            break;
+        case 'fila-position':
+            break;
+        default:
+            console.log('No se ha encontrado ninguna función para elementos de ese tipo');
+    }
+}
+appendAllElements();
 
 ////////////////////////////////////////////////////////////////////////////////////
 /////////       3.FUNCIONES PARA CADA PESTAÑA (EN ORDEN)      //////////////////////
