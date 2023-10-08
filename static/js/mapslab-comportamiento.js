@@ -139,7 +139,7 @@ async function loadJSON (url) {
     return await res.json();
 }
 // Se cargará el JSON 1 sóla vez y se almacena en esta variable
-var botonesPromise = loadJSON("/json/botones.json");
+var botonesPromise = loadJSON("static/json/botones.json");
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO botón
 function createHtmlBoton (element) {
@@ -234,11 +234,11 @@ function createHtmlSlider (element) {
                                 <div class="centered boton form-control">
                                     <label for="${element.sliderid}" class="form-label">${element.name}</label>`;
     if (element.type.includes("and-input")) {
-        newSlider +=               `<input type="number" class="slider-box" id="${element.inputid}" value="${element.default-value}"/>`;
+        newSlider +=               `<input type="number" class="slider-box" id="${element.inputid}" value="${element.defaultvalue}"/>`;
     }
     newSlider +=                   `<div class="slider-input">
                                         <div class="value left">${element.min}</div>
-                                        <input type="range" min="${element.min}" max="${element.max}" value="${element.default-value}" step="${element.step}" class="boton" id="${element.sliderid}"/>
+                                        <input type="range" min="${element.min}" max="${element.max}" value="${element.defaultvalue}" step="${element.step}" class="boton" id="${element.sliderid}"/>
                                         <div class="value right">${element.max}</div>
                                     </div>
                                 </div>
@@ -261,9 +261,9 @@ function createHtmlPanel (element, ...createFunctions) {
     var newPanelHtml = htmlToElement(newPanelString);
 
     // Añadir el contenido a ese panel llamando a las funciones de los objetos contenidos en él
-    document.getElementById(element.panelid).append(createFunctions);
+    newPanelHtml.getElementById(element.panelid).append(createFunctions);
 
-    return htmlToElement(newPanelString);
+    return htmlToElement(newPanelHtml);
 } 
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO select-one Y select-multiple 
@@ -312,19 +312,48 @@ function createHtmlTextInput (element) {
 // FUNCIÓN PARA CREAR TODOS LOS ELEMENTOS DE LAS PESTAÑAS DEL MENÚ DE LA DERECHA
 async function appendAllElements() {
     // Esperar a que se cargue el archivo JSON con la información de los elementos / botones
-    let botones = await botonesPromise;
-    console.log(botones);
-    // Según el tipo de elemento que sea, así se llamará a su función correspondiente
-    switch (element.type) {
-        case 'boton': 
-            console.log('Creando boton');
-            break;
-        case 'fila-position':
-            break;
-        default:
-            console.log('No se ha encontrado ninguna función para elementos de ese tipo');
+    let botonesJson = await botonesPromise;
+
+    // Recorrer las pestañas
+    for (var pestana of botonesJson) {
+        console.log('Accediendo a PESTAÑA', pestana.Tab);
+
+        // Recorrer los elementos de esa pestaña
+        for (var element of pestana.Container) {
+            var botonesDeEstaTab = document.createElement('div');
+            console.log('Qué es botonesdeestatab: ', botonesDeEstaTab);
+            console.log('Accediendo a ', element.name);
+            // Según el tipo de elemento que sea, así se llamará a su función correspondiente
+            switch (element.type) {
+                case 'boton': 
+                    console.log('Creando boton en ', pestana.Tab);
+                    botonesDeEstaTab += createHtmlBoton(element);
+
+                    console.log('Qué es botonesdeestatab: ', botonesDeEstaTab);
+                    break;
+                case 'fila-position':
+                    console.log('Creando posiciones en ', pestana.Tab);
+                    //fillPositions();
+                    break;
+                case 'selector-capa':
+                    console.log('Creando selector capa en ', pestana.Tab);
+                    botonesDeEstaTab += createHtmlSelectorCapa();
+                    break;
+                case 'slider-and-input':
+                    console.log('Creando slider and input en ', pestana.Tab);
+                    botonesDeEstaTab += createHtmlSlider(element);
+                    break;
+                default:
+                    console.log('No se ha encontrado ninguna función para elementos de ese tipo');
+            }
+        }
+
+        console.log('Qué es botonesdeestatab: ', botonesDeEstaTab);
+        document.getElementById("Positions").appendChild(botonesDeEstaTab);
     }
+    
 }
+
 appendAllElements();
 
 ////////////////////////////////////////////////////////////////////////////////////
