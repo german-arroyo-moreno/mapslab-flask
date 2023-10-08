@@ -151,25 +151,6 @@ function createHtmlBoton (element) {
     newBotonString+= `>${element.name}</button>`;
     return htmlToElement(newBotonString);
 }
-// Crear botón Valid
-//var validBoton = createHtmlBoton(jsonData[0].Container[0]);
-
-// document.getElementById("positions").appendChild(validBoton);
-//console.log(validBoton);
-// Crear botón Update Data
-// var updateDataBoton = createHtmlBoton("Update data", "update-boton");
-// // Crear botón Remove selected layer
-// var removeSelectedLayerBoton = createHtmlBoton("Remove selected layer", " ", "remove-selected-layer");
-// // Crear botón Remove all layers
-// var removeAllLayersBoton = createHtmlBoton("Remove all layers", " ", "remove-all-layers");
-// // Crear botón Create some maps
-// var createSomeMapsBoton = createHtmlBoton("Create some maps", " ", "create-some-maps");
-// // Crear botón Create all the maps
-// var createAllMapsBoton = createHtmlBoton("Create all the maps", " ", "create-all-maps");
-// // Crear botón Create combination maps
-// var createCombinationMapsBoton = createHtmlBoton("Create combination maps");
-// // Crear botón Create all individual maps
-// var createAllIndividualMapsBoton = createHtmlBoton("Create all individual maps");
 
 // FUNCIÓN PARA CREAR ELEMENTO HTML DE TIPO fila-position
 function createHtmlFilaPosition (position) {
@@ -185,23 +166,34 @@ function createHtmlFilaPosition (position) {
 
 
 //Crear tantos botones fila-position como posiciones haya
-function fillPositions () {
+function createHtmlFilaPositions (positions) {
     // Obtener nº de posiciones a crear
-    var positions = 155;
+    // var positions = 155;
+    // Declaración de array vacío que devolverá todas las posiciones Html
+    var htmlArrayPositions = [];
+
+    // Cuál será el número del siguiente botón de posición que se tome de referencia de base
+    // El siguiente número a éste dependería de que se vayan creando los botones a la par para poder obtener la correcta sig posición si está dentro del for
+    var nextPosition = document.getElementById("positions").childElementCount + 1;
 
     // Tantas posiciones como haya, crear un botón
     for (var i=0; i < positions; i++) {
-        // Cuál será el número del siguiente botón de posición
-        var nextPosition = document.getElementById("positions").childElementCount + 1;
-
         // Obtener el elemento HTML de la fila con la posición indicada
         var newRowHtml = createHtmlFilaPosition(nextPosition);
 
         // Crear el nuevo botón añadiéndolo debajo de los anteriores
-        document.getElementById("positions").appendChild(newRowHtml); 
+        // document.getElementById("positions").appendChild(newRowHtml); 
+        // Añadir posición a array de posiciones Html creadas
+        htmlArrayPositions.push(newRowHtml);
+
+        // Obtenemos la siguiente posición
+        nextPosition++;
     }
+    return htmlArrayPositions;
 }
-fillPositions();
+var mispositions = createHtmlFilaPositions(155);
+console.log(mispositions);
+document.getElementById('positions').appendChild(...mispositions);
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO selector-capa
 function createHtmlSelectorCapa () {
@@ -261,7 +253,7 @@ function createHtmlPanel (element, ...createFunctions) {
     var newPanelHtml = htmlToElement(newPanelString);
 
     // Añadir el contenido a ese panel llamando a las funciones de los objetos contenidos en él
-    newPanelHtml.getElementById(element.panelid).append(createFunctions);
+    document.getElementById(element.panelid).appendChild(...createFunctions);
 
     return htmlToElement(newPanelHtml);
 } 
@@ -314,42 +306,57 @@ async function appendAllElements() {
     // Esperar a que se cargue el archivo JSON con la información de los elementos / botones
     let botonesJson = await botonesPromise;
 
-    // Recorrer las pestañas
+    // Recorrer el array de pestañas del archivo JSON
     for (var pestana of botonesJson) {
         console.log('Accediendo a PESTAÑA', pestana.Tab);
+        var botonesDeEstaTab = [];
+        console.log('Qué es botonesdeestatab tras definición: ', botonesDeEstaTab);
 
         // Recorrer los elementos de esa pestaña
         for (var element of pestana.Container) {
-            var botonesDeEstaTab = document.createElement('div');
-            console.log('Qué es botonesdeestatab: ', botonesDeEstaTab);
             console.log('Accediendo a ', element.name);
             // Según el tipo de elemento que sea, así se llamará a su función correspondiente
             switch (element.type) {
                 case 'boton': 
                     console.log('Creando boton en ', pestana.Tab);
-                    botonesDeEstaTab += createHtmlBoton(element);
-
-                    console.log('Qué es botonesdeestatab: ', botonesDeEstaTab);
-                    break;
+                    botonesDeEstaTab.push(createHtmlBoton(element));
+                    console.log('Qué es botonesdeestatab tras asignación en case: ', botonesDeEstaTab);
+                    break;/*
                 case 'fila-position':
                     console.log('Creando posiciones en ', pestana.Tab);
-                    //fillPositions();
+                    botonesDeEstaTab.push(createHtmlFilaPositions(155));
+                    console.log('Qué es botonesdeestatab tras createHtmlFilaPositions en case: ', botonesDeEstaTab);
                     break;
-                case 'selector-capa':
+                /*case 'selector-capa':
                     console.log('Creando selector capa en ', pestana.Tab);
-                    botonesDeEstaTab += createHtmlSelectorCapa();
+                    botonesDeEstaTab.push(createHtmlSelectorCapa());
                     break;
-                case 'slider-and-input':
-                    console.log('Creando slider and input en ', pestana.Tab);
-                    botonesDeEstaTab += createHtmlSlider(element);
+                case ('slider-and-input' || 'slider-without-input'):
+                    console.log('Creando slider and/without input en ', pestana.Tab);
+                    botonesDeEstaTab.push(createHtmlSlider(element));
                     break;
+                case 'panel':
+                    //console.log('Creando panel en ', pestana.Tab);
+                    //for (var component of element.components) {
+
+                    //}
+                    botonesDeEstaTab.push(createHtmlPanel(element));
+                    break;
+                case ('select-one' || 'select-multiple'):
+                    botonesDeEstaTab.push(createHtmlSelect(element));
+                    break;
+                case 'text-input':
+                    botonesDeEstaTab.push(createHtmlTextInput(element));
+                    break;
+                case 'checkbox':
+                    botonesDeEstaTab.push(createHtmlCheckbox(element));
+                    break;*/
                 default:
-                    console.log('No se ha encontrado ninguna función para elementos de ese tipo');
+                    console.error('No se ha especificado ninguna función para elementos de ese tipo!');
             }
         }
-
-        console.log('Qué es botonesdeestatab: ', botonesDeEstaTab);
-        document.getElementById("Positions").appendChild(botonesDeEstaTab);
+        console.log('Qué es botonesdeestatab antes del append de la PESTAÑA', pestana.Tab, ': ', botonesDeEstaTab);
+        document.getElementById(pestana.Tab).appendChild(...botonesDeEstaTab);
     }
     
 }
