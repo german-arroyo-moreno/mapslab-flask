@@ -169,48 +169,29 @@ function createHtmlFilaPosition (position) {
 function createHtmlFilaPositions (positions) {
     // Obtener nº de posiciones a crear
     // var positions = 155; // 165 totales - 10 de ejemplo del html
-    // Declaración de array vacío que devolverá todas las posiciones Html
-    var htmlArrayPositions = [];
 
-    // Cuál será el número del siguiente botón de posición que se tome de referencia de base
-    // El siguiente número a éste dependería de que se vayan creando los botones a la par para poder obtener la correcta sig posición si está dentro del for
+    // Cuál será el número del siguiente botón de posición que se tome de referencia de base (una unidad más de los que haya de base en el HTML)
     var nextPosition = document.getElementById("positions").childElementCount + 1;
 
-    // Comenzar el contenedor de todas las filas de las posiciones
-    // var divStart = document.createElement('div');
-    // divStart.add.classList('positions');
-    // console.log('divstart es: ', divStart);
+    // Declarar el contenedor Html que contendrá a todas las filas de las posiciones
     var containerWithPositions = `<div class="positions" id="positions">`;
     var containerWithPositionsHtml = htmlToElement(containerWithPositions);
-    // htmlArrayPositions.push(htmlToElement(containerStart));
-    // console.log('Tras añadir la cabecera del contenedor de las filas de positions', htmlArrayPositions);
 
     // Tantas posiciones como haya, crear un botón
     for (var i=0; i < positions; i++) {
         // Obtener el elemento HTML de la fila con la posición indicada
         var newRowHtml = createHtmlFilaPosition(nextPosition);
 
-        // Crear el nuevo botón añadiéndolo debajo de los anteriores
-        // document.getElementById("positions").appendChild(newRowHtml); 
-        // Añadir posición a array de posiciones Html creadas
-        // htmlArrayPositions.push(newRowHtml);
+        // Añadir el nuevo botón debajo de los anteriores, metiéndolo dentro del contenedor de todas las filas de las posiciones
         containerWithPositionsHtml.appendChild(newRowHtml);
 
         // Obtenemos la siguiente posición
         nextPosition++;
     }
 
-    // Cerrar el contenedor de todas las filas de las posiciones
-    // var containerEnd = `</div><div class="mecagoentodo">Hola buenas! Me cago en todo!</div> <!-- Fin del contenedor de las filas de las posiciones -->`;
-    // htmlArrayPositions.push(htmlToElement(containerEnd));
-    // console.log('Tras añadir </div> del contenedor de las filas de positions', htmlArrayPositions);
-    // htmlArrayPositions.push(containerStartHtml);
-    // console.log('Qué es containerStartHTml y después el htmlArrayPositions:', containerStartHtml, htmlArrayPositions);
-
-    // Devolver array con todas las filas de las posiciones y su contenedor
+    // Devolver elemento HTML con todas las filas de las posiciones en su contenedor
     return containerWithPositionsHtml;
 }
-//document.getElementById('positions').append(...createHtmlFilaPositions(155));
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO selector-capa
 function createHtmlSelectorCapa () {
@@ -284,12 +265,12 @@ function createHtmlSelect (element) {
         newSelect +=           `<label for="${element.selectid}" class="form-label">${element.name}</label>`;
     }
     newSelect +=               `<select id="${element.selectid}" class="form-control ${element.ownclass==undefined ? "" : element.ownclass}" `;
-    if (element.type.inclues("multiple")) {
+    if (element.type.includes("multiple")) {
         newSelect += `multiple`;
     }
     newSelect += `>`;
     for (var value of element.values) {
-        newSelect +=            `<option value="${value.value-id}">${value.value-name}</option>`;
+        newSelect +=            `<option value="${value.valueid}">${value.valuename}</option>`;
     }
     newSelect +=            `</select>
                         </div>
@@ -325,55 +306,55 @@ async function appendAllElements() {
 
     // Recorrer el array de pestañas del archivo JSON
     for (var pestana of botonesJson) {
-        console.log('Accediendo a PESTAÑA', pestana.Tab);
+        console.log('PESTAÑA:', pestana.Tab);
 
         // Recorrer los elementos de esa pestaña
         for (var element of pestana.Container) {
-            console.log('Accediendo a ', element.name);
-            var botonesDeEstaTab = [];
-            console.log('Qué es botonesdeestatab tras definición: ', botonesDeEstaTab);
+            // Los botones/elementos HTML se irán almacenando como elementos de un array en JS
+            var elementoDeEstaTab = [];
+            console.log('Accediendo a ', element.name, 'donde elementoDeEstaTab se define como:', elementoDeEstaTab);
+
             // Según el tipo de elemento que sea, así se llamará a su función correspondiente
             switch (element.type) {
                 case 'boton': 
                     console.log('Creando boton en ', pestana.Tab);
-                    botonesDeEstaTab.push(createHtmlBoton(element));
-                    console.log('Qué es botonesdeestatab tras asignación en case: ', botonesDeEstaTab);
+                    elementoDeEstaTab.push(createHtmlBoton(element));
+                    console.log('Qué es elementoDeEstaTab tras asignación en case: ', elementoDeEstaTab);
                     break;
                 case 'fila-position':
                     console.log('Creando posiciones en ', pestana.Tab);
-                    botonesDeEstaTab.push(createHtmlFilaPositions(155));
-                    //document.getElementById('positions').append(...createHtmlFilaPositions(155));
-                    console.log('Qué es botonesdeestatab tras createHtmlFilaPositions en case: ', botonesDeEstaTab);
+                    elementoDeEstaTab.push(createHtmlFilaPositions(155));
+                    console.log('Qué es elementoDeEstaTab tras createHtmlFilaPositions en case: ', elementoDeEstaTab);
                     break;
-                /*case 'selector-capa':
+                case 'selector-capa':
                     console.log('Creando selector capa en ', pestana.Tab);
-                    botonesDeEstaTab.push(createHtmlSelectorCapa());
+                    elementoDeEstaTab.push(createHtmlSelectorCapa());
                     break;
                 case ('slider-and-input' || 'slider-without-input'):
                     console.log('Creando slider and/without input en ', pestana.Tab);
-                    botonesDeEstaTab.push(createHtmlSlider(element));
-                    break;
+                    elementoDeEstaTab.push(createHtmlSlider(element));
+                    break;/*
                 case 'panel':
                     //console.log('Creando panel en ', pestana.Tab);
                     //for (var component of element.components) {
 
                     //}
-                    botonesDeEstaTab.push(createHtmlPanel(element));
-                    break;
+                    elementoDeEstaTab.push(createHtmlPanel(element));
+                    break;*/
                 case ('select-one' || 'select-multiple'):
-                    botonesDeEstaTab.push(createHtmlSelect(element));
+                    elementoDeEstaTab.push(createHtmlSelect(element));
                     break;
                 case 'text-input':
-                    botonesDeEstaTab.push(createHtmlTextInput(element));
+                    elementoDeEstaTab.push(createHtmlTextInput(element));
                     break;
                 case 'checkbox':
-                    botonesDeEstaTab.push(createHtmlCheckbox(element));
-                    break;*/
+                    elementoDeEstaTab.push(createHtmlCheckbox(element));
+                    break;
                 default:
                     console.error('No se ha especificado ninguna función para elementos de ese tipo!');
             }
-            console.log('Qué es botonesdeestatab antes del append de la PESTAÑA', pestana.Tab, ': ', botonesDeEstaTab);
-            document.getElementById(pestana.Tab).append(...botonesDeEstaTab);
+            console.log('Qué es elementoDeEstaTab antes del append de la PESTAÑA', pestana.Tab, ': ', elementoDeEstaTab);
+            document.getElementById(pestana.Tab).append(...elementoDeEstaTab); // Los ... son cruciales si se añade un array de elementos HTML
         }
     }
     
