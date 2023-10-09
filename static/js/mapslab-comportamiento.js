@@ -152,6 +152,13 @@ function createHtmlBoton (element) {
     return htmlToElement(newBotonString);
 }
 
+// FUNCIÓN PARA CREAR ELEMENTO HTML DE TIPO separador-horizontal
+function createHtmlHorizontal () {
+    // Definir string con el contenido HTML del divisor horizontal
+    var newSeparadorString = `<hr/> <!-- Divisor horizontal -->`;
+    return htmlToElement(newSeparadorString);
+}
+
 // FUNCIÓN PARA CREAR ELEMENTO HTML DE TIPO fila-position
 function createHtmlFilaPosition (position) {
     // Crear botón de posición (Creando todo el html directamente con función auxiliar)
@@ -237,7 +244,7 @@ function createHtmlSlider (element) {
 }
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO panel
-function createHtmlPanel (element, ...createFunctions) {
+function createHtmlPanel (element) {
     // Definir un string con el contenido
     var newPanelString =   `<div class="centered border border-secondary" id="${element.panelid}"> <!-- Subpanel de ${element.name} -->`;
 
@@ -248,23 +255,23 @@ function createHtmlPanel (element, ...createFunctions) {
     newPanelString += `</div> <!-- Fin de subpanel ${element.name} -->`;
 
     // Convertir el string hasta ahora almacenado en HTML
-    var newPanelHtml = htmlToElement(newPanelString);
+    // var newPanelHtml = htmlToElement(newPanelString);
 
     // Añadir el contenido a ese panel llamando a las funciones de los objetos contenidos en él
-    document.getElementById(element.panelid).appendChild(...createFunctions);
+    // document.getElementById(element.panelid).append(...createFunctions);
 
-    return htmlToElement(newPanelHtml);
+    return htmlToElement(newPanelString);
 } 
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO select-one Y select-multiple 
 function createHtmlSelect (element) {
     // Definir un string con el contenido
     var newSelect = `<div class="panel">
-                        <div class="boton form-control">`;
-    if (element.type.includes("one")) {
+                        <div class="boton ${element.name==undefined ? "": "form-control"}">`;
+    if (element.name !== undefined) {
         newSelect +=           `<label for="${element.selectid}" class="form-label">${element.name}</label>`;
     }
-    newSelect +=               `<select id="${element.selectid}" class="form-control ${element.ownclass==undefined ? "" : element.ownclass}" `;
+    newSelect +=               `<select id="${element.selectid}" class="form-control" ${element.ownclass==undefined ? "" : element.ownclass}" `;
     if (element.type.includes("multiple")) {
         newSelect += `multiple`;
     }
@@ -299,6 +306,72 @@ function createHtmlTextInput (element) {
     return htmlToElement(newTextInput);
 }
 
+// FUNCIÓN PARA DEVOLVER UN ELEMENTO HTML DEL TIPO DEL ELEMENTO PASADO COMO PARÁMETRO
+function appendElement(element) {
+    // El/los botones/elementos HTML se irán almacenando como elementos de un array de JS
+    var arrayElementosHtml = [];
+
+    // Según el tipo de elemento que sea, así se llamará a su función correspondiente
+    switch (element.type) {
+        case 'boton': 
+            arrayElementosHtml.push(createHtmlBoton(element));
+            break;
+        case 'fila-position':
+            let positions = 155;
+            arrayElementosHtml.push(createHtmlFilaPositions(positions));
+            break;
+        case 'selector-capa':
+            arrayElementosHtml.push(createHtmlSelectorCapa());
+            break;
+        case 'slider-and-input':
+        case 'slider-without-input':
+            arrayElementosHtml.push(createHtmlSlider(element));
+            break;
+        case 'panel':
+            // Creo sólo el HTML del contenedor del panel
+            var panelHtml = createHtmlPanel(element);
+
+            // Creo un array vacío donde se almacenarán los elementos HTML de los componentes contenidos en este panel
+            var arrayComponentesHtml = [];
+
+            // Por cada componente dentro del panel, almacenar su HTML en el array
+            for (var component of element.components) {
+                arrayComponentesHtml.push(appendElement(component));
+            }
+
+            // Meter todos los componentes en el panel
+            for (var i = 0; i < arrayComponentesHtml.length; i++) {
+                panelHtml.append(...arrayComponentesHtml[i]);
+            }
+            /*
+            document.getElementById('XRF').append(...arrayComponentesHtml);
+            console.log('Antes el panel HTML estaba así:', panelHtml);
+            // Meto dentro del panel sus componentes
+            panelHtml.append(...arrayComponentesHtml[2]);
+            console.log('Después el panel HTML está así: ', panelHtml);
+            console.log('Añadiendo el array de componentes al panel ', element.name, arrayComponentesHtml);*/
+            // Añado el HTML del panel conteniendo todos sus elementos
+            arrayElementosHtml.push(panelHtml);
+            break;
+        case 'select-one':
+        case 'select-multiple':
+            arrayElementosHtml.push(createHtmlSelect(element));
+            break;
+        case 'separador-horizontal':
+            arrayElementosHtml.push(createHtmlHorizontal());
+            break;
+        case 'text-input':
+            arrayElementosHtml.push(createHtmlTextInput(element));
+            break;
+        case 'checkbox':
+            arrayElementosHtml.push(createHtmlCheckbox(element));
+            break;
+        default:
+            console.error('No se ha especificado ninguna función para añadir elementos HTML de ese tipo!');
+    }
+    return arrayElementosHtml;
+}
+
 // FUNCIÓN PARA CREAR TODOS LOS ELEMENTOS DE LAS PESTAÑAS DEL MENÚ DE LA DERECHA
 async function appendAllElements() {
     // Esperar a que se cargue el archivo JSON con la información de los elementos / botones
@@ -308,58 +381,16 @@ async function appendAllElements() {
     for (var pestana of botonesJson) {
         console.log('PESTAÑA:', pestana.Tab);
 
-        // Recorrer los elementos de esa pestaña
+        // Recorrer el array de los elementos de esa pestaña
         for (var element of pestana.Container) {
-            // Los botones/elementos HTML se irán almacenando como elementos de un array en JS
-            var elementoDeEstaTab = [];
-            console.log('Accediendo a ', element.name, 'donde elementoDeEstaTab se define como:', elementoDeEstaTab);
-
-            // Según el tipo de elemento que sea, así se llamará a su función correspondiente
-            switch (element.type) {
-                case 'boton': 
-                    console.log('Creando boton en ', pestana.Tab);
-                    elementoDeEstaTab.push(createHtmlBoton(element));
-                    console.log('Qué es elementoDeEstaTab tras asignación en case: ', elementoDeEstaTab);
-                    break;
-                case 'fila-position':
-                    console.log('Creando posiciones en ', pestana.Tab);
-                    elementoDeEstaTab.push(createHtmlFilaPositions(155));
-                    console.log('Qué es elementoDeEstaTab tras createHtmlFilaPositions en case: ', elementoDeEstaTab);
-                    break;
-                case 'selector-capa':
-                    console.log('Creando selector capa en ', pestana.Tab);
-                    elementoDeEstaTab.push(createHtmlSelectorCapa());
-                    break;
-                case ('slider-and-input' || 'slider-without-input'):
-                    console.log('Creando slider and/without input en ', pestana.Tab);
-                    elementoDeEstaTab.push(createHtmlSlider(element));
-                    break;/*
-                case 'panel':
-                    //console.log('Creando panel en ', pestana.Tab);
-                    //for (var component of element.components) {
-
-                    //}
-                    elementoDeEstaTab.push(createHtmlPanel(element));
-                    break;*/
-                case ('select-one' || 'select-multiple'):
-                    elementoDeEstaTab.push(createHtmlSelect(element));
-                    break;
-                case 'text-input':
-                    elementoDeEstaTab.push(createHtmlTextInput(element));
-                    break;
-                case 'checkbox':
-                    elementoDeEstaTab.push(createHtmlCheckbox(element));
-                    break;
-                default:
-                    console.error('No se ha especificado ninguna función para elementos de ese tipo!');
-            }
-            console.log('Qué es elementoDeEstaTab antes del append de la PESTAÑA', pestana.Tab, ': ', elementoDeEstaTab);
-            document.getElementById(pestana.Tab).append(...elementoDeEstaTab); // Los ... son cruciales si se añade un array de elementos HTML
+            // Obtener el elemento HTML o array de elementos HTML del tipo correspondiente
+            var elementoAniadir = appendElement(element);
+            // Añadir el elemento Html a la pestaña correspondiente
+            document.getElementById(pestana.Tab).append(...elementoAniadir); // Los ... son cruciales si se añade un array de elementos HTML  
         }
-    }
-    
+    } 
 }
-
+// Llamada a la función para que cree todos los botones del menú de la derecha automáticamente con los datos del JSON
 appendAllElements();
 
 ////////////////////////////////////////////////////////////////////////////////////

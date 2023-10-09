@@ -15,6 +15,9 @@
                 "n-elements": 165
             },
             {
+                "type": "separador-horizontal"
+            },
+            {
                 "type": "boton",
                 "name": "Update Data",
                 "ownclass": "update-boton"
@@ -130,8 +133,10 @@
                 ]
             },
             {
+                "type": "separador-horizontal"
+            },
+            {
                 "type": "select-one",
-                "name": "Add auxiliary layers",
                 "selectid": "add-auxiliary-layers",
                 "values": [
                     {
@@ -161,7 +166,7 @@
         "Container":[
             {
                 "type": "select-multiple",
-                "name": "selector-elementos",
+                "name": "Elements",
                 "selectid": "select-elements",
                 "ownclass": "select-elements",
                 "values": [
@@ -411,6 +416,9 @@
                 ]
             },
             {
+                "type": "separador-horizontal"
+            },
+            {
                 "type": "boton",
                 "name": "Create some maps",
                 "id": "create-some-maps"
@@ -427,7 +435,6 @@
         "Container":[
             {
                 "type": "select-multiple",
-                "name": "selector-compounds",
                 "ownclass": "select-compounds",
                 "values":[
                     {
@@ -595,6 +602,9 @@
                         "valuename": "Continuous_tone_5_interval"
                     }
                 ]
+            },
+            {
+                "type": "separador-horizontal"
             },
             {
                 "type": "boton",
