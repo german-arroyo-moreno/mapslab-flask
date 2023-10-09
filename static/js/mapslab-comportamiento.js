@@ -172,7 +172,7 @@ function createHtmlFilaPosition (position) {
 }
 
 
-//Crear tantos botones fila-position como posiciones haya
+// Crear tantos botones fila-position como posiciones haya
 function createHtmlFilaPositions (positions) {
     // Obtener nº de posiciones a crear
     // var positions = 155; // 165 totales - 10 de ejemplo del html
@@ -254,12 +254,6 @@ function createHtmlPanel (element) {
     }
     newPanelString += `</div> <!-- Fin de subpanel ${element.name} -->`;
 
-    // Convertir el string hasta ahora almacenado en HTML
-    // var newPanelHtml = htmlToElement(newPanelString);
-
-    // Añadir el contenido a ese panel llamando a las funciones de los objetos contenidos en él
-    // document.getElementById(element.panelid).append(...createFunctions);
-
     return htmlToElement(newPanelString);
 } 
 
@@ -339,17 +333,11 @@ function appendElement(element) {
                 arrayComponentesHtml.push(appendElement(component));
             }
 
-            // Meter todos los componentes en el panel
+            // Meter todos los componentes dentro del panel
             for (var i = 0; i < arrayComponentesHtml.length; i++) {
+                // Recorrer array de arrays de 1 elemento
                 panelHtml.append(...arrayComponentesHtml[i]);
             }
-            /*
-            document.getElementById('XRF').append(...arrayComponentesHtml);
-            console.log('Antes el panel HTML estaba así:', panelHtml);
-            // Meto dentro del panel sus componentes
-            panelHtml.append(...arrayComponentesHtml[2]);
-            console.log('Después el panel HTML está así: ', panelHtml);
-            console.log('Añadiendo el array de componentes al panel ', element.name, arrayComponentesHtml);*/
             // Añado el HTML del panel conteniendo todos sus elementos
             arrayElementosHtml.push(panelHtml);
             break;
