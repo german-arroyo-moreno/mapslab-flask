@@ -31,7 +31,8 @@ MapSlabFlask is an advanced online interface that extends the capabilities of pr
 1. Clone this repository:
 
    ```bash
-   git clone [https://github.com/your-username/MapSlabFlask.git](https://github.com/laurator/mapslab-flask)https://github.com/laurator/mapslab-flask
+   git clone https://github.com/laurator/mapslab-flask
+   ```
 
 ## License
 
