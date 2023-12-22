@@ -119,75 +119,75 @@
     <main class="contenido"> <!-- Contenido: todo aquello que no es la barra de navegación -->
         <div class="menu-derecha"> <!-- Menú de configuración de la derecha -->
             <div class="pestanas"> <!-- Tab links / Botones de las pestañas -->
-                <button class="pestana-link" onclick="openTab(event, 'Positions')">Positions</button>
+                <button class="pestana-link active" onclick="openTab(event, 'Positions')">Positions</button>
                 <button class="pestana-link" onclick="openTab(event, 'Layers')">Layers</button>
                 <button class="pestana-link" onclick="openTab(event, 'XRF')">XRF</button>
                 <button class="pestana-link" onclick="openTab(event, 'Compounds')">Compounds</button>
                 <button class="pestana-link" onclick="openTab(event, 'XRD')">XRD</button>
             </div>
             
-            <div id="Positions" class="pestana-content"> <!-- Position Tab content / Contenido de la pestaña "Positions"-->
+            <div id="Positions" class="pestana-content" style="display: block"> <!-- Position Tab content / Contenido de la pestaña "Positions"-->
                 <h3>Positions</h3>
-                <button onclick="clickCheckPositions()" class="valid-boton boton">Valid</button>
+                <button class="valid-boton boton" id="valid-boton">Valid</button>
                 
                 <div class="positions" id="positions">
                     <div class="fila">
                         <button>1</button>
-                        <button onclick="clickCheckPosition('Position1')" class="">
+                        <button class="" id="ButtonPosition1">
                             <i class="fa fa-solid fa-check" id="Position1"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>2</button>
-                        <button onclick="clickCheckPosition('Position2')" class="">
+                        <button class="" id="ButtonPosition2">
                             <i class="fa fa-solid fa-check" id="Position2"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>3</button>
-                        <button onclick="clickCheckPosition('Position3')" class="">
+                        <button onclick="clickCheckPosition('Position3')" class="" id="ButtonPosition3">
                             <i class="fa fa-solid fa-check" id="Position3"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>4</button>
-                        <button onclick="clickCheckPosition('Position4')" class="">
+                        <button onclick="clickCheckPosition('Position4')" class="" id="ButtonPosition4">
                             <i class="fa fa-solid fa-check" id="Position4"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>5</button>
-                        <button onclick="clickCheckPosition('Position5')" class="">
+                        <button onclick="clickCheckPosition('Position5')" class="" id="ButtonPosition5">
                             <i class="fa fa-solid fa-check" id="Position5"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>6</button>
-                        <button onclick="clickCheckPosition('Position6')" class="">
+                        <button onclick="clickCheckPosition('Position6')" class="" id="ButtonPosition6"> 
                             <i class="fa fa-solid fa-check" id="Position6"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>7</button>
-                        <button onclick="clickCheckPosition('Position7')" class="">
+                        <button onclick="clickCheckPosition('Position7')" class="" id="ButtonPosition7">
                             <i class="fa fa-solid fa-check" id="Position7"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>8</button>
-                        <button onclick="clickCheckPosition('Position8')">
+                        <button onclick="clickCheckPosition('Position8')" id="ButtonPosition8">
                             <i class="fa fa-solid fa-check" id="Position8"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>9</button>
-                        <button onclick="clickCheckPosition('Position9')" class="">
+                        <button onclick="clickCheckPosition('Position9')" class="" id="ButtonPosition9">
                             <i class="fa fa-solid fa-check" id="Position9"></i>
                         </button>
                     </div>
                     <div class="fila">
                         <button>10</button>
-                        <button onclick="clickCheckPosition('Position10')" class="">
+                        <button onclick="clickCheckPosition('Position10')" class="" id="ButtonPosition10">
                             <i class="fa fa-solid fa-check" id="Position10"></i>
                         </button>
                     </div>
@@ -195,7 +195,7 @@
 
                 <hr/> <!-- Divisor horizontal -->
 
-                <button class="update-boton boton">Update data</button>
+                <button class="update-boton boton" id="update-boton">Update data</button>
             </div> <!-- Fin del contenido de la pestaña "Positions" -->
 
             <div id="Layers" class="pestana-content"> <!-- Contenido de la pestaña "Layers" -->
@@ -205,21 +205,21 @@
                         <strong>View</strong>
                         <div class="fila" id="fila-capa1">
                             <button>1</button>
-                            <button onclick="clickCheckLayer('Layer1')">
+                            <button id="ButtonLayer1"> <!-- onclick="clickCheckLayer('Layer1')"-->
                                 <i class="fa fa-eye" id="Layer1"></i>
                             </button>
                         </div>
         
                         <div class="fila" id="fila-capa2">
                             <button>2</button>
-                            <button onclick="clickCheckLayer('Layer2')">
+                            <button id="ButtonLayer2">
                                 <i class="fa fa-eye-slash" id="Layer2"></i>
                             </button>
                         </div>
 
                         <div class="fila" id="fila-capa3">
                             <button>3</button>
-                            <button onclick="clickCheckLayer('Layer3')">
+                            <button id="ButtonLayer3">
                                 <i class="fa fa-eye-slash" id="Layer3"></i>
                             </button>
                         </div>
@@ -444,7 +444,7 @@
             <div id="Compounds" class="pestana-content"> <!-- Contenido de la pestaña "Compounds" -->
                 <h3>Compounds</h3>
 
-                <select class="select select-compounds" multiple>
+                <select class="select select-compounds" multiple id="select-compounds">
                     <option value="cad-red">Cadmium_red</option>
                     <option value="cad-yellow">Cadmium_yellow</option>
                     <option value="chr-yellow">Chromium_yellow</option>

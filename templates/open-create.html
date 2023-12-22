@@ -18,14 +18,14 @@
 
                 <div class="btn-group btn-group-toggle" data-toggle="buttons"> <!-- Parte derecha de la barra de navegación -->
                     <ul class="navbar-nav me-right mb-2 mb-lg-0"> <!-- Campo para iniciar sesión o mostrar el nombre del usuario logueado -->
-                        {% if logged %}
+                        {% if session['username'] %}
                         <li class="nav-item">
-                            <a class="nav-link link-dark">Bienvenido {{ myusername }} !!!</a>
+                            <a class="nav-link link-dark">Bienvenido {{ session["username"] }} !!!</a>
                         </li>
-                        <li class="nav-item"><a class="active nav-link link-dark" aria-current="page" href="">Cerrar sesión</a></li>
+                        <li class="nav-item"><a class="active nav-link link-dark" aria-current="page" href="{{ url_for('logout') }}">Cerrar sesión</a></li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="active link-dark nav-link" aria-current="page" href="">
+                            <a class="active link-dark nav-link" aria-current="page" href="{{ url_for('login') }}">
                                 Iniciar sesión</a>
                             </li>
                         {% endif %} 
