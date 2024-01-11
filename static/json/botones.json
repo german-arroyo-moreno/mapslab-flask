@@ -6,13 +6,28 @@
                 "type": "boton",
                 "name": "Valid",
                 "ownclass": "valid-boton",
-                "onclick": "clickCheckPositions()"
+                "buttonid": "valid-boton",
+                "status": "not clicked"
             },
             {
                 "type": "fila-position",
                 "name": "fila-position",
                 "n-components": 2,
-                "n-elements": 165
+                "n-elements": 165,
+                "components": [
+                    {
+                        "buttonpositionid": "ButtonPosition1",
+                        "status": "not clicked"
+                    },
+                    {
+                        "buttonpositionid": "ButtonPosition2",
+                        "status": "not clicked"
+                    },
+                    {
+                        "buttonpositionid": "ButtonPosition3",
+                        "status": "not clicked"
+                    }
+                ]
             },
             {
                 "type": "separador-horizontal"
@@ -20,7 +35,9 @@
             {
                 "type": "boton",
                 "name": "Update Data",
-                "ownclass": "update-boton"
+                "ownclass": "update-boton",
+                "buttonid": "update-boton",
+                "status": "not clicked"
             }
         ]
     },
@@ -30,7 +47,35 @@
             {
                 "type": "selector-capa",
                 "name": "selector-capa",
-                "n-components": 3
+                "n-components": 3,
+                "components": [
+                    {
+                        "buttonlayerid": "ButtonLayer1",
+                        "status": "visible"
+                    },
+                    {
+                        "buttonlayerid": "ButtonLayer2",
+                        "status": "invisible"
+                    },
+                    {
+                        "buttonlayerid": "ButtonLayer3",
+                        "status": "invisible"
+                    }
+                ],
+                "values": [
+                    {
+                        "valueid": "layer0",
+                        "status":"not clicked"
+                    },
+                    {
+                        "valueid": "layer1",
+                        "status":"not clicked"
+                    },
+                    {
+                        "valueid": "layer2",
+                        "status": "not clicked"
+                    }
+                ]
             },
             {
                 "type": "slider-and-input",
@@ -40,7 +85,9 @@
                 "defaultvalue": 0,
                 "sliderid": "slide-transparency",
                 "inputid": "transparency-value",
-                "step": ".001"
+                "step": ".001",
+                "slidervalue": 0,
+                "inputvalue": 0
             },
             {
                 "type": "panel",
@@ -54,7 +101,8 @@
                         "max": 1,
                         "defaultvalue": 0,
                         "sliderid": "slide-min-threshold",
-                        "step": ".001"
+                        "step": ".001",
+                        "slidervalue": 0
                     },
                     {
                         "type": "slider-without-input",
@@ -63,7 +111,8 @@
                         "max": 1,
                         "defaultvalue": 1,
                         "sliderid": "slide-max-threshold",
-                        "step": ".001"
+                        "step": ".001",
+                        "slidervalue": 1
                     },
                     {
                         "type": "select-one",
@@ -72,19 +121,24 @@
                         "values": [
                             {
                                 "valueid": "integer",
-                                "valuename": "Integer"
+                                "valuename": "Integer",
+                                "predetselectedoption": true,
+                                "status": "clicked"
                             },
                             {
                                 "valueid": "float",
-                                "valuename": "Float"
+                                "valuename": "Float",
+                                "status": "not clicked"
                             },
                             {
                                 "valueid": "scientific",
-                                "valuename": "Scientific"
+                                "valuename": "Scientific",
+                                "status": "not clicked"
                             },
                             {
                                 "valueid": "percent",
-                                "valuename": "Per cent"
+                                "valuename": "Per cent",
+                                "status": "not clicked"
                             }
                         ]
                     }
@@ -98,7 +152,8 @@
                     {
                         "type": "checkbox",
                         "name": "Pixel transparency",
-                        "checkboxid": "pixel-transparency"
+                        "checkboxid": "pixel-transparency",
+                        "status": "unchecked"
                     },
                     {
                         "type": "slider-and-input",
@@ -108,7 +163,9 @@
                         "defaultvalue": 250,
                         "sliderid": "gaussian-threshold",
                         "inputid": "gaussian-threshold-value",
-                        "step": 1
+                        "step": 1,
+                        "slidervalue": 250,
+                        "inputvalue": 250
                     },
                     {
                         "type": "slider-and-input",
@@ -118,7 +175,9 @@
                         "defaultvalue": 25,
                         "sliderid": "big-gaussian-size",
                         "inputid": "big-gaussian-value",
-                        "step": "1"
+                        "step": "1",
+                        "slidervalue": 25,
+                        "inputvalue": 25
                     },
                     {
                         "type": "slider-and-input",
@@ -128,7 +187,9 @@
                         "defaultvalue": 13,
                         "sliderid": "small-gaussian-size",
                         "inputid": "small-gaussian-value",
-                        "step": "1"
+                        "step": "1",
+                        "slidervalue": 13,
+                        "inputvalue": 13
                     }
                 ]
             },
@@ -138,26 +199,32 @@
             {
                 "type": "select-one",
                 "selectid": "add-auxiliary-layers",
+                "border": false,
                 "values": [
                     {
                         "valueid": "add-layers",
-                        "valuename": "Add auxiliary layers"
+                        "valuename": "Add auxiliary layers",
+                        "predetselectedoption": true,
+                        "status": "clicked"
                     }, 
                     {
                         "valueid": "diff-gauss",
-                        "valuename": "Difference of Gaussians"
+                        "valuename": "Difference of Gaussians",
+                        "status": "not clicked"
                     }
                 ]
             },
             {
                 "type": "boton",
                 "name": "Remove selected layer",
-                "id": "remove-selected-layer"
+                "buttonid": "remove-selected-layer",
+                "status": "not clicked"
             },
             {
                 "type": "boton",
                 "name": "Remove all layers",
-                "id": "remove-all-layers"
+                "buttonid": "remove-all-layers",
+                "status": "not clicked"
             }
         ]
     },
@@ -172,75 +239,93 @@
                 "values": [
                     {
                         "valueid": "As",
-                        "valuename": "As"
+                        "valuename": "As",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Ba",
-                        "valuename": "Ba"
+                        "valuename": "Ba",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Ca",
-                        "valuename": "Ca"
+                        "valuename": "Ca",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Cd",
-                        "valuename": "Cd"
+                        "valuename": "Cd",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Co",
-                        "valuename": "Co"
+                        "valuename": "Co",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Cr",
-                        "valuename": "Cr"
+                        "valuename": "Cr",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Cu",
-                        "valuename": "Cu"
+                        "valuename": "Cu",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Fe",
-                        "valuename": "Fe"
+                        "valuename": "Fe",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Hg",
-                        "valuename": "Hg"
+                        "valuename": "Hg",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "K",
-                        "valuename": "K"
+                        "valuename": "K",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Mn",
-                        "valuename": "Mn"
+                        "valuename": "Mn",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Ni",
-                        "valuename": "Ni"
+                        "valuename": "Ni",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Pb",
-                        "valuename": "Pb"
+                        "valuename": "Pb",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Sb",
-                        "valuename": "Sb"
+                        "valuename": "Sb",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Se",
-                        "valuename": "Se"
+                        "valuename": "Se",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Sn",
-                        "valuename": "Sn"
+                        "valuename": "Sn",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Ti",
-                        "valuename": "Ti"
+                        "valuename": "Ti",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "Zn",
-                        "valuename": "Zn"
+                        "valuename": "Zn",
+                        "status": "not clicked"
                     }
                 ]
             },
@@ -248,7 +333,8 @@
                 "type": "text-input",
                 "name": "View name",
                 "inputid": "view-name-xrf",
-                "placeholder": "view1"
+                "placeholder": "view1",
+                "inputvalue": ""
             },
             {
                 "type": "select-one",
@@ -257,26 +343,32 @@
                 "values": [
                     {
                         "valueid": "min-hypercube-distance", 
-                        "valuename": "Minimum Hypercube Distance"
+                        "valuename": "Minimum Hypercube Distance",
+                        "predetselectedoption": true,
+                        "status": "clicked"
                     }, 
                     {
                         "valueid": "min-cartesian-distance",
-                        "valuename": "Minimum 2D Cartesian Distance"
+                        "valuename": "Minimum 2D Cartesian Distance",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "rbf",
-                        "valuename": "RBF"
+                        "valuename": "RBF",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "triangulation",
-                        "valuename": "Triangulation"
+                        "valuename": "Triangulation",
+                        "status": "not clicked"
                     } 
                 ]
             },
             {
                 "type": "checkbox",
                 "name": "Normalization",
-                "checkboxid": "normalization"
+                "checkboxid": "normalization",
+                "status": "unchecked"
             },
             {
                 "type": "select-one",
@@ -285,11 +377,14 @@
                 "values": [
                     {
                         "valueid": "homogeneous",
-                        "valuename": "Homogeneous"
+                        "valuename": "Homogeneous",
+                        "predetselectedoption": true,
+                        "status": "clicked"
                     }, 
                     {
                         "valueid": "heterogeneous",
-                        "valuename": "Heterogeneous"
+                        "valuename": "Heterogeneous",
+                        "status": "not clicked"
                     }
                 ]
             },
@@ -300,43 +395,54 @@
                 "values": [
                     {
                         "valueid": "1x1",
-                        "valuename": "1x1"
+                        "valuename": "1x1",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "3x3",
-                        "valuename": "3x3"
+                        "valuename": "3x3",
+                        "predetselectedoption": true,
+                        "status": "clicked"
                     }, 
                     {
                         "valueid": "5x5",
-                        "valuename": "5x5"
+                        "valuename": "5x5",
+                        "status": "not clicked"
                     }, 
                     {
                         "valueid": "7x7",
-                        "valuename": "7x7"
+                        "valuename": "7x7",
+                        "status": "not clicked"
                     }, 
                     {
                         "valueid": "9x9",
-                        "valuename": "9x9"
+                        "valuename": "9x9",
+                        "status": "not clicked"
                     }, 
                     {
                         "valueid": "11x11",
-                        "valuename": "11x11"
+                        "valuename": "11x11",
+                        "status": "not clicked"
                     }, 
                     {
                         "valueid": "13x13",
-                        "valuename": "13x13"
+                        "valuename": "13x13",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "15x15",
-                        "valuename": "15x15"
+                        "valuename": "15x15",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "25x25",
-                        "valuename": "25x25"
+                        "valuename": "25x25",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "49x49",
-                        "valuename": "49x49"
+                        "valuename": "49x49",
+                        "status": "not clicked"
                     }
                 ]
             },
@@ -347,71 +453,89 @@
                 "values": [
                     {
                         "valueid": "disc-tone-2",
-                        "valuename": "Discrete_tone_2_interval"
+                        "valuename": "Discrete_tone_2_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-tone-3",
-                        "valuename": "Discrete_tone_3_interval"
+                        "valuename": "Discrete_tone_3_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-tone-4",
-                        "valuename": "Discrete_tone_4_interval"
+                        "valuename": "Discrete_tone_4_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-tone-5",
-                        "valuename": "Discrete_tone_5_interval"
+                        "valuename": "Discrete_tone_5_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-color-2",
-                        "valuename": "Discrete_color_2_interval"
+                        "valuename": "Discrete_color_2_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-color-3",
-                        "valuename": "Discrete_color_3_interval"
+                        "valuename": "Discrete_color_3_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-color-4",
-                        "valuename": "Discrete_color_4_interval"
+                        "valuename": "Discrete_color_4_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-color-5",
-                        "valuename": "Discrete_color_5_interval"
+                        "valuename": "Discrete_color_5_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-1",
-                        "valuename": "Continuous_color_1_interval"
+                        "valuename": "Continuous_color_1_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-2",
-                        "valuename": "Continuous_color_2_interval"
+                        "valuename": "Continuous_color_2_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-3",
-                        "valuename": "Continuous_color_3_interval"
+                        "valuename": "Continuous_color_3_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-4",
-                        "valuename": "Continuous_color_4_interval"
+                        "valuename": "Continuous_color_4_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-5",
-                        "valuename": "Continuous_color_5_interval"
+                        "valuename": "Continuous_color_5_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-tone-2",
-                        "valuename": "Continuous_tone_2_interval"
+                        "valuename": "Continuous_tone_2_interval",
+                        "predetselectedoption": true,
+                        "status": "clicked"
                     },
                     {
                         "valueid": "cont-tone-3",
-                        "valuename": "Continuous_tone_3_interval"
+                        "valuename": "Continuous_tone_3_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-tone-4",
-                        "valuename": "Continuous_tone_4_interval"
+                        "valuename": "Continuous_tone_4_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-tone-5",
-                        "valuename": "Continuous_tone_5_interval"
+                        "valuename": "Continuous_tone_5_interval",
+                        "status": "not clicked"
                     }
                 ]
             },
@@ -421,12 +545,14 @@
             {
                 "type": "boton",
                 "name": "Create some maps",
-                "id": "create-some-maps"
+                "buttonid": "create-some-maps",
+                "status": "not clicked"
             },
             {
                 "type": "boton",
                 "name": "Create all the maps",
-                "id": "create-all-maps"
+                "buttonid": "create-all-maps",
+                "status": "not clicked"
             }
         ]
     },
@@ -436,42 +562,53 @@
             {
                 "type": "select-multiple",
                 "ownclass": "select-compounds",
+                "selectid": "select-compounds",
                 "values":[
                     {
                         "valueid": "cad-red",
-                        "valuename": "Cadmium red"
+                        "valuename": "Cadmium red",
+                        "predetselectedoption": true,
+                        "status": "clicked"
                     },
                     {
                         "valueid": "cad-yellow",
-                        "valuename": "Cadmium yellow"
+                        "valuename": "Cadmium yellow",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "chr-yellow",
-                        "valuename": "Chromium yellow"
+                        "valuename": "Chromium yellow",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cinnabar",
-                        "valuename": "Cinnabar"
+                        "valuename": "Cinnabar",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cob-blue",
-                        "valuename": "Cobalt blue"
+                        "valuename": "Cobalt blue",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "egi-blue",
-                        "valuename": "Egiptian blue"
+                        "valuename": "Egiptian blue",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "lapizlazuli",
-                        "valuename": "Lapizlazuli"
+                        "valuename": "Lapizlazuli",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "lea-yellow",
-                        "valuename": "Lead tin yellow"
+                        "valuename": "Lead tin yellow",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "oropiment",
-                        "valuename": "Oropiment"
+                        "valuename": "Oropiment",
+                        "status": "not clicked"
                     }
                 ]
             },
@@ -479,7 +616,8 @@
                 "type": "text-input",
                 "name": "View name",
                 "inputid": "view-name-compounds",
-                "placeholder": "view1"
+                "placeholder": "view1",
+                "inputvalue": ""
             },
             {
                 "type": "select-one",
@@ -488,43 +626,54 @@
                 "values": [
                     {
                         "valueid": "1x1",
-                        "valuename": "1x1"
+                        "valuename": "1x1",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "3x3",
-                        "valuename": "3x3"
+                        "valuename": "3x3",
+                        "predetselectedoption": true,
+                        "status": "clicked"
                     }, 
                     {
                         "valueid": "5x5",
-                        "valuename": "5x5"
+                        "valuename": "5x5",
+                        "status": "not clicked"
                     }, 
                     {
                         "valueid": "7x7",
-                        "valuename": "7x7"
+                        "valuename": "7x7",
+                        "status": "not clicked"
                     }, 
                     {
                         "valueid": "9x9",
-                        "valuename": "9x9"
+                        "valuename": "9x9",
+                        "status": "not clicked"
                     }, 
                     {
                         "valueid": "11x11",
-                        "valuename": "11x11"
+                        "valuename": "11x11",
+                        "status": "not clicked"
                     }, 
                     {
                         "valueid": "13x13",
-                        "valuename": "13x13"
+                        "valuename": "13x13",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "15x15",
-                        "valuename": "15x15"
+                        "valuename": "15x15",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "25x25",
-                        "valuename": "25x25"
+                        "valuename": "25x25",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "49x49",
-                        "valuename": "49x49"
+                        "valuename": "49x49",
+                        "status": "not clicked"
                     }
                 ]
             },
@@ -535,71 +684,89 @@
                 "values": [
                     {
                         "valueid": "disc-tone-2",
-                        "valuename": "Discrete_tone_2_interval"
+                        "valuename": "Discrete_tone_2_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-tone-3",
-                        "valuename": "Discrete_tone_3_interval"
+                        "valuename": "Discrete_tone_3_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-tone-4",
-                        "valuename": "Discrete_tone_4_interval"
+                        "valuename": "Discrete_tone_4_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-tone-5",
-                        "valuename": "Discrete_tone_5_interval"
+                        "valuename": "Discrete_tone_5_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-color-2",
-                        "valuename": "Discrete_color_2_interval"
+                        "valuename": "Discrete_color_2_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-color-3",
-                        "valuename": "Discrete_color_3_interval"
+                        "valuename": "Discrete_color_3_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-color-4",
-                        "valuename": "Discrete_color_4_interval"
+                        "valuename": "Discrete_color_4_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "disc-color-5",
-                        "valuename": "Discrete_color_5_interval"
+                        "valuename": "Discrete_color_5_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-1",
-                        "valuename": "Continuous_color_1_interval"
+                        "valuename": "Continuous_color_1_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-2",
-                        "valuename": "Continuous_color_2_interval"
+                        "valuename": "Continuous_color_2_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-3",
-                        "valuename": "Continuous_color_3_interval"
+                        "valuename": "Continuous_color_3_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-4",
-                        "valuename": "Continuous_color_4_interval"
+                        "valuename": "Continuous_color_4_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-color-5",
-                        "valuename": "Continuous_color_5_interval"
+                        "valuename": "Continuous_color_5_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-tone-2",
-                        "valuename": "Continuous_tone_2_interval"
+                        "valuename": "Continuous_tone_2_interval",
+                        "predetselectedoption": true,
+                        "status": "clicked"
                     },
                     {
                         "valueid": "cont-tone-3",
-                        "valuename": "Continuous_tone_3_interval"
+                        "valuename": "Continuous_tone_3_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-tone-4",
-                        "valuename": "Continuous_tone_4_interval"
+                        "valuename": "Continuous_tone_4_interval",
+                        "status": "not clicked"
                     },
                     {
                         "valueid": "cont-tone-5",
-                        "valuename": "Continuous_tone_5_interval"
+                        "valuename": "Continuous_tone_5_interval",
+                        "status": "not clicked"
                     }
                 ]
             },
@@ -608,11 +775,15 @@
             },
             {
                 "type": "boton",
-                "name": "Create combination maps"
+                "name": "Create combination maps",
+                "buttonid": "create-combination-maps",
+                "status": "not clicked"
             },
             {
                 "type": "boton",
-                "name": "Create all individual maps"
+                "name": "Create all individual maps",
+                "buttonid": "create-all-individual-maps",
+                "status": "not clicked"
             }
         ]
     },

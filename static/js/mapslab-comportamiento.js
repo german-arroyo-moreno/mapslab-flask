@@ -121,6 +121,222 @@ class DOGLayer extends BackgroundLayer {
 }
 
 
+/****************************************** */
+// CLASE PARA MANEJAR JSON CON MÉTODOS
+
+// Se cargará el JSON 1 sóla vez y se almacena en esta variable
+var botonesPromise = loadJSON("static/json/botones.json");
+var botonesJson = await botonesPromise;
+
+// Clase con todos los métodos de modificación y actualización del JSON en el servidor, y actualización del HTML en el front
+class jsonStatus {
+    // Constructor de la clase jsonStatus
+    // constructor() {
+    //      = ;
+    // }
+
+    // Métodos static (común para todas las instancias) 
+    // Cambiar JSON de un botón
+    static async Button_onclick (tabNumber, buttonOrderNumber, buttonid) {
+        // Cargar JSON
+        // var botonesPromise = loadJSON("static/json/botones.json");
+        // var botones = await botonesPromise;
+        // console.log('Estos botones: ', botonesJson);
+
+        // Modificar el JSON cargado al principio de la app que generaba los botones en html
+        // Si el estado del botón era "no clicado", se marca como clicado. Si no, como no clicado
+        if (botonesJson[tabNumber].Container[buttonOrderNumber].status == "not clicked") {
+            botonesJson[tabNumber].Container[buttonOrderNumber].status = "clicked";
+        } else {
+            botonesJson[tabNumber].Container[buttonOrderNumber].status = "not clicked";
+        }
+
+        // Actualizar el elemento HTML botón que ha cambiado (volver a generarlo con el cambio aplicado)
+        if (buttonid == "valid-boton") {
+            clickCheckPositions();
+        }
+
+        if (buttonid == "create-some-maps") {
+            // Obtener todos los elementos seleccionados (uno o múltiples elementos seleccionados)
+            var collection = document.getElementById("select-elements").selectedOptions;
+
+            // Crear una nueva capa por cada elemento seleccionado
+            for (var i = 0; i < collection.length; i++) {
+                console.log("Añadiendo la capa del elemento: ", collection[i].value);
+                addNewLayer(collection[i].value);
+            }
+        }
+
+        if (buttonid == "create-all-maps") {
+            // Crear una nueva capa por cada elemento que haya en el selector de elementos
+            for (var i = 0; i < document.getElementById("select-elements").options.length; i++) {
+                addNewLayer(document.getElementById("select-elements").options[i].value);
+            }
+        }
+
+        // Enviar al servidor nuevo JSON modificado - parcialmente en el json de cambios
+        let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber]);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+    }
+
+    static async Checkbox_onchange(tabNumber, elementOrderNumber, panelOrderNumber) {
+        // Modificar el JSON cargado al principio de la app que generaba los botones HTML
+        // Si el checkbox está dentro de un panel, tener en cuenta su posición dentro del panel que lo contiene
+        var elementoJson = panelOrderNumber == undefined ? botonesJson[tabNumber].Container[elementOrderNumber] : botonesJson[tabNumber].Container[elementOrderNumber].components[panelOrderNumber];
+        if (elementoJson.status == "checked") {
+            elementoJson.status = "unchecked";
+        } else {
+            elementoJson.status = "checked";
+        }
+
+        // Actualizar elemento HTML
+        if (elementoJson.status == "checked") { // Si ahora el elemento se ha quedado checked
+            this.checked = true;
+        } else {
+            this.checked = false;
+        }
+
+        // Enviar al servidor nuevo JSON modificado
+        let modificacion = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+    }
+
+    static async FilaPosition_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, buttonid) {
+        console.log("Detecto que el botón.status es éste:", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber].status);
+        // Modificar el JSON cargado al principio de la app que generaba los botones HTML
+        // Si el estado del botón era "no clicado", se marca como clicado. Si no, como no clicado
+        if (botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber].status == "not clicked") {
+            botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber].status = "clicked"
+        } else {
+            botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber].status = "not clicked";
+        }
+
+        // Actualizar HTML con la funcionalidad que supondría clicar este botón
+        // Cambiar el icono del botón clicado. De Check -> Cruz -> Check
+        var posNumber = buttonid.slice(6);  // Obtener Position6 de 'ButtonPosition6'
+        clickCheckPosition(posNumber);      // Esta función requiere pasarle formato 'Position4'
+
+        // Enviar al servidor nuevo JSON modificado
+        let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber]);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+    }
+
+    static async FilaSelectorCapa_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, buttonid) {
+        // Modificar el JSON cargado al principio de la app que generaba los botones HTML
+        // Si el estado del botón era "no clicado", se marca como clicado. Si no, como no clicado
+        if (botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber].status == "invisible") {
+            botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber].status = "visible"
+        } else {
+            botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber].status = "invisible";
+        }
+
+        // Actualizar HTML con la funcionalidad que supondría clicar este botón
+        var layNumber = buttonid.slice(6);  // Obtener Layer6 de 'ButtonLayer6'
+        clickCheckLayer(layNumber);         // Esta función requiere pasarle formato 'Layer4'
+
+        // Enviar al servidor nuevo JSON modificado
+        let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber]);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+    }
+
+    static async SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, selectObject) {
+        // Modificar el JSON cargado al principio de la app que generaba los botones HTML
+        for (var i = 0; i < selectedOptions.length; i++) { // Recorrer el array de JSONs con status de los botones
+            if (selectedOptions[i].status == "clicked") {
+                botonesJson[tabNumber].Container[elementOrderNumber].values[i].status = "clicked";
+            } else {
+                botonesJson[tabNumber].Container[elementOrderNumber].values[i].status = "not clicked";
+            }
+
+            // Enviar modificación JSON al servidor. POR CADA OPCIÓN DEL SELECT, UNA PETICIÓN
+            // let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[elementOrderNumber].values[i]);
+            // console.log('El front le he enviado al server la modificación: ', modificacion);
+        }
+
+        // Enviar modificación JSON al servidor del COMPONENTE SELECT COMPLETO
+        let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[elementOrderNumber]);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+
+        // Actualizar elemento HTML
+        // Realmente clicar una opción aún no tiene un efecto inmediato
+        // El siguiente for provisional se podría combinar con el anterior
+        for (var i = 0; i < selectObject.options.length; i++) {
+            if (selectedOptions[i].status == "clicked") {
+                selectObject.options[i].selected = "selected";
+            }
+        }
+    }
+
+    static async Select_onchange (tabNumber, elementOrderNumber, selectedOption, selectObject, panelOrderNumber) {
+        // Modificar el JSON cargado al principio de la app que generaba los botones HTML
+        // Si el select está dentro de un panel, tener en cuenta su posición dentro del panel que lo contiene
+        var elementoJson = panelOrderNumber == undefined ? botonesJson[tabNumber].Container[elementOrderNumber] : botonesJson[tabNumber].Container[elementOrderNumber].components[panelOrderNumber];
+        
+        for (var i = 0; i < selectObject.options.length; i++) {
+            // Todas las opciones del select se marcan como NO clicadas
+            elementoJson.values[i].status = "not clicked";
+        }
+        // Sólo la opción seleccionada se marca a clicado
+        elementoJson.values[selectedOption].status = "clicked";
+        
+
+        // Actualizar elemento HTML
+        selectObject.options[selectedOption].selected = "selected";
+
+        // Enviar modificación JSON al servidor del COMPONENTE SELECT COMPLETO
+        let modificacion = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+    }
+
+    static async SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber) {
+        // Modificar el JSON cargado al principio de la app que generaba los botones HTML
+        // Si el slider está dentro de un panel, tener en cuenta su posición dentro del panel que lo contiene
+        var elementoJson = panelOrderNumber == undefined ? botonesJson[tabNumber].Container[elementOrderNumber] : botonesJson[tabNumber].Container[elementOrderNumber].components[panelOrderNumber];
+        elementoJson.slidervalue = slider_value;
+        // Su caja de texto muestra el nuevo valor del slider
+        elementoJson.inputvalue = slider_value;
+
+        // Actualizar elemento HTML
+        // ...Restaurar valores en slider + input...
+
+        // Enviar al servidor nuevo JSON modificado
+        let modificacion = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+    }
+
+    static async SliderWithoutInput_onchange(tabNumber, elementOrderNumber, panelOrderNumber, slider_value) {
+        // Modificar el JSON cargado al principio de la app que generaba los botones HTML
+        // Si el slider está dentro de un panel, tener en cuenta su posición dentro del panel que lo contiene
+        var elementoJson = panelOrderNumber == undefined ? botonesJson[tabNumber].Container[elementOrderNumber] : botonesJson[tabNumber].Container[elementOrderNumber].components[panelOrderNumber];
+        elementoJson.slidervalue = slider_value; // Actualizar valor del slider en el JSON
+    
+        // Actualizar elemento HTML
+        // ...Restaurar valores en slider...
+
+        // Enviar al servidor nuevo JSON modificado
+        let modificacion = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+    }
+
+    static async TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, inputObject) {
+        // Modificar el JSON cargado al principio de la app que generaba los botones HTML
+        // Si el checkbox está dentro de un panel, tener en cuenta su posición dentro del panel que lo contiene
+        var elementoJson = panelOrderNumber == undefined ? botonesJson[tabNumber].Container[elementOrderNumber] : botonesJson[tabNumber].Container[elementOrderNumber].components[panelOrderNumber];
+        
+        elementoJson.inputvalue = inputObject.value;
+        elementoJson.slidervalue = inputObject.value;
+
+        // Actualizar elemento HTML
+        // inputObject.value = elementoJson.inputvalue;
+        // Si estaba conectado a un slider de tipo slider-and-input, cambiar valor de su slider también
+
+        // Enviar al servidor nuevo JSON modificado
+        let modificacion = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', modificacion);
+    }
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////////
 //////  2.FUNCIONES PARA CREAR TODOS LOS TIPOS DE BOTONES DE LA APLICACIÓN  /////////
 ////////////////////////////////////////////////////////////////////////////////////
@@ -138,15 +354,17 @@ async function loadJSON (url) {
     const res = await fetch(url);
     return await res.json();
 }
-// Se cargará el JSON 1 sóla vez y se almacena en esta variable
-var botonesPromise = loadJSON("static/json/botones.json");
+// Se cargará el JSON 1 sóla vez y se almacena en esta variable 
+// var botonesPromise = loadJSON("static/json/botones.json");
 
 // FUNCIÓN PARA CREAR ELEMENTO DE TIPO botón
 function createHtmlBoton (element) {
     // Crear botón (Creando todo el html directamente con función auxiliar)
-    var newBotonString =  `<button onclick="${element.onclick == undefined ? "" : element.onclick}" class="${element.ownclass== undefined ? "" : element.ownclass} boton" `;
-    if (element.id !== undefined) {
-        newBotonString += `id="${element.id}"`;
+    var newBotonString =  `<button 
+                            class="${element.ownclass== undefined ? "" : element.ownclass} boton" `;
+                            // onclick="${element.onclick == undefined ? "" : element.onclick}" 
+    if (element.buttonid !== undefined) {
+        newBotonString += `id="${element.buttonid}"`;
     }
     newBotonString+= `>${element.name}</button>`;
     return htmlToElement(newBotonString);
@@ -164,7 +382,7 @@ function createHtmlFilaPosition (position) {
     // Crear botón de posición (Creando todo el html directamente con función auxiliar)
     var newRowString =  `<div class="fila">
                             <button>${position}</button>
-                            <button onclick="clickCheckPosition('Position${position}')">
+                            <button onclick="clickCheckPosition('Position${position}')" id="ButtonPosition${position}">
                                 <i class="fa fa-solid fa-check" id="Position${position}"></i>
                             </button>
                         </div>`;
@@ -261,7 +479,7 @@ function createHtmlPanel (element) {
 function createHtmlSelect (element) {
     // Definir un string con el contenido
     var newSelect = `<div class="panel">
-                        <div class="boton ${element.name==undefined ? "": "form-control"}">`;
+                        <div class="boton ${element.border==false ? "": "form-control"}">`;
     if (element.name !== undefined) {
         newSelect +=           `<label for="${element.selectid}" class="form-label">${element.name}</label>`;
     }
@@ -271,7 +489,7 @@ function createHtmlSelect (element) {
     }
     newSelect += `>`;
     for (var value of element.values) {
-        newSelect +=            `<option value="${value.valueid}">${value.valuename}</option>`;
+        newSelect +=            `<option ${value.predetselectedoption ? 'selected="selected"' : ""} value="${value.valueid}">${value.valuename}</option>`;
     }
     newSelect +=            `</select>
                         </div>
@@ -367,7 +585,7 @@ async function appendAllElements() {
 
     // Recorrer el array de pestañas del archivo JSON
     for (var pestana of botonesJson) {
-        console.log('PESTAÑA:', pestana.Tab);
+        //console.log('PESTAÑA:', pestana.Tab); // Mostrar en consola la pestaña que se está rellenando
 
         // Recorrer el array de los elementos de esa pestaña
         for (var element of pestana.Container) {
@@ -397,7 +615,7 @@ window.openTab = function(evt, tabName) {
         tabcontent[i].style.display="none";
     }
 
-    // Get all elements with class="tablinks" and remove the class "active"
+    // Get all elements with class="pestana-link" and remove the class "active"
     tablinks = document.getElementsByClassName("pestana-link");
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
@@ -412,7 +630,7 @@ window.openTab = function(evt, tabName) {
 // COMPORTAMIENTO DE LOS BOTONES DEL MENÚ DE LA DERECHA
 // PESTAÑA POSITIONS
 //Función para cambiar un check / tick del menú positions
-window.clickCheckPosition = function(posNumber) {
+function clickCheckPosition (posNumber) {
     var iconTarget = document.getElementById(posNumber);
     // Si es tick, cambia a cruz. Si no, a la inversa
     if (iconTarget.classList.contains("fa-check")) {
@@ -420,18 +638,18 @@ window.clickCheckPosition = function(posNumber) {
     } else {
         iconTarget.classList.replace("fa-times", "fa-check");
     }
-};
+}
 
 //Función para cambiar los checks de todas las posiciones con botón valid. MENÚ POSITIONs
-window.clickCheckPositions = function () {
+function clickCheckPositions() {
     var positions = document.getElementsByClassName("positions");
     var rows = positions[0].childElementCount; // El primer y único elemento "positions"
     for (let i = 0; i < rows; i++) {
         let string = "Position" + (i+1);
-        console.log(string);
+        // console.log(string); // Mostrar por consola la posición a la que se le ha cambiado el check
         clickCheckPosition(string);
     }
-};
+}
 
 
 /************************************************ */
@@ -444,7 +662,7 @@ function obtainNumberLayer(string) {
 }
 
 //Función para cambiar un ojo / ojo tachado del menú layers
-window.clickCheckLayer = function(layer) {
+function clickCheckLayer(layer) {
     // Cambiar icono del botón de la capa correspondiente
     var iconTarget = document.getElementById(layer);
     // Si es ojo, cambia a ojo tachado. Si no, a la inversa
@@ -464,7 +682,7 @@ window.clickCheckLayer = function(layer) {
         console.log('El material de esta capa no está definido aún');
         document.getElementById("alertMaterialUndefined").style.display = "block";
     }
-};
+}
 
 /************************************************ */
 // PESTAÑA LAYERS: Deslizador de transparencia y su cajita del número
@@ -706,7 +924,7 @@ function addNewLayer (element) {
     mesh3 = new THREE.Mesh( plano, materials ); //se van creando objetos que sobrecargan el programa. Destruirlos
     scene.add( mesh3 );
 }
-
+/*
 // Comportamiento al clicar el botón 'Create Some Maps' de XRF
 document.getElementById("create-some-maps").onclick = function () {
     // Obtener todos los elementos seleccionados (uno o múltiples elementos seleccionados)
@@ -718,7 +936,8 @@ document.getElementById("create-some-maps").onclick = function () {
         addNewLayer(collection[i].value);
     }
 };
-
+*/
+/*
 // Comportamiento al clicar el botón 'Create all maps' de XRF
 document.getElementById("create-all-maps").onclick = function () {
     console.log(document.getElementById("select-elements").options.length, "elementos nuevos"); // 18 elementos
@@ -727,7 +946,7 @@ document.getElementById("create-all-maps").onclick = function () {
         addNewLayer(document.getElementById("select-elements").options[i].value);
     }
 };
-
+*/
 
 ////////////////////////////////////////////////////////////////////////////////////
 /////////      4.FUNCIONES PARA CANVAS PRINCIPAL (THREE.JS)      ///////////////////
@@ -1052,3 +1271,540 @@ colorBar("Ca", 0);
 
 // Si se selecciona otro color en la ventana modal, se actualiza en la barra
 document.getElementById("ok-color").onclick = colorBar;
+
+////////////////////////////////////////////////////////////////////////////////////
+/////////////      6.FUNCIONES ASÍNCRONAS CON AJAX (FETCH)    //////////////////
+////////////////////////////////////////////////////////////////////////////////////
+
+/*
+window.onload = function() {
+    document.getElementById("theButton").onclick = doWork;
+}
+function doWork() {
+    // ajax the JSON to the server
+    $.post("receiver", cars, function() {
+
+    });
+    // stop link reloading the page
+    event.preventDefault();
+}
+
+// Comprobando que la petición es satisfactoria
+fetch(url, {
+    method: "POST", // or 'PUT'
+    body: JSON.stringify(data), // data can be `string` or {object}!
+    headers: {
+      "Content-Type": "application/json",
+    },
+  })
+
+
+  .then((response) => {
+    if (response.ok) {
+        return response.json();
+        /*
+      response.blob().then(function (miBlob) {
+        var objectURL = URL.createObjectURL(miBlob);
+        miImagen.src = objectURL;
+      });*//*
+    } else {
+        console.log("Respuesta de red OK pero respuesta HTTP no OK");
+    }
+  })
+  .then((res) => res.json())
+  .catch(function (error) {
+    console.log("Hubo un problema con la petición Fetch:" + error.message);
+  })
+  .then((response) => console.log("Success:", response));
+
+
+
+fetch(url, {
+  method: "POST", // or 'PUT'
+  body: JSON.stringify(data), // data can be `string` or {object}!
+  headers: {
+    "Content-Type": "application/json",
+  },
+})
+  .then((res) => res.json())
+  .catch((error) => console.error("Error:", error))
+  .then((response) => console.log("Success:", response));
+*/
+////////////
+/*
+const initFetch = {
+    // method: "POST", // *GET, POST, PUT, DELETE, etc.
+    // mode: "cors", // no-cors, *cors, same-origin
+    // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+    // credentials: "same-origin", // include, *same-origin, omit
+    headers: {
+      "Content-Type": "application/json",
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    // redirect: "follow", // manual, *follow, error
+    // referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+    body: JSON.stringify(data), // body data type must match "Content-Type" header
+}
+/*
+var url = "https://example.com/profile";
+var data = { username: "example" };
+*/
+
+async function myButtonEvt (url= "", data = {}) {
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+            credentials: "include", // incluirá el id de sesión del usuario
+        });
+        if (!response.ok) {
+            console.error("Respuesta de red OK pero respuesta HTTP no OK", response.status);
+        }
+        // console.log('Igualmente el response es: ', response.text());
+        const buttons = await response.json();
+        // console.log('Buttons: ', buttons);
+        // console.log("Éxito: ", buttons);
+
+        return buttons;
+    } catch (error) {
+        console.error("Hubo un problema con la petición Fetch: " + error.message);
+    }    
+}
+
+let data = await myButtonEvt("/receive", {"holi": "hola"});
+//const data = {"holi": "hola"};
+//myButtonEvt("/receive", data).then((data) => {
+  console.log('Muestra de DATA:', data); // JSON data parsed by `data.json()` call
+//});
+
+// DETECCIÓN DE EVENTOS DE CADA BOTÓN / ELEMENTO PARA NOTIFICAR AL SERVIDOR
+// Detectar si los botones de la aplicación han sido clicados y actualizar al servidor
+
+// Botón valid
+document.getElementById("valid-boton").addEventListener("click", function () {
+    var tabNumber = 0;          // El botón Valid se encuentra en Pestaña Positions, la 0 en el JSON
+    var buttonOrderNumber = 0;  // Posición del botón Valid en el orden de aparición de botones de cada pestaña (aparece el primero)
+    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "valid-boton");
+});
+
+//Función para extraer el número entero del nombre de una capa (auxiliar para otras funciones)
+function obtainNumberPositionId(string) {
+    // Extraer nº position del id de su botón
+    var stringNumber = string.slice(14); // Formato string (14 carácteres del comienzo 'ButtonPosition')
+    return Number(stringNumber);        // Formato int
+}
+
+// Todos los elementos fila positions. Al clicar el segundo botón (el que contiene el icono) de la fila se identifica qué posición es
+document.querySelectorAll("#Positions > #positions > .fila button:nth-child(2)").forEach(function(element) {
+    //addEventListener sólo para el botón que se ha clicado dentro del conjunto de botones posibles de todas las filas de posiciones
+    element.addEventListener("click", function() {
+        console.log('he clicado la posición tal', this.id);
+        var tabNumber = 0;          // El panel de positions se encuentra en Pestaña Positions, la 0 en el JSON
+        var buttonOrderNumber = 1;  // Posición del panel positions en el orden de aparición de cada pestaña (comienza en 0)
+        var buttonIdNumber = obtainNumberPositionId(this.id) - 1; // Obtener el '6' de ButtonPosition6
+        jsonStatus.FilaPosition_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, this.id);
+    });
+});
+
+// Botón Update Data de la pestaña Positions
+document.getElementById("update-boton").addEventListener("click", function() {
+    var tabNumber = 0;          // El botón Update Data se encuentra en Pestaña Positions, la 0 en el JSON
+    var buttonOrderNumber = 3;  // Posición del botón Update en el orden de aparición de cada pestaña del JSON (comienza en 0)
+    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "update-boton");
+});
+
+/****************************** */
+// FUNCIONES COMUNES PARA LOS DETECTORES DE EVENTOS
+// Función para SELECTORES MÚLTIPLES 
+function getSelectedOptions(sel) {
+    var opts = [], opt;
+    for (var i = 0; i < sel.options.length; i++) {
+        opt = sel.options[i];
+        opts.push({"valueid": opt.value,
+                    "status": "not-clicked"}); // Array de JSON provisional, paralelo al original. Con todos los status de todas las opciones
+    
+        if (opt.selected) {
+            opts[i].status = "clicked";   // Índice empezando en 0 de la opción seleccionada
+        }
+    }        
+    return opts; // Obtener un array provisional con los status actualizados de las opciones seleccionadas
+}
+
+// Función para SELECTORES INDIVIDUALES
+function getSelectedOption(sel) {
+    var opt;
+    for (var i = 0; i < sel.options.length; i++) {
+        opt = sel.options[i];
+    
+        if (opt.selected) {
+            return i; // Posición comenzando en 0 de la opción seleccionada dentro del select
+        }
+    }
+}
+
+
+/****************************** */
+// PESTAÑA LAYERS: EVENTOS DE SUS ELEMENTOS / BOTONES
+// BOTONES DE VISIBILIDAD DEL SELECTOR DE CAPAS, PESTAÑA LAYERS
+document.querySelectorAll("#Layers > #layer-selector > #layers-botones > .fila button:nth-child(2)").forEach(function(element) {
+    //addEventListener sólo para el botón que se ha clicado dentro del conjunto de botones posibles
+    element.addEventListener("click", function() {
+        console.log('he clicado la layer tal', this.id);
+        var tabNumber = 1;          // El panel de selector-capa se encuentra en Pestaña Layers, la 1 en el JSON
+        var buttonOrderNumber = 0;  // Posición del panel selector en el orden de aparición de cada pestaña (comienza en 0)
+        var buttonIdNumber = obtainNumberLayer(this.firstElementChild.id) - 1; // Obtener el '6' de Layer6
+        jsonStatus.FilaSelectorCapa_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, this.id);
+    });
+});
+
+// SELECTOR INDIVIDUAL DE CAPAS (seleccionar sólo nombre de capas)
+document.getElementById("layers-nombre").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 0; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+});
+
+// INPUT DEL SLIDER TRAANSPARENCY, PESTAÑA LAYERS
+document.getElementById("transparency-value").addEventListener("input", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 1; // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
+});
+
+// SLIDER CON INPUT DE TRANSPARENCY, PESTAÑA LAYERS
+document.getElementById("slide-transparency").addEventListener("change", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 1; // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+    var slider_value = this.value;
+    jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value);
+});
+
+// SLIDER SIN INPUT DE MAX THRESHOLD
+document.getElementById("slide-min-threshold").addEventListener("change", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 2; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 0;   // Nº orden dentro de los elementos del PANEL en el JSON
+    var slider_value = this.value;
+    jsonStatus.SliderWithoutInput_onchange(tabNumber, elementOrderNumber, panelOrderNumber, slider_value);
+});
+
+// SLIDER SIN INPUT DE MAX THRESHOLD
+document.getElementById("slide-max-threshold").addEventListener("change", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 2; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
+    var slider_value = this.value;
+    jsonStatus.SliderWithoutInput_onchange(tabNumber, elementOrderNumber, panelOrderNumber, slider_value);
+});
+
+// SELECTOR INDIVIDUAL DE DATA TYPE PRINT, PESTAÑA LAYERS
+document.getElementById("data-type").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 2;  // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this, panelOrderNumber);
+});
+
+// CHECKBOX DE PIXEL TRANSPARENCY
+document.getElementById("pixel-transparency").addEventListener("change", function () {
+    var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 0;   // Nº orden dentro de los elementos del PANEL en el JSON
+    jsonStatus.Checkbox_onchange(tabNumber, elementOrderNumber, panelOrderNumber);
+});
+
+// INPUT DEL SLIDER GAUSSIAN THRESHOLD
+document.getElementById("gaussian-threshold-value").addEventListener("input", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
+    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
+});
+
+// SLIDER CON INPUT DE GAUSSIAN THRESHOLD
+document.getElementById("gaussian-threshold").addEventListener("change", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
+    var slider_value = this.value;
+    jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
+});
+
+// INPUT DEL SLIDER BIG GAUSSIAN SIZE
+document.getElementById("big-gaussian-value").addEventListener("input", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
+    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
+});
+
+// SLIDER CON INPUT DE BIG GAUSSIAN SIZE
+document.getElementById("big-gaussian-size").addEventListener("change", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
+    var slider_value = this.value;
+    jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
+});
+
+// INPUT DEL SLIDER SMALL GAUSSIAN SIZE
+document.getElementById("small-gaussian-value").addEventListener("input", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 3;   // Nº orden dentro de los elementos del PANEL en el JSON
+    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
+});
+
+// SLIDER CON INPUT DE SMALL GAUSSIAN SIZE
+document.getElementById("small-gaussian-size").addEventListener("change", function() {
+    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+    var panelOrderNumber = 3;   // Nº orden dentro de los elementos del PANEL en el JSON
+    var slider_value = this.value;
+    jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
+});
+
+// SELECTOR INDIVIDUAL INTERPOLATION TYPE
+document.getElementById("add-auxiliary-layers").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
+    var elementOrderNumber = 5; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+});
+
+// BOTÓN REMOVE SELECTED LAYER DE LA PESTAÑA LAYERS
+document.getElementById("remove-selected-layer").addEventListener("click", function() {
+    var tabNumber = 1;          // El botón Remove Selected Layer se encuentra en Pestaña Layers, la 1 en el JSON (comienza en 0)
+    var buttonOrderNumber = 6;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-selected-layer");
+});
+
+// BOTÓN REMOVE SELECTED LAYER DE LA PESTAÑA LAYERS
+document.getElementById("remove-all-layers").addEventListener("click", function() {
+    var tabNumber = 1;          // El botón Remove Selected Layer se encuentra en Pestaña Layers, la 1 en el JSON (comienza en 0)
+    var buttonOrderNumber = 7;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-all-layers");
+});
+
+/****************************** */
+// PESTAÑA XRF: EVENTOS DE SUS ELEMENTOS / BOTONES
+// SELECTOR MÚLTIPLE DE ELEMENTS DE XRF
+document.getElementById("select-elements").addEventListener("change", function() {
+    var selectedOptions = getSelectedOptions(this);
+    var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
+    var elementOrderNumber = 0;  // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, this);
+});
+
+// VIEW NAME TEXT INPUT DE XRF
+document.getElementById("view-name-xrf").addEventListener("input", function() {
+    var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
+    var elementOrderNumber = 1; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
+});
+
+// SELECTOR INDIVIDUAL INTERPOLATION TYPE
+document.getElementById("interpolation").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
+    var elementOrderNumber = 2; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+});
+
+// CHECKBOX NORMALIZATION
+document.getElementById("normalization").addEventListener("change", function () {
+    var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Checkbox_onchange(tabNumber, elementOrderNumber);
+});
+
+// SELECTOR INDIVIDUAL POS.NORMALIZATION
+document.getElementById("pos-normalization").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
+    var elementOrderNumber = 4; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+});
+
+// SELECTOR INDIVIDUAL PROBE DE XRF
+document.getElementById("probe-xrf").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
+    var elementOrderNumber = 5; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+});
+
+// SELECTOR INDIVIDUAL PALETTE DE XRF
+document.getElementById("palette-xrf").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
+    var elementOrderNumber = 6; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+});
+
+// BOTÓN CREATE SOME MAPS DE LA PESTAÑA XRF
+document.getElementById("create-some-maps").addEventListener("click", function() {
+    var tabNumber = 2;          // El botón Create Some Maps de XRF se encuentra en Pestaña XRF, la 2 en el JSON (comienza en 0)
+    var buttonOrderNumber = 8;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-some-maps");
+});
+
+// BOTÓN CREATE SOME MAPS DE LA PESTAÑA XRF
+document.getElementById("create-all-maps").addEventListener("click", function() {
+    var tabNumber = 2;          // El botón Create All Maps de XRF se encuentra en Pestaña XRF, la 2 en el JSON (comienza en 0)
+    var buttonOrderNumber = 9;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-all-maps");
+});
+
+/****************************** */
+// PESTAÑA COMPOUNDS: EVENTOS DE SUS ELEMENTOS / BOTONES
+// SELECTOR MÚLTIPLE DE COMPOUNDS
+document.getElementById("select-compounds").addEventListener("change", function() {
+    var selectedOptions = getSelectedOptions(this);
+    var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
+    var elementOrderNumber = 0;  // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, this);
+});
+
+// VIEW NAME TEXT INPUT DE COMPOUNDS
+document.getElementById("view-name-compounds").addEventListener("input", function() {
+    var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
+    var elementOrderNumber = 1; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
+});
+
+// SELECTOR INDIVIDUAL PROBE DE COMPOUNDS
+document.getElementById("probe-compounds").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
+    var elementOrderNumber = 2; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+});
+
+// SELECTOR INDIVIDUAL PALETTE DE COMPOUNDS
+document.getElementById("palette-compounds").addEventListener("change", function() {
+    var selectedOption = getSelectedOption(this);
+    var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
+    var elementOrderNumber = 3; // Nº orden del elemento en la pestaña en el JSON
+    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+});
+
+// BOTÓN CREATE COMBINATION MAPS DE LA PESTAÑA COMPOUNDS
+document.getElementById("create-combination-maps").addEventListener("click", function() {
+    var tabNumber = 3;          // El botón Create Combination Maps de Compounds se encuentra en Pestaña Compounds, la 3 en el JSON (comienza en 0)
+    var buttonOrderNumber = 5;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-combination-maps");
+});
+
+// BOTÓN CREATE ALL INDIVIDUAL MAPS DE LA PESTAÑA COMPOUNDS
+document.getElementById("create-all-individual-maps").addEventListener("click", function() {
+    var tabNumber = 3;          // El botón Create All individual Maps de Compounds se encuentra en Pestaña Compounds, la 3 en el JSON (comienza en 0)
+    var buttonOrderNumber = 6;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-all-individual-maps");
+});
+
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////////
+/////////////  7.FUNCIONES ASÍNCRONAS CON AJAX (FETCH): LONG POLLING  ///////////////
+////////////////////////////////////////////////////////////////////////////////////
+async function longpolling() {
+    try {
+        let response = await fetch("/longpolling", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({"mi peticion": "al longpolling"}),
+            // credentials: "include"
+        });
+
+        if (!response.ok) {
+            console.error("Respuesta de red OK pero respuesta HTTP no ok (longpollin)", response.status);
+        }
+
+        if (response.status == 502) {
+            // El estado 502 es un error de "tiempo de espera agotado" en la conexión,
+            // puede suceder cuando la conexión estuvo pendiente durante demasiado tiempo,
+            // y el servidor remoto o un proxy la cerró
+            // vamos a reconectarnos
+            longpolling();
+        } else if (response.status != 200) {
+            // Un error : vamos a mostrarlo
+            console.error(response.statusText);
+            // Vuelve a conectar en un segundo
+            await new Promise(resolve => setTimeout(resolve, 100000));
+            longpolling();
+        } else {
+            // Recibe y muestra el mensaje
+            // let message = await response.json();
+            // console.error(message);
+            // Llama a longpolling() nuevamente para obtener el siguiente mensaje
+            // longpolling();
+        }
+
+        let newButtons = await response.json();
+        // longpolling();
+        return newButtons;
+
+    } catch (error) {
+        console.error("Hubo un problema con la petición Fetch: " + error.message);
+    }  
+}
+/*
+    if (response.status == 502) {
+        // El estado 502 es un error de "tiempo de espera agotado" en la conexión,
+        // puede suceder cuando la conexión estuvo pendiente durante demasiado tiempo,
+        // y el servidor remoto o un proxy la cerró
+        // vamos a reconectarnos
+        longpolling();
+    } else if (response.status != 200) {
+        // Un error : vamos a mostrarlo
+        console.error(response.statusText);
+        // Vuelve a conectar en un segundo
+        await new Promise(resolve => setTimeout(resolve, 100000));
+        longpolling();
+    } else {
+        // Recibe y muestra el mensaje
+        let message = await response.text();
+        console.error(message);
+        // Llama a longpolling() nuevamente para obtener el siguiente mensaje
+        // longpolling();
+    }
+*/
+/*
+async function myButtonEvt (url= "", data = {}) {
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+            //credentials: "include", // incluirá el id de sesión del usuario
+        });
+        if (!response.ok) {
+            console.error("Respuesta de red OK pero respuesta HTTP no OK", response.status);
+        }
+        // console.log('Igualmente el response es: ', response.text());
+        const buttons = await response.json();
+        // console.log('Buttons: ', buttons);
+        // console.log("Éxito: ", buttons);
+
+        return buttons;
+    } catch (error) {
+        console.error("Hubo un problema con la petición Fetch: " + error.message);
+    }    
+}
+*/
+
+let LPResponse = await longpolling();
+console.log(LPResponse);
