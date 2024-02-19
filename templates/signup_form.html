@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Sign up - {% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <form action="" method="post" novalidate class="form-signin">
+        <h1 class="h3 mb-3 font-weight-normal">Regístrese</h1>
+        {{ form.hidden_tag() }}
+        <div>
+            {{ form.name.label }}
+            {{ form.name(size=64, class_="form-control") }}<br>
+            {% for error in form.name.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.password.label }}
+            {{ form.password(class_="form-control") }}<br>
+            {% for error in form.password.errors %}
+            <span style="color: red;">{{ error }}</span>
+            {% endfor %}
+        </div>
+        <div>
+            {{ form.submit(class="btn btn-lg btn-primary btn-block") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -3,27 +3,26 @@ from flask import render_template   #Renderizar plantillas
 from flask import request #peticiones
 from flask import jsonify #convertir en formato json en Python
 from flask import Response #poder devolver respuestas
-from flask_login import LoginManager #manejo de sesiones de usuario
+from flask import url_for, redirect 
+from flask_login import LoginManager, current_user, login_user, logout_user #manejo de sesiones de usuario (flask-login)
 from flask import session #almacenar info de la sesión de un usuario
-from models import users
+from models import users, get_user, User #importar objetos Users definido en models.py
+from forms import SignupForm, LoginForm #importar de forms.py
+from werkzeug.urls import url_parse
 
 import json
+import csv
 
 app = Flask(__name__)
-login_manager = LoginManager()
-login_manager.init_app(app)
+
+# Login instance
+login_manager = LoginManager(app)
+login_manager.login_view = "login"
 
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
-#app.app_context().push()
-#app.run(debug=True)
-print(f'__name__ es: ', __name__)
-print(app)
-
-# if __name__ == "__main__": # No es __main__, es app!!
-#     with app.app_context():
-#         app.run(debug=True)
+#app.run(debug=True) # Debug mode
 
 # Permitir multithreading en Flask
 if __name__ == '__main__':
@@ -31,51 +30,39 @@ if __name__ == '__main__':
 
 @app.route("/")
 @login_manager.user_loader
-def open_project(logged=False):
-    logged = False if logged else True
-    myusername = 'Manolito'
+def open_project():
+    projects_to_show = [0]
+    if current_user.is_authenticated:
+        users_local = load_users()
 
-    obras = [
-        {
-            "nombre": "La transfiguración",
-            "autor": "Rafael Sanzio", 
-            "url": "images/transfiguracion.png"
-        },
-        {
-            "nombre": "Niños comiendo uvas y melón",
-            "autor": "Bartolomé Esteban Murillo",
-            "url": "images/uvasmelon.jpg"
-        },
-        {
-            "nombre": "La escuela de Atenas",
-            "autor": "Rafael Sanzio",
-            "url": "images/escuelaatenas.webp"
-        }
-    ]
-    return render_template('open-create.html', logged=logged, myusername=myusername, obras=obras)
+        for user in users_local:
+            if user["username"] == current_user.name:
+                projects_to_show = user["id_projects_list_reader"] #Se almacenan los projectos que puede leer el usuario autenticado
+
+    with open('./static/data/artwork.csv') as artwork_csv:
+        artwork_data = csv.reader(artwork_csv, delimiter=';')
+        artwork = []
+
+        first_line = True
+        for row in artwork_data:
+            if not first_line:
+                if row[0] in projects_to_show: #Si el proyecto es uno que puede leer el usuario... que sea visible
+                    artwork.append({
+                        "nombre": row[1],
+                        "autor": row[2],
+                        "url": row[3]
+                    })
+            else:
+                first_line = False
+        print("Artwork", artwork)
+    return render_template('open-create.html', obras=artwork)
 
 @app.route("/app")
 def main_app():
     return render_template('main-app.html')
 
-'''
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-        session['username'] = request.form['username']
-        return redirect(url_for('open_project'))
-    return <form method="post">
-            <p><input type=text name=username>
-            <p><input type=submit value=Login>
-        </form>
-'''
 
-@app.route('/logout')
-def logout():
-    # remove the username from the session if it's there
-    session.pop('username', None)
-    return redirect(url_for('open_project'))
-
+# Devolver objeto User a partir de string con su ID almacenado
 @login_manager.user_loader
 def load_user(user_id):
     for user in users:
@@ -83,43 +70,27 @@ def load_user(user_id):
             return user
     return None
 
+def load_users():
+    with open('./static/data/users.csv') as users_csv:
+        users_data = csv.reader(users_csv, delimiter=';')
+        first_line = True
+        users_local = []
 
-from werkzeug.urls import url_parse
+        for row in users_data:
+            if not first_line:
+                users_local.append({
+                    "user_id": row[0],
+                    "username": row[1],
+                    "password": row[2],
+                    "id_projects_list_author": row[3],
+                    "id_projects_list_reader": row[4]
+                })
+            else: #Omitimos el header del csv de users
+                first_line = False
+    return users_local
+        
 
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = get_user(form.email.data)
-        if user is not None and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            next_page = request.args.get('next')
-            if not next_page or url_parse(next_page).netloc != '':
-                next_page = url_for('index')
-            return redirect(next_page)
-    return render_template('login_form.html', form=form)
 
-@app.route("/signup/", methods=["GET", "POST"])
-def show_signup_form():
-    if current_user.is_authenticated:
-        return redirect(url_for('index'))
-    form = SignupForm()
-    if form.validate_on_submit():
-        name = form.name.data
-        email = form.email.data
-        password = form.password.data
-        # Creamos el usuario y lo guardamos
-        user = User(len(users) + 1, name, email, password)
-        users.append(user)
-        # Dejamos al usuario logueado
-        login_user(user, remember=True)
-        next_page = request.args.get('next', None)
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('index')
-        return redirect(next_page)
-    return render_template("signup_form.html", form=form)
 
 @app.route("/receive", methods = ['POST', 'GET'])
 def receiver():
@@ -140,7 +111,6 @@ def receiver():
     return jsonify(data)
 
 
-
 @app.route("/longpolling", methods = ['POST', 'GET'])
 def longpolling():
     if not request.is_json:
@@ -150,9 +120,145 @@ def longpolling():
 
     return jsonify({"me lo": "estoy pensando"})
 
-# @app.route("/")
-# @login_required
-# def logged():
-#     myname = 'Germán'
-#     return render_template('open-create.html', myname)
+'''
+#Login si se usan los modelos (ORM) (alternativa)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('open_project'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = get_user(form.name.data)
+        print(user)
+        if user is not None and user.check_password(form.password.data):
+            login_user(user, remember=form.remember_me.data)
+            next_page = request.args.get('next')
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('open_project')
+            return redirect(next_page)
+        else:
+            print("Password is not correct or user not registered. Try again")
+    return render_template('login_form.html', form=form)
+'''
+'''
+#Registro de usuarios si se usan los modelos (ORM) para base de datos (1º alternativa)
+@app.route("/signup/", methods=["GET", "POST"])
+def show_signup_form():
+    if current_user.is_authenticated:
+        return redirect(url_for('open_project'))
+    form = SignupForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        password = form.password.data
+        # Creamos el usuario y lo guardamos
+        user = User(len(users) + 1, name, password)
+        users.append(user)
+        
+        # Dejamos al usuario logueado
+        login_user(user, remember=True)
+        next_page = request.args.get('next', None)
 
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('open_project')
+        return redirect(next_page)
+    return render_template("signup_form.html", form=form)
+'''
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('open_project'))
+
+    users_local = load_users() # Mostrar usuarios en página de login
+    
+    form = LoginForm()
+    if form.validate_on_submit(): # si se aprieta el botón de login
+        name = form.name.data
+
+        with open("./static/data/users.csv", mode='r') as users_csv: #Se podría usar users_local y ahorrar?
+            users_data_r = csv.reader(users_csv, delimiter=';')
+            usernames = []
+            for row in users_data_r:
+                usernames.append(row[1])
+            
+            if name not in usernames:
+                print("Sorry, that username doesn't exist")
+            else:
+                user = get_user(form.name.data)
+                if user is not None and user.check_password(form.password.data):
+                    login_user(user, remember=form.remember_me.data)
+                    next_page = request.args.get('next')
+                    if not next_page or url_parse(next_page).netloc != '':
+                        next_page = url_for('open_project')
+                    return redirect(next_page)
+                else:
+                    print("Password is not correct. Try again")            
+    return render_template('login_form.html', form=form, users=users_local)
+
+#Registro de usuarios si se usa el archivo users.csv (2º alternativa)
+@app.route("/signup/", methods=["GET", "POST"])
+def show_signup_form():
+    if current_user.is_authenticated:
+        return redirect(url_for('open_project'))
+    form = SignupForm()
+    if form.validate_on_submit():
+        name = form.name.data
+        password = form.password.data
+
+        with open("./static/data/users.csv", mode='r+') as users_csv:
+            users_data_r = csv.reader(users_csv, delimiter=';')
+            usernames = []
+            rownumbers = 0
+            for row in users_data_r:
+                usernames.append(row[1])
+                rownumbers += 1
+
+            if name in usernames:
+                print("Sorry, that username is already in use. Choose another one")
+            else:
+                users_data_w = csv.writer(users_csv, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                users_data_w.writerow([rownumbers, name, password, 0, 0]) # Grabamos datos de nuevo usuario en csv
+                user = User(len(users) + 1, name, password)
+                users.append(user)
+                login_user(user, remember=True)
+                next_page = request.args.get('next', None)
+                if not next_page or url_parse(next_page).netloc != '':
+                    next_page = url_for('open_project')
+                return redirect(next_page)
+    return render_template("signup_form.html", form=form)
+
+
+@app.route('/logout')
+#@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('open_project'))
+
+@app.route('/upload_artwork', methods={"GET", "POST"})
+def upload_artwork():
+    if request.method == "GET":
+        return render_template("upload_artwork.html")
+    elif request.method == "POST":
+        userdata = dict(request.form)
+        name = userdata["name"]
+        author = userdata["author"]
+        url = userdata["url"]
+        with open('./static/data/artwork.csv', mode='a') as csv_file:
+            data = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            data.writerow([name, author, url])
+    return f"{name} saved in artwork.csv!",{"Refresh": "2; url=/"} 
+
+@app.route('/delete_artwork', methods={"GET", "POST"})
+def delete_artwork():
+    lines = list()
+    with open('./static/data/artwork.csv', 'r') as readFile:
+        reader = csv.reader(readFile)
+        for row in reader:
+            lines.append(row)
+        lines.pop()
+
+    with open('./static/data/artwork.csv', 'w') as writeFile:
+        writer = csv.writer(writeFile)
+        writer.writerows(lines)
+        
+    return f"¡Se ha eliminado la última obra del archivo artwork.csv!",{"Refresh": "3; url=/"} 

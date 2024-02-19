@@ -1,13 +1,38 @@
 {% extends "base.html" %}
 {% block title %}Open project - {% endblock %}
 
+
+{% block modals %}
+<div class="modal fade" tabindex="-1" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fs-5" id="deleteModalLabel">¿Realmente desea eliminar esta obra de arte?</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Implicará eliminarla del archivo artwork.csv. Esta acción no podrá ser deshecha.</p>
+                <p><strong style="background-color: yellow;">¡Atención! Esta funcionalidad está en construcción. Se eliminará la última obra de la lista independientemente de cuál se haya seleccionado</strong></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <a type="button" class="btn btn-danger" href="{{ url_for('delete_artwork') }}">Eliminar obra</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
 {% block header %}
 
 <div class="container container-fluid"> <!-- Contenedor para centrar el contenido -->
     <header>
         <nav class="navbar navbar-expand-lg bg-light"> <!-- Barra de navegación -->
             <div class="container-fluid"> <!-- Contenedor de la barra de navegación -->
-                <a class="navbar-brand" href="/">Abrir un proyecto</a>
+                <a class="navbar-brand" href="{{ url_for('open_project') }}">Abrir un proyecto</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
@@ -18,16 +43,16 @@
 
                 <div class="btn-group btn-group-toggle" data-toggle="buttons"> <!-- Parte derecha de la barra de navegación -->
                     <ul class="navbar-nav me-right mb-2 mb-lg-0"> <!-- Campo para iniciar sesión o mostrar el nombre del usuario logueado -->
-                        {% if session['username'] %}
+                        {% if current_user.is_anonymous %}
                         <li class="nav-item">
-                            <a class="nav-link link-dark">Bienvenido {{ session["username"] }} !!!</a>
+                            <a type="button" class="active link-dark nav-link" aria-current="page" href="{{ url_for('login') }}">
+                                Iniciar sesión</a>
                         </li>
-                        <li class="nav-item"><a class="active nav-link link-dark" aria-current="page" href="{{ url_for('logout') }}">Cerrar sesión</a></li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="active link-dark nav-link" aria-current="page" href="{{ url_for('login') }}">
-                                Iniciar sesión</a>
-                            </li>
+                            <a class="nav-link link-dark">¡Bienvenid@ {{ current_user.name }}!</a>
+                        </li>
+                        <li class="nav-item"><a class="active nav-link link-dark" aria-current="page" href="{{ url_for('logout') }}">Cerrar sesión</a></li>
                         {% endif %} 
                     </ul>        
             
@@ -48,7 +73,7 @@
 <div class="container container-fluid"> <!-- Contenedor para centrar el contenido -->
     <h2 class="text-dark">Lista de proyectos</h2>
     
-    <a type="button" class="btn btn-primary" href="">
+    <a type="button" class="btn btn-primary" href="{{ url_for('upload_artwork')}}">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
             Subir nuevo proyecto
@@ -81,7 +106,7 @@
                             </svg>
                             Modificar
                         </a>
-                        <a type="button" class="btn btn-danger" href="">
+                        <a type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                                 <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                             </svg>
