@@ -40,20 +40,16 @@ def open_project():
                 projects_to_show = user["id_projects_list_reader"] #Se almacenan los projectos que puede leer el usuario autenticado
 
     with open('./static/data/artwork.csv') as artwork_csv:
-        artwork_data = csv.reader(artwork_csv, delimiter=';')
+        artwork_data = csv.DictReader(artwork_csv, delimiter=';')
         artwork = []
 
-        first_line = True
         for row in artwork_data:
-            if not first_line:
-                if row[0] in projects_to_show: #Si el proyecto es uno que puede leer el usuario... que sea visible
-                    artwork.append({
-                        "nombre": row[1],
-                        "autor": row[2],
-                        "url": row[3]
-                    })
-            else:
-                first_line = False
+            if row['project_id'] in projects_to_show: #Si el proyecto es uno que puede leer el usuario... que sea visible
+                artwork.append({
+                    "nombre": row['name'],
+                    "autor": row['author'],
+                    "url": row['url']
+                })
         print("Artwork", artwork)
     return render_template('open-create.html', obras=artwork)
 
@@ -72,24 +68,19 @@ def load_user(user_id):
 
 def load_users():
     with open('./static/data/users.csv') as users_csv:
-        users_data = csv.reader(users_csv, delimiter=';')
-        first_line = True
+        users_data = csv.DictReader(users_csv, delimiter=';')
         users_local = []
 
         for row in users_data:
-            if not first_line:
-                users_local.append({
-                    "user_id": row[0],
-                    "username": row[1],
-                    "password": row[2],
-                    "id_projects_list_author": row[3],
-                    "id_projects_list_reader": row[4]
-                })
-            else: #Omitimos el header del csv de users
-                first_line = False
-    return users_local
+            users_local.append({
+                "user_id": row['user_id'],
+                "username": row['username'],
+                "password": row['password'],
+                "id_projects_list_author": row['id_projects_list_author'],
+                "id_projects_list_reader": row['id_projects_list_reader']
+            })
         
-
+    return users_local
 
 
 @app.route("/receive", methods = ['POST', 'GET'])
@@ -168,31 +159,29 @@ def show_signup_form():
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('open_project'))
-
-    users_local = load_users() # Mostrar usuarios en página de login
     
     form = LoginForm()
+    users_local = load_users() # Mostrar usuarios en página de login
+
     if form.validate_on_submit(): # si se aprieta el botón de login
         name = form.name.data
-
-        with open("./static/data/users.csv", mode='r') as users_csv: #Se podría usar users_local y ahorrar?
-            users_data_r = csv.reader(users_csv, delimiter=';')
-            usernames = []
-            for row in users_data_r:
-                usernames.append(row[1])
-            
-            if name not in usernames:
-                print("Sorry, that username doesn't exist")
+        
+        usernames = []
+        for row in users_local:
+            usernames.append(row['username'])
+        
+        if name not in usernames:
+            print("Sorry, that username doesn't exist")
+        else:
+            user = get_user(name)
+            if user is not None and user.check_password(form.password.data):
+                login_user(user, remember=form.remember_me.data)
+                next_page = request.args.get('next')
+                if not next_page or url_parse(next_page).netloc != '':
+                    next_page = url_for('open_project')
+                return redirect(next_page)
             else:
-                user = get_user(form.name.data)
-                if user is not None and user.check_password(form.password.data):
-                    login_user(user, remember=form.remember_me.data)
-                    next_page = request.args.get('next')
-                    if not next_page or url_parse(next_page).netloc != '':
-                        next_page = url_for('open_project')
-                    return redirect(next_page)
-                else:
-                    print("Password is not correct. Try again")            
+                print("Password is not correct. Try again")           
     return render_template('login_form.html', form=form, users=users_local)
 
 #Registro de usuarios si se usa el archivo users.csv (2º alternativa)
@@ -219,6 +208,7 @@ def show_signup_form():
                 users_data_w = csv.writer(users_csv, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 users_data_w.writerow([rownumbers, name, password, 0, 0]) # Grabamos datos de nuevo usuario en csv
                 user = User(len(users) + 1, name, password)
+                #user.set_password(password)
                 users.append(user)
                 login_user(user, remember=True)
                 next_page = request.args.get('next', None)
@@ -236,17 +226,25 @@ def logout():
 
 @app.route('/upload_artwork', methods={"GET", "POST"})
 def upload_artwork():
-    if request.method == "GET":
-        return render_template("upload_artwork.html")
-    elif request.method == "POST":
-        userdata = dict(request.form)
-        name = userdata["name"]
-        author = userdata["author"]
-        url = userdata["url"]
-        with open('./static/data/artwork.csv', mode='a') as csv_file:
-            data = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-            data.writerow([name, author, url])
-    return f"{name} saved in artwork.csv!",{"Refresh": "2; url=/"} 
+    if not current_user.is_authenticated:
+        return f"You have to login to add a new project",{"Refresh": "3; url=/login"}
+    else:
+        if request.method == "GET":
+            return render_template("upload_artwork.html")
+        elif request.method == "POST":
+            userdata = dict(request.form)
+            name = userdata["name"]
+            author = userdata["author"]
+            url = userdata["url"]
+            with open('./static/data/artwork.csv', mode='r+') as csv_file:
+                data = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+                data_r = csv.reader(csv_file, delimiter=';')
+                id_new_artwork = len(list(data_r)) #Último id + 1 (incluyendo el header)
+
+                data.writerow([id_new_artwork, name, author, url])
+                username_with_projectadded = add_project_to_user(id_new_artwork) # Añadir obra a usuario (autor y lector)
+    return f"{name} saved in artwork.csv! Author and reader permissions given to user {username_with_projectadded}",{"Refresh": "2; url=/"} 
 
 @app.route('/delete_artwork', methods={"GET", "POST"})
 def delete_artwork():
@@ -262,3 +260,27 @@ def delete_artwork():
         writer.writerows(lines)
         
     return f"¡Se ha eliminado la última obra del archivo artwork.csv!",{"Refresh": "3; url=/"} 
+
+
+def add_project_to_user(id_new_artwork):
+    with open("./static/data/users.csv", mode='r+') as users_csv:
+        users_data_r = csv.reader(users_csv, delimiter=';')
+        row_number = 0
+        
+        for row in users_data_r:
+            if row[1] == current_user.name:
+                user_row = row_number
+            row_number += 1
+                
+
+        users_data_w = csv.writer(users_csv, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        row_number_w = 0
+
+        for row in users_data_r:
+            if row_number_w == row_number:
+                users_data_w[row][3].append(id_new_artwork) #Se añade el id del proyecto al usuario autenticado como autor
+                users_data_w[row][4].append(id_new_artwork) #Se añade el id del proyecto al usuario autenticado como lector
+            row_number_w += 1
+        
+        #Algo habrá que hacer para jugar con el row iterando en el writer, el cual no permite iterar (mirar función delete_artwork)
+        return current_user.name

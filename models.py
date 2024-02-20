@@ -17,6 +17,7 @@ class User(UserMixin):
     def __repr__(self):
         return '<User {}>'.format(self.name)
 
+
 users = []
 def get_user(name):
     for user in users:
