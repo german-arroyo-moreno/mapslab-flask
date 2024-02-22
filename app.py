@@ -13,7 +13,10 @@ from werkzeug.urls import url_parse
 import json
 import csv
 
+# Global variables for the CSV files
 CSV_DELIMITER = ';'
+USER_CSV_LOCATION = './static/data/users.csv'
+PROJECTS_CSV_LOCATION = './static/data/artwork.csv'
 
 app = Flask(__name__)
 
@@ -39,20 +42,23 @@ def open_project():
 
         for user in users_local:
             if user["username"] == current_user.name:
-                projects_to_show = user["id_projects_list_reader"] #Se almacenan los projectos que puede leer el usuario autenticado
+                if len(user["id_projects_list_reader"]) > 0:
+                    projects_to_show = user["id_projects_list_reader"].split(",") #Se almacenan los projectos que puede leer el usuario autenticado en una LISTA
+                else:
+                    projects_to_show = list(user["id_projects_list_reader"])
 
-    with open('./static/data/artwork.csv') as artwork_csv:
+    with open(PROJECTS_CSV_LOCATION) as artwork_csv:
         artwork_data = csv.DictReader(artwork_csv, delimiter=CSV_DELIMITER)
         artwork = []
 
         for row in artwork_data:
             if row['project_id'] in projects_to_show: #Si el proyecto es uno que puede leer el usuario... que sea visible
                 artwork.append({
+                    "id": row['project_id'],
                     "nombre": row['name'],
                     "autor": row['author'],
                     "url": row['url']
                 })
-        print("Artwork", artwork)
     return render_template('open-create.html', obras=artwork)
 
 @app.route("/app")
@@ -69,7 +75,7 @@ def load_user(user_id):
     return None
 
 def load_users():
-    with open('./static/data/users.csv') as users_csv:
+    with open(USER_CSV_LOCATION) as users_csv:
         users_data = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
         users_local = []
 
@@ -196,7 +202,7 @@ def show_signup_form():
         name = form.name.data
         password = form.password.data
 
-        with open("./static/data/users.csv", mode='r+') as users_csv:
+        with open(USER_CSV_LOCATION, mode='r+') as users_csv:
             users_data_r = csv.reader(users_csv, delimiter=CSV_DELIMITER)
             usernames = []
             rownumbers = 0
@@ -208,7 +214,7 @@ def show_signup_form():
                 print("Sorry, that username is already in use. Choose another one")
             else:
                 users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                users_data_w.writerow([rownumbers, name, password, 0, 0]) # Grabamos datos de nuevo usuario en csv
+                users_data_w.writerow([rownumbers, name, password, '', '']) # Grabamos datos de nuevo usuario en csv
                 user = User(len(users) + 1, name, password)
                 #user.set_password(password)
                 users.append(user)
@@ -238,69 +244,106 @@ def upload_artwork():
             name = userdata["name"]
             author = userdata["author"]
             url = userdata["url"]
-            with open('./static/data/artwork.csv', mode='r+') as csv_file:
-                data = csv.writer(csv_file, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            with open(PROJECTS_CSV_LOCATION, mode='r+') as csv_file:
+                project_data = csv.writer(csv_file, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
                 data_r = csv.reader(csv_file, delimiter=CSV_DELIMITER)
                 id_new_artwork = len(list(data_r)) #Último id + 1 (incluyendo el header)
 
-                data.writerow([id_new_artwork, name, author, url])
+                project_data.writerow([id_new_artwork, name, author, url])
                 username_with_projectadded = add_project_to_user(id_new_artwork) # Añadir obra a usuario (autor y lector)
-    return f"{name} saved in artwork.csv! Author and reader permissions given to user {username_with_projectadded}",{"Refresh": "2; url=/"} 
+    return f"{name} saved in artwork.csv! Author and reader permissions given to user {username_with_projectadded}",{"Refresh": "4; url=/"} 
 
-@app.route('/delete_artwork', methods={"GET", "POST"})
-def delete_artwork():
-    lines = list()
-    with open('./static/data/artwork.csv', 'r') as readFile:
-        reader = csv.reader(readFile)
-        for row in reader:
-            lines.append(row)
-        lines.pop()
+@app.route('/delete_artwork/<id>', methods={"GET", "POST"})
+def delete_artwork(id):
+    if not current_user.is_authenticated:
+        return f'You have to login to delete a project',{"Refresh": "3; url=/login"}
+    else:
+        lines = []
+        with open(PROJECTS_CSV_LOCATION, 'r') as readFile:
+            reader = csv.DictReader(readFile, delimiter=CSV_DELIMITER)
+            for row in reader:
+                if row['project_id'] != str(id): #Not to include the project to delete
+                    lines.append(dict(row))
 
-    with open('./static/data/artwork.csv', 'w') as writeFile:
-        writer = csv.writer(writeFile)
-        writer.writerows(lines)
+        with open(PROJECTS_CSV_LOCATION, 'w') as writeFile:
+            writer = csv.DictWriter(writeFile, delimiter=CSV_DELIMITER, fieldnames=['project_id', 'name', 'author', 'url'])
+            writer.writeheader()
+            writer.writerows(lines)
         
-    return f"¡Se ha eliminado la última obra del archivo artwork.csv!",{"Refresh": "3; url=/"} 
+        username_with_projectdeleted = delete_project_from_user(id)
+            
+        return f"¡Se ha eliminado la obra con id {id} del usuario {username_with_projectdeleted} en el archivo artwork.csv!",{"Refresh": "3; url=/"} 
 
 
 def add_project_to_user(id_new_artwork):
-    with open("./static/data/users.csv", mode='r+') as users_csv:
+    with open(USER_CSV_LOCATION, mode='r') as users_csv:
         users_data_r = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
-        users_dict = [] #dict(users_data_r)
+        users_dict = []
 
         for row in users_data_r:
-            print('Antes de la edición', row['id_projects_list_author'])
+            if row['username'] == current_user.name:
+                if len(row['id_projects_list_author']) > 0:
+                    row['id_projects_list_author'] = row['id_projects_list_author'].split(",") #Convertir elemento string dentro de obj diccionario en lista y separar con comas
+                else:
+                    row['id_projects_list_author'] = list(row['id_projects_list_author']) #Sólo convertir string a lista, sin separar con comas (no hay ningún elemento)
 
-            temp_author_row = row['id_projects_list_author']
-            row['id_projects_list_author'] = temp_author_row.split(",") #Convertir elemento concreto en lista dentro de obj diccionario
+                if len(row['id_projects_list_reader']) > 0:
+                    row['id_projects_list_reader'] = row['id_projects_list_reader'].split(",")
+                else:
+                    row['id_projects_list_reader'] = list(row['id_projects_list_reader'])
 
-            temp_reader_row = row['id_projects_list_reader']
-            row['id_projects_list_reader'] = temp_reader_row.split(",")
-
-            if row['username'] == 'mk':  #current_user.name
-                row['id_projects_list_author'].append(f'{id_new_artwork}')
+                row['id_projects_list_author'].append(f'{id_new_artwork}') #Añadir id_proyecto a lista
                 row['id_projects_list_reader'].append(f'{id_new_artwork}')
 
-            print('DesPUÉS de la edición', row['id_projects_list_author'])
+                row['id_projects_list_author'] = ','.join(row['id_projects_list_author']) #Convertir lista en string
+                row['id_projects_list_reader'] = ','.join(row['id_projects_list_reader'])
 
             users_dict.append(dict(row))
-            #users_dict.append(row)
-        print('Dictionario', users_dict)  
+            #users_dict.append(row)  
 
+    with open(USER_CSV_LOCATION, mode='w') as users_csv: #Abrimos de nuevo para sobreescribir el archivo
         users_data_w = csv.DictWriter(users_csv, delimiter=CSV_DELIMITER, fieldnames=['user_id', 'username', 'password', 'id_projects_list_author', 'id_projects_list_reader']) 
+        users_data_w.writeheader()
         users_data_w.writerows(users_dict)
         
-        #users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER)
-        #users_data_w.writerows(users_dict)
+    return current_user.name
 
-        # for row in users_data_r:
-        #     if row_number_w == row_number:
-        #         users_data_w[row][3].append(id_new_artwork) #Se añade el id del proyecto al usuario autenticado como autor
-        #         users_data_w[row][4].append(id_new_artwork) #Se añade el id del proyecto al usuario autenticado como lector
-        #     row_number_w += 1
+def delete_project_from_user(id_artwork):
+    with open(USER_CSV_LOCATION, mode='r') as users_csv:
+        users_data_r = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
+        users_dict = []
+
+        for row in users_data_r:
+            if row['username'] == current_user.name:
+                if len(row['id_projects_list_author']) > 0:
+                    row['id_projects_list_author'] = row['id_projects_list_author'].split(",") #Convertir elemento string dentro de obj diccionario en lista y separar con comas
+                else:
+                    row['id_projects_list_author'] = list(row['id_projects_list_author']) #Sólo convertir string a lista, sin separar con comas (no hay ningún elemento)
+
+                if len(row['id_projects_list_reader']) > 0:
+                    row['id_projects_list_reader'] = row['id_projects_list_reader'].split(",")
+                else:
+                    row['id_projects_list_reader'] = list(row['id_projects_list_reader'])
+
+                if (str(id_artwork) in row['id_projects_list_author']):
+                    row['id_projects_list_author'].remove(str(id_artwork)) #Delete string project_id from list
+                else:
+                    print(f'There is no project_id number {id_artwork} associated as author permissions to user qw')
+
+                if (str(id_artwork) in row['id_projects_list_reader']):
+                    row['id_projects_list_reader'].remove(str(id_artwork))
+                else:
+                    print(f'There is no project_id number {id_artwork} associated as reader permissions to user qw')
+
+                row['id_projects_list_author'] = ','.join(row['id_projects_list_author']) #Convertir lista en string
+                row['id_projects_list_reader'] = ','.join(row['id_projects_list_reader'])
+
+            users_dict.append(dict(row))
+
+    with open(USER_CSV_LOCATION, mode='w') as users_csv: #Abrimos de nuevo para sobreescribir el archivo
+        users_data_w = csv.DictWriter(users_csv, delimiter=CSV_DELIMITER, fieldnames=['user_id', 'username', 'password', 'id_projects_list_author', 'id_projects_list_reader']) 
+        users_data_w.writeheader()
+        users_data_w.writerows(users_dict)
         
-        #Algo habrá que hacer para jugar con el row iterando en el writer, el cual no permite iterar (mirar función delete_artwork)
-        return 'mk' #current_user.name
-
-add_project_to_user(4)
+    return current_user.name

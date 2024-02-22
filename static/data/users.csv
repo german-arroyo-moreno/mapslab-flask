@@ -1,15 +1,15 @@
 user_id;username;password;id_projects_list_author;id_projects_list_reader
-1;manolito;manolitopwd;[1,2,3,4,5];[1,2,3,4,5]
-2;pepito;pepitopwd;[1,2,3,4];[1,2,3,4]
-3;eduardo;eduardopwd;[1,2,3];[1,2,3]
-4;antonia;antoniapwd;[1,2];[1,2]
+1;manolito;manolitopwd;1,2,3,4,5;1,2,3,4,5
+2;pepito;pepitopwd;1,2,3,4;1,2,3,4
+3;eduardo;eduardopwd;1,2,3;1,2,3
+4;antonia;antoniapwd;1,2;1,2
 5;vicenta;vicentapwd;1;1
 6;carol;carolpwd;2;2
 7;carlota;carlotapwd;3;3
 8;catalina;catalinapwd;4;4
 9;ignacio;ignaciopwd;5;5
 10;eva;evapwd;;
-11;lorenzo;lorenzopwd;0;[5,2]
+11;lorenzo;lorenzopwd;0;5,2
 12;dolores;dolorespwd;0;0
 13;lola;lolapwd;0;0
 14;lo;l;0;0
@@ -23,75 +23,17 @@ user_id;username;password;id_projects_list_author;id_projects_list_reader
 22;mp;m;0;0
 23;mk;m;1,2;1,2
 24;p;p;0;0
-1;manolito;manolitopwd;['[1', '2', '3', '4', '5]'];['[1', '2', '3', '4', '5]']
-2;pepito;pepitopwd;['[1', '2', '3', '4]'];['[1', '2', '3', '4]']
-3;eduardo;eduardopwd;['[1', '2', '3]'];['[1', '2', '3]']
-4;antonia;antoniapwd;['[1', '2]'];['[1', '2]']
-5;vicenta;vicentapwd;['1'];['1']
-6;carol;carolpwd;['2'];['2']
-7;carlota;carlotapwd;['3'];['3']
-8;catalina;catalinapwd;['4'];['4']
-9;ignacio;ignaciopwd;['5'];['5']
-10;eva;evapwd;[''];['']
-11;lorenzo;lorenzopwd;['0'];['[5', '2]']
-12;dolores;dolorespwd;['0'];['0']
-13;lola;lolapwd;['0'];['0']
-14;lo;l;['0'];['0']
-15;li;l;['0'];['0']
-16;le;l;['0'];['0']
-17;lu;l;['0'];['0']
-18;ly;l;['0'];['0']
-19;mi;m;['0'];['0']
-20;mu;m;['0'];['0']
-21;my;m;['0'];['0']
-22;mp;m;['0'];['0']
-23;mk;m;['1', '2', '4'];['1', '2', '4']
-24;p;p;['0'];['0']
-1;manolito;manolitopwd;['[1', '2', '3', '4', '5]'];['[1', '2', '3', '4', '5]']
-2;pepito;pepitopwd;['[1', '2', '3', '4]'];['[1', '2', '3', '4]']
-3;eduardo;eduardopwd;['[1', '2', '3]'];['[1', '2', '3]']
-4;antonia;antoniapwd;['[1', '2]'];['[1', '2]']
-5;vicenta;vicentapwd;['1'];['1']
-6;carol;carolpwd;['2'];['2']
-7;carlota;carlotapwd;['3'];['3']
-8;catalina;catalinapwd;['4'];['4']
-9;ignacio;ignaciopwd;['5'];['5']
-10;eva;evapwd;[''];['']
-11;lorenzo;lorenzopwd;['0'];['[5', '2]']
-12;dolores;dolorespwd;['0'];['0']
-13;lola;lolapwd;['0'];['0']
-14;lo;l;['0'];['0']
-15;li;l;['0'];['0']
-16;le;l;['0'];['0']
-17;lu;l;['0'];['0']
-18;ly;l;['0'];['0']
-19;mi;m;['0'];['0']
-20;mu;m;['0'];['0']
-21;my;m;['0'];['0']
-22;mp;m;['0'];['0']
-23;mk;m;['1', '2', '4'];['1', '2', '4']
-24;p;p;['0'];['0']
-1;manolito;manolitopwd;"[""['[1'"", "" '2'"", "" '3'"", "" '4'"", "" '5]']""]";"[""['[1'"", "" '2'"", "" '3'"", "" '4'"", "" '5]']""]"
-2;pepito;pepitopwd;"[""['[1'"", "" '2'"", "" '3'"", "" '4]']""]";"[""['[1'"", "" '2'"", "" '3'"", "" '4]']""]"
-3;eduardo;eduardopwd;"[""['[1'"", "" '2'"", "" '3]']""]";"[""['[1'"", "" '2'"", "" '3]']""]"
-4;antonia;antoniapwd;"[""['[1'"", "" '2]']""]";"[""['[1'"", "" '2]']""]"
-5;vicenta;vicentapwd;"[""['1']""]";"[""['1']""]"
-6;carol;carolpwd;"[""['2']""]";"[""['2']""]"
-7;carlota;carlotapwd;"[""['3']""]";"[""['3']""]"
-8;catalina;catalinapwd;"[""['4']""]";"[""['4']""]"
-9;ignacio;ignaciopwd;"[""['5']""]";"[""['5']""]"
-10;eva;evapwd;"[""['']""]";"[""['']""]"
-11;lorenzo;lorenzopwd;"[""['0']""]";"[""['[5'"", "" '2]']""]"
-12;dolores;dolorespwd;"[""['0']""]";"[""['0']""]"
-13;lola;lolapwd;"[""['0']""]";"[""['0']""]"
-14;lo;l;"[""['0']""]";"[""['0']""]"
-15;li;l;"[""['0']""]";"[""['0']""]"
-16;le;l;"[""['0']""]";"[""['0']""]"
-17;lu;l;"[""['0']""]";"[""['0']""]"
-18;ly;l;"[""['0']""]";"[""['0']""]"
-19;mi;m;"[""['0']""]";"[""['0']""]"
-20;mu;m;"[""['0']""]";"[""['0']""]"
-21;my;m;"[""['0']""]";"[""['0']""]"
-22;mp;m;"[""['0']""]";"[""['0']""]"
-23;mk;m;"[""['1'"", "" '2'"", "" '4']"", '4']";"[""['1'"", "" '2'"", "" '4']"", '4']"
-24;p;p;"[""['0']""]";"[""['0']""]"
+25;pe;p;0,12,13;0,12,13
+26;py;py;0,14,15;0,14,15
+27;mg;m;,16;,16
+28;kl;l;3,4;3,4
+29;UI;UI;16;16
+30;tr;tr;17;17
+31;yr;yr;18;18
+32;yt;yt;19;19
+33;lñ;lñ;20;20
+34;bn;bn;21;21
+35;we;we;;
+36;qw;qw;;
+37;fe;fe;;
+38;fw;fw;;
