@@ -13,6 +13,8 @@ from werkzeug.urls import url_parse
 import json
 import csv
 
+CSV_DELIMITER = ';'
+
 app = Flask(__name__)
 
 # Login instance
@@ -40,7 +42,7 @@ def open_project():
                 projects_to_show = user["id_projects_list_reader"] #Se almacenan los projectos que puede leer el usuario autenticado
 
     with open('./static/data/artwork.csv') as artwork_csv:
-        artwork_data = csv.DictReader(artwork_csv, delimiter=';')
+        artwork_data = csv.DictReader(artwork_csv, delimiter=CSV_DELIMITER)
         artwork = []
 
         for row in artwork_data:
@@ -68,7 +70,7 @@ def load_user(user_id):
 
 def load_users():
     with open('./static/data/users.csv') as users_csv:
-        users_data = csv.DictReader(users_csv, delimiter=';')
+        users_data = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
         users_local = []
 
         for row in users_data:
@@ -195,7 +197,7 @@ def show_signup_form():
         password = form.password.data
 
         with open("./static/data/users.csv", mode='r+') as users_csv:
-            users_data_r = csv.reader(users_csv, delimiter=';')
+            users_data_r = csv.reader(users_csv, delimiter=CSV_DELIMITER)
             usernames = []
             rownumbers = 0
             for row in users_data_r:
@@ -205,7 +207,7 @@ def show_signup_form():
             if name in usernames:
                 print("Sorry, that username is already in use. Choose another one")
             else:
-                users_data_w = csv.writer(users_csv, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 users_data_w.writerow([rownumbers, name, password, 0, 0]) # Grabamos datos de nuevo usuario en csv
                 user = User(len(users) + 1, name, password)
                 #user.set_password(password)
@@ -237,9 +239,9 @@ def upload_artwork():
             author = userdata["author"]
             url = userdata["url"]
             with open('./static/data/artwork.csv', mode='r+') as csv_file:
-                data = csv.writer(csv_file, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                data = csv.writer(csv_file, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-                data_r = csv.reader(csv_file, delimiter=';')
+                data_r = csv.reader(csv_file, delimiter=CSV_DELIMITER)
                 id_new_artwork = len(list(data_r)) #Último id + 1 (incluyendo el header)
 
                 data.writerow([id_new_artwork, name, author, url])
@@ -264,23 +266,41 @@ def delete_artwork():
 
 def add_project_to_user(id_new_artwork):
     with open("./static/data/users.csv", mode='r+') as users_csv:
-        users_data_r = csv.reader(users_csv, delimiter=';')
-        row_number = 0
+        users_data_r = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
+        users_dict = [] #dict(users_data_r)
+
+        for row in users_data_r:
+            print('Antes de la edición', row['id_projects_list_author'])
+
+            temp_author_row = row['id_projects_list_author']
+            row['id_projects_list_author'] = temp_author_row.split(",") #Convertir elemento concreto en lista dentro de obj diccionario
+
+            temp_reader_row = row['id_projects_list_reader']
+            row['id_projects_list_reader'] = temp_reader_row.split(",")
+
+            if row['username'] == 'mk':  #current_user.name
+                row['id_projects_list_author'].append(f'{id_new_artwork}')
+                row['id_projects_list_reader'].append(f'{id_new_artwork}')
+
+            print('DesPUÉS de la edición', row['id_projects_list_author'])
+
+            users_dict.append(dict(row))
+            #users_dict.append(row)
+        print('Dictionario', users_dict)  
+
+        users_data_w = csv.DictWriter(users_csv, delimiter=CSV_DELIMITER, fieldnames=['user_id', 'username', 'password', 'id_projects_list_author', 'id_projects_list_reader']) 
+        users_data_w.writerows(users_dict)
         
-        for row in users_data_r:
-            if row[1] == current_user.name:
-                user_row = row_number
-            row_number += 1
-                
+        #users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER)
+        #users_data_w.writerows(users_dict)
 
-        users_data_w = csv.writer(users_csv, delimiter=';', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        row_number_w = 0
-
-        for row in users_data_r:
-            if row_number_w == row_number:
-                users_data_w[row][3].append(id_new_artwork) #Se añade el id del proyecto al usuario autenticado como autor
-                users_data_w[row][4].append(id_new_artwork) #Se añade el id del proyecto al usuario autenticado como lector
-            row_number_w += 1
+        # for row in users_data_r:
+        #     if row_number_w == row_number:
+        #         users_data_w[row][3].append(id_new_artwork) #Se añade el id del proyecto al usuario autenticado como autor
+        #         users_data_w[row][4].append(id_new_artwork) #Se añade el id del proyecto al usuario autenticado como lector
+        #     row_number_w += 1
         
         #Algo habrá que hacer para jugar con el row iterando en el writer, el cual no permite iterar (mirar función delete_artwork)
-        return current_user.name
+        return 'mk' #current_user.name
+
+add_project_to_user(4)
