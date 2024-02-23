@@ -14,7 +14,7 @@ user_id;username;password;id_projects_list_author;id_projects_list_reader
 13;lola;lolapwd;0;0
 14;lo;l;0;0
 15;li;l;0;0
-16;le;l;0;0
+16;le;l;0;24
 17;lu;l;0;0
 18;ly;l;0;0
 19;mi;m;0;0
@@ -23,7 +23,7 @@ user_id;username;password;id_projects_list_author;id_projects_list_reader
 22;mp;m;0;0
 23;mk;m;1,2;1,2
 24;p;p;0;0
-25;pe;p;0,12,13;0,12,13
+25;pe;p;0,12,13;0,12,13,24
 26;py;py;0,14,15;0,14,15
 27;mg;m;,16;,16
 28;kl;l;3,4;3,4
@@ -31,9 +31,10 @@ user_id;username;password;id_projects_list_author;id_projects_list_reader
 30;tr;tr;17;17
 31;yr;yr;18;18
 32;yt;yt;19;19
-33;lñ;lñ;20;20
+33;lñ;lñ;20;20,25
 34;bn;bn;21;21
-35;we;we;;
+35;we;we;;24
 36;qw;qw;;
-37;fe;fe;;
+37;fe;fe;;24
 38;fw;fw;;
+39;br;br;24,25,26;24,25,26

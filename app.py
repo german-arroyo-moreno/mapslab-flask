@@ -36,7 +36,9 @@ if __name__ == '__main__':
 @app.route("/")
 @login_manager.user_loader
 def open_project():
-    projects_to_show = [0]
+    projects_to_show = []
+    author_projects = []
+    reader_users_of_own_projects = []
     if current_user.is_authenticated:
         users_local = load_users()
 
@@ -46,6 +48,20 @@ def open_project():
                     projects_to_show = user["id_projects_list_reader"].split(",") #Se almacenan los projectos que puede leer el usuario autenticado en una LISTA
                 else:
                     projects_to_show = list(user["id_projects_list_reader"])
+
+                if len(user["id_projects_list_author"]) > 0:
+                    author_projects = user["id_projects_list_author"].split(",")
+                else:
+                    author_projects = list(user["id_projects_list_author"])
+
+        for user in users_local:
+            for reader_permission in user["id_projects_list_reader"].split(","):
+                if reader_permission in author_projects:
+                    reader_users_of_own_projects.append({
+                        "username": user["username"],
+                        "reader_permission": reader_permission
+                    }) 
+        print('reader_users_of_own_projects ', reader_users_of_own_projects)
 
     with open(PROJECTS_CSV_LOCATION) as artwork_csv:
         artwork_data = csv.DictReader(artwork_csv, delimiter=CSV_DELIMITER)
@@ -59,7 +75,7 @@ def open_project():
                     "autor": row['author'],
                     "url": row['url']
                 })
-    return render_template('open-create.html', obras=artwork)
+    return render_template('open-create.html', obras=artwork, reader_users=reader_users_of_own_projects)
 
 @app.route("/app")
 def main_app():

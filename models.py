@@ -18,7 +18,7 @@ class User(UserMixin):
         return '<User {}>'.format(self.name)
 
 
-users = []
+users = [] #Supuesta lista de objetos tipo User que contiene todos los usuarios creados "en la base de datos"
 def get_user(name):
     for user in users:
         if user.name == name:

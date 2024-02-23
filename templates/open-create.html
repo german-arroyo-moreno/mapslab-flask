@@ -97,7 +97,16 @@
                         </a>
                     </th>
 
-                    <td><a href="/app" target="_blank">{{obra.nombre}}</td>
+                    <td><a href="/app" target="_blank">{{obra.nombre}}</a>
+                        <p class="mb-3 font-weight-normal">Usuarios que tienen permisos de lectura en este proyecto:</p>
+                        {% for user in reader_users %}
+                            {% if user.reader_permission == obra.id %}
+                                <a type='button' class="btn btn-outline-secondary">{{ user.username }}</a>
+                            {% endif %}
+                        {% endfor %}
+                        <p class="mb-3 font-weight-normal">Usuarios que tienen permisos de autoría en este proyecto:</p>
+                    </td>
+                        
                     <td>{{ obra.autor }}</td>
                     <td>
                         <a type="button" class="btn btn-warning" href="/app">
