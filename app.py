@@ -36,18 +36,19 @@ if __name__ == '__main__':
 @app.route("/")
 @login_manager.user_loader
 def open_project():
-    projects_to_show = []
+    projects_to_read = []
     author_projects = []
-    reader_users_of_own_projects = []
+    reader_users_of_shown_projects = []
+    authors_of_shown_projects = []
     if current_user.is_authenticated:
         users_local = load_users()
 
         for user in users_local:
             if user["username"] == current_user.name:
                 if len(user["id_projects_list_reader"]) > 0:
-                    projects_to_show = user["id_projects_list_reader"].split(",") #Se almacenan los projectos que puede leer el usuario autenticado en una LISTA
+                    projects_to_read = user["id_projects_list_reader"].split(",") #Se almacenan los projectos que puede leer el usuario autenticado en una LISTA
                 else:
-                    projects_to_show = list(user["id_projects_list_reader"])
+                    projects_to_read = list(user["id_projects_list_reader"])
 
                 if len(user["id_projects_list_author"]) > 0:
                     author_projects = user["id_projects_list_author"].split(",")
@@ -55,27 +56,38 @@ def open_project():
                     author_projects = list(user["id_projects_list_author"])
 
         for user in users_local:
-            for reader_permission in user["id_projects_list_reader"].split(","):
-                if reader_permission in author_projects:
-                    reader_users_of_own_projects.append({
+            for reader_permission in user["id_projects_list_reader"].split(","): 
+                if reader_permission in author_projects or reader_permission in projects_to_read: 
+                    #Mostrar lectores de los proyectos de los que YO soy autor
+                    #Mostrar lectores de los proyectos en los que YO soy sólo lector
+                    reader_users_of_shown_projects.append({
                         "username": user["username"],
                         "reader_permission": reader_permission
-                    }) 
-        print('reader_users_of_own_projects ', reader_users_of_own_projects)
+                    })
+            for author_permission in user["id_projects_list_author"].split(","): 
+                if author_permission in author_projects or author_permission in projects_to_read: 
+                    #Mostrar autores de los proyectos de los que YO soy sólo author
+                    #Mostrar autores de los proyectos de los que YO soy sólo lector
+                    authors_of_shown_projects.append({
+                        "username": user["username"],
+                        "author_project": author_permission
+                    })
+        print('reader_users_of_shown_projects ', reader_users_of_shown_projects)
+        print('authors_of_shown_projects', authors_of_shown_projects)
 
     with open(PROJECTS_CSV_LOCATION) as artwork_csv:
         artwork_data = csv.DictReader(artwork_csv, delimiter=CSV_DELIMITER)
         artwork = []
 
         for row in artwork_data:
-            if row['project_id'] in projects_to_show: #Si el proyecto es uno que puede leer el usuario... que sea visible
+            if row['project_id'] in projects_to_read: #Si el proyecto es uno que puede leer el usuario... que sea visible
                 artwork.append({
                     "id": row['project_id'],
                     "nombre": row['name'],
                     "autor": row['author'],
                     "url": row['url']
                 })
-    return render_template('open-create.html', obras=artwork, reader_users=reader_users_of_own_projects)
+    return render_template('open-create.html', obras=artwork, reader_users=reader_users_of_shown_projects, authors=authors_of_shown_projects, author_projects=author_projects)
 
 @app.route("/app")
 def main_app():

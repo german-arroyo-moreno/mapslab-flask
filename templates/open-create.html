@@ -97,14 +97,28 @@
                         </a>
                     </th>
 
-                    <td><a href="/app" target="_blank">{{obra.nombre}}</a>
+                    <td>
+                        <a href="/app" target="_blank">{{obra.nombre}}</a>
+                        <hr/>
+                        {% for project in author_projects %}
+                            {% if project == obra.id %}
+                                <span class="badge badge-info">Eres autor</span>
+                            {% endif %}
+                        {% endfor %}
+                        <span class="badge badge-secondary">Eres lector</span>
                         <p class="mb-3 font-weight-normal">Usuarios que tienen permisos de lectura en este proyecto:</p>
                         {% for user in reader_users %}
                             {% if user.reader_permission == obra.id %}
                                 <a type='button' class="btn btn-outline-secondary">{{ user.username }}</a>
                             {% endif %}
                         {% endfor %}
+                        
                         <p class="mb-3 font-weight-normal">Usuarios que tienen permisos de autoría en este proyecto:</p>
+                        {% for user in authors %}
+                            {% if user.author_project == obra.id %}
+                                <a type='button' class="btn btn-outline-info">{{ user.username }}</a>
+                            {% endif %}
+                        {% endfor %}
                     </td>
                         
                     <td>{{ obra.autor }}</td>
@@ -115,12 +129,16 @@
                             </svg>
                             Modificar
                         </a>
-                        <a type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                                <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
-                            </svg>
-                            Eliminar id={{ obra.id }}
-                        </a>
+                        {% for project in author_projects %}
+                            {% if project == obra.id %}
+                                <a type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+                                    </svg>
+                                    Eliminar id={{ obra.id }}
+                                </a>
+                            {% endif %}
+                        {% endfor %}
                     </td>
                 </tr>
             {% endfor %}
