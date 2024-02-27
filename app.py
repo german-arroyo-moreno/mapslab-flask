@@ -262,19 +262,19 @@ def show_signup_form():
         password = form.password.data
 
         with open(USER_CSV_LOCATION, mode='r+') as users_csv:
-            users_data_r = csv.reader(users_csv, delimiter=CSV_DELIMITER)
+            users_data_r = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
             usernames = []
-            rownumbers = 0
+            last_user_id = 0
             for row in users_data_r:
-                usernames.append(row[1])
-                rownumbers += 1
+                usernames.append(row['username'])
+                last_user_id = row['user_id']
 
             if name in usernames:
                 print("Sorry, that username is already in use. Choose another one")
             else:
                 users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                users_data_w.writerow([rownumbers, name, password, '', '']) # Grabamos datos de nuevo usuario en csv
-                user = User(len(users) + 1, name, password, '', '')
+                users_data_w.writerow([int(last_user_id) + 1, name, password, '', '']) # Grabamos datos de nuevo usuario en csv
+                user = User(int(last_user_id) + 1, name, password, '', '')
                 #user.set_password(password)
                 users.append(user)
                 login_user(user, remember=True)
@@ -299,9 +299,11 @@ def upload_artwork():
             url = userdata["url"]
             with open(PROJECTS_CSV_LOCATION, mode='r+') as csv_file:
                 project_data = csv.writer(csv_file, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
-                data_r = csv.reader(csv_file, delimiter=CSV_DELIMITER)
-                id_new_artwork = len(list(data_r)) #Último id + 1 (incluyendo el header)
+                data_r = csv.DictReader(csv_file, delimiter=CSV_DELIMITER)
+                
+                #id_new_artwork = len(list(data_r)) #Last id + 1 (including the header)
+                all_projects = list(data_r) #Last project's id + 1
+                id_new_artwork =  int(all_projects[-1]['project_id']) + 1
 
                 project_data.writerow([id_new_artwork, name, author, url])
                 username_with_projectadded = add_project_to_user(id_new_artwork) # Añadir obra a usuario (autor y lector)

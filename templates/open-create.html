@@ -13,12 +13,12 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Implicará eliminarla del archivo artwork.csv. Esta acción no podrá ser deshecha.</p>
-                <p><strong style="background-color: yellow;">¡Atención! Esta funcionalidad está en construcción. Se eliminará la última obra creada independientemente de cuál se haya seleccionado</strong></p>
+                <p>Implicará eliminarla del archivo artwork.csv y de todos los permisos que tuvieran asociados los usuarios en users.csv. 
+                    Esta acción no podrá ser deshecha.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                <a type="button" class="btn btn-danger" href="{{ url_for('delete_artwork', id=24) }}">Eliminar obra</a>
+                <a type="button" class="btn btn-danger" id="deleteButton" href="">Eliminar obra</a>
             </div>
         </div>
     </div>
@@ -131,7 +131,7 @@
                         </a>
                         {% for project in author_projects %}
                             {% if project == obra.id %}
-                                <a type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">
+                                <a type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal" data-id="{{obra.id}}" id="deleteConfirm">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
                                         <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
                                     </svg>
@@ -145,4 +145,7 @@
         </tbody>
     </table>
 </div> <!-- Fin del contenedor que centra el contenido -->
+
+<!-- JavaScript personalizado de Laura para open-create.html -->
+<script type="module" src="{{ url_for('static', filename='js/open-create.js') }}"></script>
 {% endblock %}
