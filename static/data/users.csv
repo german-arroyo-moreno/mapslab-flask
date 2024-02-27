@@ -34,8 +34,9 @@ user_id;username;password;id_projects_list_author;id_projects_list_reader
 33;lñ;lñ;20;20,25
 34;bn;bn;21;21
 35;we;we;;24
-36;qw;qw;29;
+36;qw;qw;29,30;30
 37;fe;fe;28;24
 38;fw;fw;;29
 39;yu;y;27,29;28,29
-40;yi;y;1,27,29;1,2,27,28,29
+40;yi;y;1,27,29;1,2,27,28,29,30
+41;no;no;30,27,4,15;30,27,4,12,7
