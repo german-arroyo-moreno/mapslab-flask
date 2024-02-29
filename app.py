@@ -21,7 +21,8 @@ PROJECTS_CSV_LOCATION = './static/data/artwork.csv'
 app = Flask(__name__)
 
 # Login instance
-login_manager = LoginManager(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
 login_manager.login_view = "login"
 
 # Set the secret key to some random bytes. Keep this really secret!
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     app.run(threaded=True)
 
 @app.route("/")
-@login_manager.user_loader
+#@login_required
 def open_project():
     #Declare varibles
     artwork = []
@@ -45,7 +46,8 @@ def open_project():
 
     #load_Users_array()
     #print(current_user.id_projects_list_author.split(","))
-
+    print('el user está autenticado ahora en el índice?', current_user.is_authenticated)
+    print('y aquí puede acceder a users?', users)
     if current_user.is_authenticated:
         projects_to_read, author_projects, reader_users_of_shown_projects, authors_of_shown_projects = get_projects_authors_readers()
 
@@ -63,6 +65,7 @@ def open_project():
     return render_template('open-create.html', obras=artwork, reader_users=reader_users_of_shown_projects, authors=authors_of_shown_projects, author_projects=author_projects)
 
 @app.route("/app")
+#@login_required
 def main_app():
     return render_template('main-app.html')
 
@@ -71,7 +74,7 @@ def main_app():
 @login_manager.user_loader
 def load_user(user_id):
     for user in users:
-        if user.id == int(user_id):
+        if int(user.id) == int(user_id):
             return user
     return None
 
@@ -92,11 +95,11 @@ def load_users():
     return users_local
 
 def load_Users_array():
-    users_local = load_users()
+    users_local = load_users() #string
 
     for user in users_local:
         users.append(User(
-            user["user_id"],
+            int(user["user_id"]),
             user["username"],
             user["password"],
             user["id_projects_list_author"],
@@ -229,14 +232,20 @@ def login():
         usernames = []
         for row in users_local:
             usernames.append(row['username'])
+        print('en dónde busco usernames?: ', usernames)
         
-        if name not in usernames:
+        if str(name) not in usernames:
             print("Sorry, that username doesn't exist")
         else:
-            user = get_user(name)
+            load_Users_array()
+            user = get_user(str(name))
             if user is not None and user.check_password(form.password.data):
+                print('el rememberme es True??', form.remember_me.data)
                 login_user(user, remember=form.remember_me.data)
+                session['username'] = name
+                print('el user está authenticated ahora???', current_user.is_authenticated)
                 next_page = request.args.get('next')
+                print('Si estás leyendo esto se supone que me he loggeado')
                 if not next_page or url_parse(next_page).netloc != '':
                     next_page = url_for('open_project')
                 return redirect(next_page)
@@ -249,6 +258,7 @@ def login():
 #@login_required
 def logout():
     logout_user()
+    session.pop('username', default=None)
     return redirect(url_for('open_project'))
 
 #Registro de usuarios si se usa el archivo users.csv (2º alternativa)
@@ -276,8 +286,13 @@ def show_signup_form():
                 users_data_w.writerow([int(last_user_id) + 1, name, password, '', '']) # Grabamos datos de nuevo usuario en csv
                 user = User(int(last_user_id) + 1, name, password, '', '')
                 #user.set_password(password)
+                print('¿qué user se estáa append a users en el signup?', user)
+                print('Qué es ahora users?', users)
                 users.append(user)
+                print('¿Y qué es users después appendear este user?', users)
+
                 login_user(user, remember=True)
+                session['username'] = name
                 next_page = request.args.get('next', None)
                 if not next_page or url_parse(next_page).netloc != '':
                     next_page = url_for('open_project')
@@ -286,6 +301,7 @@ def show_signup_form():
 
 
 @app.route('/upload_artwork', methods={"GET", "POST"})
+#@login_required
 def upload_artwork():
     if not current_user.is_authenticated:
         return f"You have to login to add a new project",{"Refresh": "3; url=/login"}
@@ -310,6 +326,7 @@ def upload_artwork():
     return f"{name} saved in artwork.csv! Author and reader permissions given to user {username_with_projectadded}",{"Refresh": "4; url=/"} 
 
 @app.route('/delete_artwork/<id>', methods={"GET", "POST"})
+#@login_required
 def delete_artwork(id):
     if not current_user.is_authenticated:
         return f'You have to login to delete a project',{"Refresh": "3; url=/login"}

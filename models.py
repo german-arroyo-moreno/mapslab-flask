@@ -21,8 +21,11 @@ class User(UserMixin):
 
 
 users = [] #Supuesta lista de objetos tipo User que contiene todos los usuarios creados "en la base de datos"
+
+#@login_manager.user_loader #login_manager is only in app.py!
 def get_user(name):
     for user in users:
-        if user.name == name:
+        if str(user.name) == name:
+            print('Buscando user.name de ', user.name, 'en get_user')
             return user
     return None
