@@ -46,7 +46,6 @@ def open_project():
 
     #load_Users_array()
     #print(current_user.id_projects_list_author.split(","))
-    print('el user está autenticado ahora en el índice?', current_user.is_authenticated)
     print('y aquí puede acceder a users?', users)
     if current_user.is_authenticated:
         projects_to_read, author_projects, reader_users_of_shown_projects, authors_of_shown_projects = get_projects_authors_readers()
@@ -232,20 +231,16 @@ def login():
         usernames = []
         for row in users_local:
             usernames.append(row['username'])
-        print('en dónde busco usernames?: ', usernames)
         
         if str(name) not in usernames:
             print("Sorry, that username doesn't exist")
         else:
-            load_Users_array()
+            #load_Users_array()
             user = get_user(str(name))
             if user is not None and user.check_password(form.password.data):
-                print('el rememberme es True??', form.remember_me.data)
                 login_user(user, remember=form.remember_me.data)
                 session['username'] = name
-                print('el user está authenticated ahora???', current_user.is_authenticated)
                 next_page = request.args.get('next')
-                print('Si estás leyendo esto se supone que me he loggeado')
                 if not next_page or url_parse(next_page).netloc != '':
                     next_page = url_for('open_project')
                 return redirect(next_page)
@@ -284,12 +279,9 @@ def show_signup_form():
             else:
                 users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 users_data_w.writerow([int(last_user_id) + 1, name, password, '', '']) # Grabamos datos de nuevo usuario en csv
-                user = User(int(last_user_id) + 1, name, password, '', '')
-                #user.set_password(password)
-                print('¿qué user se estáa append a users en el signup?', user)
-                print('Qué es ahora users?', users)
+                user = User(int(last_user_id) + 1, name, '', '', '') #Empty password for now
+                user.set_password(password) #Hash password
                 users.append(user)
-                print('¿Y qué es users después appendear este user?', users)
 
                 login_user(user, remember=True)
                 session['username'] = name
@@ -440,3 +432,7 @@ def delete_project_from_users(id_artwork):
             users_data_w.writerows(users_dict)
         
     return True
+
+#Load only once in app
+with app.app_context():
+    load_Users_array()
