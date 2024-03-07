@@ -21,3 +21,19 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
     submit = SubmitField('Log in')
+
+    def validate_name(self, name):
+        user = get_user(name.data)
+        if user is None:
+            raise ValidationError("Sorry, that username doesn't exist")
+        else:
+            return True
+
+    def validate_password(self, password):
+        user = get_user(self.name.data)
+
+        if user is None: #Username was not valid and it doesn't exist
+            raise ValidationError("")
+
+        if not user.check_password(password.data):
+            raise ValidationError("Password is not correct. Try again")

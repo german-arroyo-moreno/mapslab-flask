@@ -6,7 +6,7 @@ user_id;username;password;id_projects_list_author;id_projects_list_reader
 11;lorenzo;lorenzopwd;;5,2
 25;pe;p;12,13;12,13,24,5
 26;py;py;14,15;14,15,3
-27;mg;m;16;16,4
+27;mg;m;30;4,30
 28;kl;l;3,4;3,4
 35;we;we;;24,2
 36;qw;qw;29;2
@@ -15,3 +15,4 @@ user_id;username;password;id_projects_list_author;id_projects_list_reader
 39;yu;y;27,29;28,29,1
 40;yi;y;1,27,29;1,2,27,28,29
 41;no;no;27,4,15;27,4,12,7
+42;pepito2;PEPE;;

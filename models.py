@@ -16,16 +16,18 @@ class User(UserMixin):
     def check_password(self, password):
         return check_password_hash(self.password, password)
 
+    def get_id_projects_list_reader(self):
+        return self.id_projects_list_reader
+
     def __repr__(self):
         return '<User {}>'.format(self.name)
 
 
-users = [] #Supuesta lista de objetos tipo User que contiene todos los usuarios creados "en la base de datos"
+users = [] # List of objects 'User' from the csv
 
-#@login_manager.user_loader #login_manager is only in app.py!
+#@login_manager.user_loader  # login_manager object is only in app.py!
 def get_user(name):
     for user in users:
         if str(user.name) == name:
-            print('Buscando user.name de ', user.name, 'en get_user')
             return user
     return None

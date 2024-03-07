@@ -30,7 +30,7 @@ app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 #app.run(debug=True) # Debug mode
 
-# Permitir multithreading en Flask
+# Allow multithreading in Flask
 if __name__ == '__main__':
     app.run(threaded=True)
 
@@ -44,9 +44,7 @@ def open_project():
     reader_users_of_shown_projects = []
     authors_of_shown_projects = []
 
-    #load_Users_array()
-    #print(current_user.id_projects_list_author.split(","))
-    print('y aquí puede acceder a users?', users)
+    print('se puede acceder a lista de lector?', current_user.get_id_projects_list_reader())
     if current_user.is_authenticated:
         projects_to_read, author_projects, reader_users_of_shown_projects, authors_of_shown_projects = get_projects_authors_readers()
 
@@ -173,49 +171,6 @@ def longpolling():
 
     return jsonify({"me lo": "estoy pensando"})
 
-'''
-#Login si se usan los modelos (ORM) (alternativa)
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if current_user.is_authenticated:
-        return redirect(url_for('open_project'))
-    form = LoginForm()
-    if form.validate_on_submit():
-        user = get_user(form.name.data)
-        print(user)
-        if user is not None and user.check_password(form.password.data):
-            login_user(user, remember=form.remember_me.data)
-            next_page = request.args.get('next')
-            if not next_page or url_parse(next_page).netloc != '':
-                next_page = url_for('open_project')
-            return redirect(next_page)
-        else:
-            print("Password is not correct or user not registered. Try again")
-    return render_template('login_form.html', form=form)
-'''
-'''
-#Registro de usuarios si se usan los modelos (ORM) para base de datos (1º alternativa)
-@app.route("/signup/", methods=["GET", "POST"])
-def show_signup_form():
-    if current_user.is_authenticated:
-        return redirect(url_for('open_project'))
-    form = SignupForm()
-    if form.validate_on_submit():
-        name = form.name.data
-        password = form.password.data
-        # Creamos el usuario y lo guardamos
-        user = User(len(users) + 1, name, password)
-        users.append(user)
-        
-        # Dejamos al usuario logueado
-        login_user(user, remember=True)
-        next_page = request.args.get('next', None)
-
-        if not next_page or url_parse(next_page).netloc != '':
-            next_page = url_for('open_project')
-        return redirect(next_page)
-    return render_template("signup_form.html", form=form)
-'''
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -225,7 +180,7 @@ def login():
     form = LoginForm()
     users_local = load_users() # Mostrar usuarios en página de login
 
-    if form.validate_on_submit(): # si se aprieta el botón de login
+    if form.validate_on_submit(): # if login submit button is clicked
         name = form.name.data
         
         usernames = []
@@ -245,7 +200,7 @@ def login():
                     next_page = url_for('open_project')
                 return redirect(next_page)
             else:
-                print("Password is not correct. Try again")           
+                print("Password is not correct or user not registered. Try again")           
     return render_template('login_form.html', form=form, users=users_local)
 
 
