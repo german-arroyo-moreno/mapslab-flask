@@ -8,6 +8,6 @@ document.querySelectorAll('.container .table tbody #deleteConfirm').forEach(func
         var id = this.dataset.id;
 
         // Select button on modal window and add project_id to its href reference
-        document.querySelector('#deleteModal > .modal-dialog .modal-footer > #deleteButton').href = "/delete_artwork/" + id;
+        document.querySelector('#deleteModal > .modal-dialog .modal-footer > #deleteButton').href = "/delete_project/" + id;
     });
 });

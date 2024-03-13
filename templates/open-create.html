@@ -13,7 +13,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Implicará eliminarla del archivo artwork.csv y de todos los permisos que tuvieran asociados los usuarios en users.csv. 
+                <p>Implicará eliminarla del archivo project.csv y de todos los permisos que tuvieran asociados los usuarios en users.csv. 
                     Esta acción no podrá ser deshecha.</p>
             </div>
             <div class="modal-footer">
@@ -46,21 +46,26 @@
                         {% if current_user.is_anonymous %}
                         <li class="nav-item">
                             <a type="button" class="active link-dark nav-link" aria-current="page" href="{{ url_for('login') }}">
-                                Iniciar sesión {{session['username']}}</a>
+                                Log in {{session['username']}}</a>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link link-dark">¡Bienvenid@ {{ current_user.name }}, {{session['username']}}!</a>
+                            <a class="nav-link link-dark">Welcome {{ current_user.name }}, Session {{session['username']}}!</a>
                         </li>
                         <li class="nav-item">
-                            <a class="active nav-link link-dark" aria-current="page" href="{{ url_for('logout') }}">Cerrar sesión</a>
+                            <a class="active nav-link link-dark" aria-current="page" href="{{ url_for('logout') }}">Log out</a>
                         </li>
                         {% endif %} 
+                        {% if current_user.is_admin %}
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-primary" aria-current="page" href="{{ url_for('show_signup_form') }}">Sign up new user</a>
+                        </li>
+                        {% endif %}
                     </ul>        
             
                     <form class="d-flex" role="search"> <!-- Campo de búsqueda -->
                         <input name="busqueda" class="form-control me-2" type="search" placeholder="por ej. 'Transfiguración'" aria-label="Search"/>
-                        <button class="btn btn-outline-success" type="submit">Búsqueda</button>
+                        <button class="btn btn-outline-success" type="submit">Search</button>
                     </form>
                 </div> <!-- Fin de la parte derecha de la barra de navegación personalizada -->
             </div> <!-- Fin contenedor de la barra de navegación -->
@@ -75,8 +80,8 @@
 <div class="container container-fluid"> <!-- Contenedor para centrar el contenido -->
     <h2 class="text-dark">Lista de proyectos</h2>
     
-    <a type="button" class="btn btn-primary" href="{{ url_for('upload_artwork')}}">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+    <a type="button" class="btn btn-primary" href="{{ url_for('upload_project')}}">
+        <svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 10">
         <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/></svg>
             Subir nuevo proyecto
     </a>
@@ -111,14 +116,20 @@
                         <p class="mb-3 font-weight-normal">Usuarios que tienen permisos de lectura en este proyecto:</p>
                         {% for user in reader_users %}
                             {% if user.reader_permission == obra.id %}
-                                <a type='button' class="btn btn-outline-secondary">{{ user.username }}</a>
+                                <a type='button' class="btn btn-sm
+                                {% if user.username == current_user.name %} btn-secondary
+                                {% else %} btn-outline-secondary
+                                {% endif %}">{{ user.username }}</a>
                             {% endif %}
                         {% endfor %}
                         
                         <p class="mb-3 font-weight-normal">Usuarios que tienen permisos de autoría en este proyecto:</p>
                         {% for user in authors %}
                             {% if user.author_project == obra.id %}
-                                <a type='button' class="btn btn-outline-info">{{ user.username }}</a>
+                                <a type='button' class="btn btn-sm
+                                {% if user.username == current_user.name %} btn-info
+                                {% else %} btn-outline-info
+                                {% endif %}">{{ user.username }}</a>
                             {% endif %}
                         {% endfor %}
                     </td>
