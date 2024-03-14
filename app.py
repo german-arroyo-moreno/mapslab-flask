@@ -13,6 +13,8 @@ from werkzeug.urls import url_parse
 import json
 import csv
 from pathlib import Path
+import os
+import shutil
 
 # Global variables for the CSV files
 CSV_DELIMITER = ';'
@@ -21,6 +23,10 @@ PROJECTS_CSV_LOCATION = './static/data/projects.csv'
 
 USER_CSV_FIELDNAMES = ['user_id', 'username', 'password', 'id_projects_list_author', 'id_projects_list_reader', 'is_admin']
 PROJECTS_CSV_FIELDNAMES = ['project_id', 'name', 'author', 'url']
+
+PROJECTS_DIR = './projects/project_'
+PROJECT_FILES_CSV = 'proj_files.csv'
+PROJECT_FILES_FIELDNAMES = ['file_id', 'file_name']
 
 app = Flask(__name__)
 
@@ -58,9 +64,10 @@ def open_project():
                 project_data = csv.DictReader(project_csv, delimiter=CSV_DELIMITER)
 
                 for row in project_data:
-                    if row['project_id'] in projects_to_read: # If the project is one of those which the user can read ... load data to show it
+                    project_id = unhashtag_id(row['project_id']) #string id number
+                    if project_id in projects_to_read: # If the project is one of those which the user can read ... load data to show it
                         projects.append({
-                            "id": row['project_id'],
+                            "id": unhashtag_id(row['project_id']),
                             "nombre": row['name'],
                             "autor": row['author'],
                             "url": row['url']
@@ -77,12 +84,18 @@ def open_project():
 def main_app():
     return render_template('main-app.html')
 
+def hashtag_id(id_number):
+    return '#' + str(id_number)
+
+def unhashtag_id(hash_id):
+    return hash_id.replace('#', '')
+
 
 # Devolver objeto User a partir de string con su ID almacenado
 @login_manager.user_loader
 def load_user(user_id):
     for user in users:
-        if int(user.id) == int(user_id):
+        if user.id == user_id: # string #id
             return user
     return None
 
@@ -94,7 +107,6 @@ def load_users():
             users_data = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
 
             for row in users_data:
-                print('qué users está encontrando leches?', row['username'])
                 users_local.append({
                     "user_id": row['user_id'],
                     "username": row['username'],
@@ -112,7 +124,7 @@ def load_Users_array():
     for user in users_local:
         print(user)
         users.append(User(
-            int(user["user_id"]),
+            user["user_id"],
             user["username"],
             user["password"],
             user["id_projects_list_author"],
@@ -124,7 +136,7 @@ def load_Users_array():
 def get_projects_authors_readers():
     projects_to_read = []
     author_projects = []
-    reader_users_of_shown_projects = []
+    readers_of_shown_projects = []
     authors_of_shown_projects = []
     users_local = load_users()
 
@@ -145,7 +157,7 @@ def get_projects_authors_readers():
             if reader_permission in author_projects or reader_permission in projects_to_read: 
                 #Mostrar lectores de los proyectos de los que YO soy autor
                 #Mostrar lectores de los proyectos en los que YO soy sólo lector
-                reader_users_of_shown_projects.append({
+                readers_of_shown_projects.append({
                     "username": user["username"],
                     "reader_permission": reader_permission
                 })
@@ -157,7 +169,7 @@ def get_projects_authors_readers():
                     "username": user["username"],
                     "author_project": author_permission
                 })
-    return projects_to_read, author_projects, reader_users_of_shown_projects, authors_of_shown_projects
+    return projects_to_read, author_projects, readers_of_shown_projects, authors_of_shown_projects
 
 @app.route("/receive", methods = ['POST', 'GET'])
 def receiver():
@@ -232,15 +244,19 @@ def signup_user_from_form(name, password, is_admin):
 
         all_users = list(users_data_r)
         if len(all_users) > 0:
-            new_user_id =  int(all_users[-1]['user_id']) + 1 # last user's id + 1
+            new_user_id =  int(unhashtag_id(all_users[-1]['user_id'])) + 1 # last user's id + 1
         else:
-            new_user_id = 1            
+            new_user_id = 1 
 
-        users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        users_data_w.writerow([int(new_user_id), name, password, '', '', is_admin]) # Write new user's data in csv
-        user = User(int(new_user_id), name, '', '', '', is_admin) #Empty password for now
+        new_user_id = hashtag_id(new_user_id)           
+
+        user = User(new_user_id, name, '', '', '', is_admin) #Empty password for now
         user.set_password(password) #Hash password
         users.append(user)
+
+        users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        users_data_w.writerow([new_user_id, name, user.password, '', '', is_admin]) # Write new user's data in csv with hashed password
+
         if is_admin:
             login_user(user, remember=True)
             session['username'] = name
@@ -335,22 +351,36 @@ def upload_project():
         if request.method == "GET":
             return render_template("upload_project.html")
         elif request.method == "POST":
+            # Record project data in project csv
             userdata = dict(request.form)
             name = userdata["name"]
             author = userdata["author"]
             url = userdata["url"]
-            with open(PROJECTS_CSV_LOCATION, mode='r+') as csv_file:
-                project_data = csv.writer(csv_file, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                data_r = csv.DictReader(csv_file, delimiter=CSV_DELIMITER)
-                
-                all_projects = list(data_r) #Last project's id + 1
-                if len(all_projects) > 0:
-                    id_new_project =  int(all_projects[-1]['project_id']) + 1
-                else:
-                    id_new_project = 1
 
-                project_data.writerow([id_new_project, name, author, url])
-                username_with_projectadded = add_project_to_user(id_new_project) # Añadir obra a usuario (autor y lector)
+            projects_file = Path(USER_CSV_LOCATION)
+            if projects_file.is_file(): # add project info to projects.csv and assign permissions to current user
+                with open(PROJECTS_CSV_LOCATION, mode='r+') as csv_file:
+                    project_data = csv.writer(csv_file, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                    data_r = csv.DictReader(csv_file, delimiter=CSV_DELIMITER)
+                    
+                    all_projects = list(data_r) #Last project's id + 1
+                    if len(all_projects) > 0:
+                        id_new_project =  int(unhashtag_id(all_projects[-1]['project_id'])) + 1
+                    else:
+                        id_new_project = 1
+
+                    project_data.writerow([hashtag_id(id_new_project), name, author, url])
+                    username_with_projectadded = add_project_to_user(id_new_project) # Añadir obra a usuario (autor y lector)
+            else: # create projects.csv if it doesn't exist. Add project info and assign permissions to current user
+                projects_file.parent.mkdir(parents=True, exist_ok=True)
+                with projects_file.open("w", encoding="utf-8") as new_file:
+                    new_file_w = csv.DictWriter(new_file, delimiter=CSV_DELIMITER, fieldnames=PROJECTS_CSV_FIELDNAMES)
+                    new_file_w.writeheader() # write header row
+                    new_file_w.writerow([1, name, author, url])
+                    username_with_projectadded = add_project_to_user(1) # Add project to user (author and reader permissions)
+
+            # Create folder and files of new project
+            create_project_files(id_new_project)
     return f"{name} saved in projects.csv! Author and reader permissions given to user {username_with_projectadded}",{"Refresh": "4; url=/"} 
 
 @app.route('/delete_project/<id>', methods={"GET", "POST"})
@@ -358,12 +388,12 @@ def upload_project():
 def delete_project(id):
     if not current_user.is_authenticated:
         return f'You have to login to delete a project',{"Refresh": "3; url=/login"}
-    else:
+    else: # Delete project info from projects.csv
         lines = []
         with open(PROJECTS_CSV_LOCATION, 'r') as readFile:
             reader = csv.DictReader(readFile, delimiter=CSV_DELIMITER)
             for row in reader:
-                if row['project_id'] != str(id): #Not to include the project to delete
+                if unhashtag_id(row['project_id']) != str(id): #Not to include the project to delete
                     lines.append(dict(row))
 
         with open(PROJECTS_CSV_LOCATION, 'w') as writeFile:
@@ -372,6 +402,7 @@ def delete_project(id):
             writer.writerows(lines)
         
         status_deleted = delete_project_from_users(id)
+        delete_project_files(id)
         
         return f"¿Se ha eliminado la obra con id {id} de projects.csv y de los permisos de los usuarios en el archivo users.csv? : {status_deleted}",{"Refresh": "3; url=/"} 
 
@@ -468,6 +499,25 @@ def delete_project_from_users(id_project):
             users_data_w.writerows(users_dict)
         
     return True
+
+def create_project_files(id_new_project):
+    try:
+        new_proj_folder = PROJECTS_DIR + str(id_new_project)
+        os.mkdir(new_proj_folder)
+        with open(new_proj_folder + '/' + PROJECT_FILES_CSV, "w") as proj_files_csv: # create new csv for project files of new added project
+            writer = csv.DictWriter(proj_files_csv, delimiter=CSV_DELIMITER, fieldnames=PROJECT_FILES_FIELDNAMES)
+            writer.writeheader()
+
+    except FileExistsError as error:
+        print(f"Error Type: {error}.\n Project with id number {id_new_project} already exists")
+    except FileNotFoundError as error:
+        print(f"Error Type: {error}.\n Project folder not found")
+
+def delete_project_files(id_project):
+    try:
+        shutil.rmtree(PROJECTS_DIR + str(id_project))
+    except OSError as error:
+        print(f"Error Type: {error}.\n Project files not found")
 
 #Load only once in app
 with app.app_context():

@@ -1,3 +1,8 @@
 user_id;username;password;id_projects_list_author;id_projects_list_reader;is_admin
-1;eladmin2;2;1,2;1,2;True
-2;rosa;rosa;2;2;False
+#1;eladmin2;2;1,2;1,2;True
+#2;rosa;rosa;2,3,4,5,6,7;2,3,4,5,6,7;False
+#3;manolo tiene hash;pbkdf2:sha256:600000$YwXPZlenapCOrikj$eb8d416e9784aa7fd4723ef43d09f1a938310e146389a529a79ea3bf8a086994;;;False
+#4;rosa tiene el hash de manolo;pbkdf2:sha256:600000$bYHAEIc4ci9RouKu$adb9380c3eb9211712f91dc97525440912a381fa6483c49e91a5ef9677c658d1;;;False
+#6;josé;j;1;1;False
+#7;tino;pbkdf2:sha256:600000$gbm8clxCf31cECJI$21f312c12fa7db325c54ce492a6713bae52a2f4331dacc8c86c71b8e437702f2;;;False
+#8;herminia;pbkdf2:sha256:600000$uSFwwgX8qJ4WXpCN$761294a75c9f41afd5b92fe4fb4b1c8f3bff9124c0f24f7b12cea05ee77c9aab;8,10;8,10;False

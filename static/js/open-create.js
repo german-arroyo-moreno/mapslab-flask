@@ -1,8 +1,9 @@
 
 ////////////////////////////////////////////////////////////////////////////////////
-/////////////  8.FUNCIÓN DE LA PÁGINA PRINCIPAL DE LA APLICACIÓN  ///////////////
+////////////////  8.FUNCIÓN DEL MENÚ PRINCIPAL DE LA APLICACIÓN  //////////////////
 ////////////////////////////////////////////////////////////////////////////////////
 
+// ASOCIAR ID AL LINK DE ELIMINAR PROYECTO EN BOTÓN DE VENTANA MODAL
 document.querySelectorAll('.container .table tbody #deleteConfirm').forEach(function (element) {
     element.addEventListener("click", function() {
         var id = this.dataset.id;
