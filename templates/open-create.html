@@ -47,11 +47,11 @@
                         {% if current_user.is_anonymous %}
                         <li class="nav-item">
                             <a type="button" class="active link-dark nav-link" aria-current="page" href="{{ url_for('login') }}">
-                                Log in {{session['username']}}</a>
+                                Log in (Session: {{session['username']}}, Current_user: {{ current_user.name }} is_admin?: {{ current_user.is_admin }})</a>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link link-dark">Welcome {{ current_user.name }}, Session {{session['username']}}!</a>
+                            <a class="nav-link link-dark" href="{{ url_for('profile', username=current_user.name)}}">Welcome {{ current_user.name }}, Session {{session['username']}}! is_admin?: {{ current_user.is_admin }}</a>
                         </li>
                         <li class="nav-item">
                             <a class="active nav-link link-dark" aria-current="page" href="{{ url_for('logout') }}">Log out</a>

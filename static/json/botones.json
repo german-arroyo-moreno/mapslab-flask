@@ -7,7 +7,8 @@
                 "name": "Valid",
                 "ownclass": "valid-boton",
                 "buttonid": "valid-boton",
-                "status": "not clicked"
+                "status": "not clicked",
+                "default": "not clicked"
             },
             {
                 "type": "fila-position",
@@ -17,15 +18,18 @@
                 "components": [
                     {
                         "buttonpositionid": "ButtonPosition1",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "buttonpositionid": "ButtonPosition2",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "buttonpositionid": "ButtonPosition3",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     }
                 ]
             },
@@ -37,7 +41,8 @@
                 "name": "Update Data",
                 "ownclass": "update-boton",
                 "buttonid": "update-boton",
-                "status": "not clicked"
+                "status": "not clicked",
+                "default": "not clicked"
             }
         ]
     },
@@ -51,29 +56,35 @@
                 "components": [
                     {
                         "buttonlayerid": "ButtonLayer1",
-                        "status": "visible"
+                        "status": "visible",
+                        "default": "visible"
                     },
                     {
                         "buttonlayerid": "ButtonLayer2",
-                        "status": "invisible"
+                        "status": "invisible",
+                        "default": "invisible"
                     },
                     {
                         "buttonlayerid": "ButtonLayer3",
-                        "status": "invisible"
+                        "status": "invisible",
+                        "default": "invisible"
                     }
                 ],
                 "values": [
                     {
                         "valueid": "layer0",
-                        "status":"not clicked"
+                        "status":"not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "layer1",
-                        "status":"not clicked"
+                        "status":"not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "layer2",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     }
                 ]
             },
@@ -123,22 +134,26 @@
                                 "valueid": "integer",
                                 "valuename": "Integer",
                                 "predetselectedoption": true,
-                                "status": "clicked"
+                                "status": "clicked",
+                                "default": "clicked"
                             },
                             {
                                 "valueid": "float",
                                 "valuename": "Float",
-                                "status": "not clicked"
+                                "status": "not clicked",
+                                "default": "not clicked"
                             },
                             {
                                 "valueid": "scientific",
                                 "valuename": "Scientific",
-                                "status": "not clicked"
+                                "status": "not clicked",
+                                "default": "not clicked"
                             },
                             {
                                 "valueid": "percent",
                                 "valuename": "Per cent",
-                                "status": "not clicked"
+                                "status": "not clicked",
+                                "default": "not clicked"
                             }
                         ]
                     }
@@ -153,7 +168,8 @@
                         "type": "checkbox",
                         "name": "Pixel transparency",
                         "checkboxid": "pixel-transparency",
-                        "status": "unchecked"
+                        "status": "unchecked",
+                        "default": "unchecked"
                     },
                     {
                         "type": "slider-and-input",
@@ -205,12 +221,14 @@
                         "valueid": "add-layers",
                         "valuename": "Add auxiliary layers",
                         "predetselectedoption": true,
-                        "status": "clicked"
+                        "status": "clicked",
+                        "default": "clicked"
                     }, 
                     {
                         "valueid": "diff-gauss",
                         "valuename": "Difference of Gaussians",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     }
                 ]
             },
@@ -218,13 +236,15 @@
                 "type": "boton",
                 "name": "Remove selected layer",
                 "buttonid": "remove-selected-layer",
-                "status": "not clicked"
+                "status": "not clicked",
+                "default": "not clicked"
             },
             {
                 "type": "boton",
                 "name": "Remove all layers",
                 "buttonid": "remove-all-layers",
-                "status": "not clicked"
+                "status": "not clicked",
+                "default": "not clicked"
             }
         ]
     },
@@ -240,92 +260,110 @@
                     {
                         "valueid": "As",
                         "valuename": "As",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Ba",
                         "valuename": "Ba",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Ca",
                         "valuename": "Ca",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Cd",
                         "valuename": "Cd",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Co",
                         "valuename": "Co",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Cr",
                         "valuename": "Cr",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Cu",
                         "valuename": "Cu",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Fe",
                         "valuename": "Fe",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Hg",
                         "valuename": "Hg",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "K",
                         "valuename": "K",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Mn",
                         "valuename": "Mn",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Ni",
                         "valuename": "Ni",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Pb",
                         "valuename": "Pb",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Sb",
                         "valuename": "Sb",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Se",
                         "valuename": "Se",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Sn",
                         "valuename": "Sn",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Ti",
                         "valuename": "Ti",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "Zn",
                         "valuename": "Zn",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     }
                 ]
             },
@@ -334,7 +372,8 @@
                 "name": "View name",
                 "inputid": "view-name-xrf",
                 "placeholder": "view1",
-                "inputvalue": ""
+                "inputvalue": "",
+                "default": ""
             },
             {
                 "type": "select-one",
@@ -345,22 +384,26 @@
                         "valueid": "min-hypercube-distance", 
                         "valuename": "Minimum Hypercube Distance",
                         "predetselectedoption": true,
-                        "status": "clicked"
+                        "status": "clicked",
+                        "default": "clicked"
                     }, 
                     {
                         "valueid": "min-cartesian-distance",
                         "valuename": "Minimum 2D Cartesian Distance",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "rbf",
                         "valuename": "RBF",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     },
                     {
                         "valueid": "triangulation",
                         "valuename": "Triangulation",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default": "not clicked"
                     } 
                 ]
             },
@@ -368,7 +411,8 @@
                 "type": "checkbox",
                 "name": "Normalization",
                 "checkboxid": "normalization",
-                "status": "unchecked"
+                "status": "unchecked",
+                "default": "unchecked"
             },
             {
                 "type": "select-one",
@@ -379,12 +423,14 @@
                         "valueid": "homogeneous",
                         "valuename": "Homogeneous",
                         "predetselectedoption": true,
-                        "status": "clicked"
+                        "status": "clicked",
+                        "default":"clicked"
                     }, 
                     {
                         "valueid": "heterogeneous",
                         "valuename": "Heterogeneous",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }
                 ]
             },
@@ -396,53 +442,63 @@
                     {
                         "valueid": "1x1",
                         "valuename": "1x1",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "3x3",
                         "valuename": "3x3",
                         "predetselectedoption": true,
-                        "status": "clicked"
+                        "status": "clicked",
+                        "default":"clicked"
                     }, 
                     {
                         "valueid": "5x5",
                         "valuename": "5x5",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }, 
                     {
                         "valueid": "7x7",
                         "valuename": "7x7",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }, 
                     {
                         "valueid": "9x9",
                         "valuename": "9x9",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }, 
                     {
                         "valueid": "11x11",
                         "valuename": "11x11",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }, 
                     {
                         "valueid": "13x13",
                         "valuename": "13x13",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "15x15",
                         "valuename": "15x15",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "25x25",
                         "valuename": "25x25",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "49x49",
                         "valuename": "49x49",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }
                 ]
             },
@@ -454,88 +510,105 @@
                     {
                         "valueid": "disc-tone-2",
                         "valuename": "Discrete_tone_2_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-tone-3",
                         "valuename": "Discrete_tone_3_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-tone-4",
                         "valuename": "Discrete_tone_4_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-tone-5",
                         "valuename": "Discrete_tone_5_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-color-2",
                         "valuename": "Discrete_color_2_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-color-3",
                         "valuename": "Discrete_color_3_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-color-4",
                         "valuename": "Discrete_color_4_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-color-5",
                         "valuename": "Discrete_color_5_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-1",
                         "valuename": "Continuous_color_1_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-2",
                         "valuename": "Continuous_color_2_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-3",
                         "valuename": "Continuous_color_3_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-4",
                         "valuename": "Continuous_color_4_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-5",
                         "valuename": "Continuous_color_5_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-tone-2",
                         "valuename": "Continuous_tone_2_interval",
                         "predetselectedoption": true,
-                        "status": "clicked"
+                        "status": "clicked",
+                        "default":"clicked"
                     },
                     {
                         "valueid": "cont-tone-3",
                         "valuename": "Continuous_tone_3_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-tone-4",
                         "valuename": "Continuous_tone_4_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-tone-5",
                         "valuename": "Continuous_tone_5_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }
                 ]
             },
@@ -546,13 +619,15 @@
                 "type": "boton",
                 "name": "Create some maps",
                 "buttonid": "create-some-maps",
-                "status": "not clicked"
+                "status": "not clicked",
+                "default":"not clicked"
             },
             {
                 "type": "boton",
                 "name": "Create all the maps",
                 "buttonid": "create-all-maps",
-                "status": "not clicked"
+                "status": "not clicked",
+                "default":"not clicked"
             }
         ]
     },
@@ -568,47 +643,56 @@
                         "valueid": "cad-red",
                         "valuename": "Cadmium red",
                         "predetselectedoption": true,
-                        "status": "clicked"
+                        "status": "clicked",
+                        "default":"clicked"
                     },
                     {
                         "valueid": "cad-yellow",
                         "valuename": "Cadmium yellow",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "chr-yellow",
                         "valuename": "Chromium yellow",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cinnabar",
                         "valuename": "Cinnabar",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cob-blue",
                         "valuename": "Cobalt blue",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "egi-blue",
                         "valuename": "Egiptian blue",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "lapizlazuli",
                         "valuename": "Lapizlazuli",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "lea-yellow",
                         "valuename": "Lead tin yellow",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "oropiment",
                         "valuename": "Oropiment",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }
                 ]
             },
@@ -617,7 +701,8 @@
                 "name": "View name",
                 "inputid": "view-name-compounds",
                 "placeholder": "view1",
-                "inputvalue": ""
+                "inputvalue": "",
+                "default":""
             },
             {
                 "type": "select-one",
@@ -627,53 +712,63 @@
                     {
                         "valueid": "1x1",
                         "valuename": "1x1",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "3x3",
                         "valuename": "3x3",
                         "predetselectedoption": true,
-                        "status": "clicked"
+                        "status": "clicked",
+                        "default":"clicked"
                     }, 
                     {
                         "valueid": "5x5",
                         "valuename": "5x5",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }, 
                     {
                         "valueid": "7x7",
                         "valuename": "7x7",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }, 
                     {
                         "valueid": "9x9",
                         "valuename": "9x9",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }, 
                     {
                         "valueid": "11x11",
                         "valuename": "11x11",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }, 
                     {
                         "valueid": "13x13",
                         "valuename": "13x13",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "15x15",
                         "valuename": "15x15",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "25x25",
                         "valuename": "25x25",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "49x49",
                         "valuename": "49x49",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }
                 ]
             },
@@ -685,88 +780,105 @@
                     {
                         "valueid": "disc-tone-2",
                         "valuename": "Discrete_tone_2_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-tone-3",
                         "valuename": "Discrete_tone_3_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-tone-4",
                         "valuename": "Discrete_tone_4_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-tone-5",
                         "valuename": "Discrete_tone_5_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-color-2",
                         "valuename": "Discrete_color_2_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-color-3",
                         "valuename": "Discrete_color_3_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-color-4",
                         "valuename": "Discrete_color_4_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "disc-color-5",
                         "valuename": "Discrete_color_5_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-1",
                         "valuename": "Continuous_color_1_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-2",
                         "valuename": "Continuous_color_2_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-3",
                         "valuename": "Continuous_color_3_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-4",
                         "valuename": "Continuous_color_4_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-color-5",
                         "valuename": "Continuous_color_5_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-tone-2",
                         "valuename": "Continuous_tone_2_interval",
                         "predetselectedoption": true,
-                        "status": "clicked"
+                        "status": "clicked",
+                        "default":"clicked"
                     },
                     {
                         "valueid": "cont-tone-3",
                         "valuename": "Continuous_tone_3_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-tone-4",
                         "valuename": "Continuous_tone_4_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     },
                     {
                         "valueid": "cont-tone-5",
                         "valuename": "Continuous_tone_5_interval",
-                        "status": "not clicked"
+                        "status": "not clicked",
+                        "default":"not clicked"
                     }
                 ]
             },
@@ -777,13 +889,15 @@
                 "type": "boton",
                 "name": "Create combination maps",
                 "buttonid": "create-combination-maps",
-                "status": "not clicked"
+                "status": "not clicked",
+                "default":"not clicked"
             },
             {
                 "type": "boton",
                 "name": "Create all individual maps",
                 "buttonid": "create-all-individual-maps",
-                "status": "not clicked"
+                "status": "not clicked",
+                "default":"not clicked"
             }
         ]
     },

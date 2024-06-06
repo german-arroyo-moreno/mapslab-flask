@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Profile panel - {% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <div class="form-signin">
+        <h1 class="h3 mb-3 font-weight-normal">Your profile</h1>
+        <p>You can set a new password here:</p>
+        <form action="" method="post" novalidate class="form-login">
+            {{ form.hidden_tag() }}
+            <div>
+                {{ form.name.label }}
+                {{ form.name(class_="form-control", id_="username-input", placeholder_=form.name.label.text, disabled_=True) }}<br>
+                {% for error in form.name.errors %}
+                <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.oldpassword.label }}
+                {{ form.oldpassword(class_="form-control", placeholder_="Old password") }}<br>
+                {% for error in form.oldpassword.errors %}
+                <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.password.label }}
+                {{ form.password(class_="form-control", placeholder_="New password") }}<br>
+                {% for error in form.password.errors %}
+                <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.password2.label }}
+                {{ form.password2(class_="form-control", placeholder_="Repeat new password") }}<br>
+                {% for error in form.password2.errors %}
+                <span style="color: red;">{{ error }}</span>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form.submit(class="btn btn-lg btn-success btn-block") }}
+            </div>
+            <hr/>
+            <a type="button" class="btn btn-lg btn-primary btn-block" href="{{ url_for('open_project') }}">Return home</a>
+        </form>
+
+    </div>
+
+</div>
+{% endblock %}

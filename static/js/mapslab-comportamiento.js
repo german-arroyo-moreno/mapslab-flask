@@ -160,8 +160,22 @@ class jsonStatus {
             // Obtener todos los elementos seleccionados (uno o múltiples elementos seleccionados)
             var collection = document.getElementById("select-elements").selectedOptions;
 
-            // Crear una nueva capa por cada elemento seleccionado
+            // Crear una nueva capa por cada elemento seleccionado en la interfaz
             for (var i = 0; i < collection.length; i++) {
+                // Send parameters of the values of the elements in the XRF Tab to the server
+                var parameters = {};
+                parameters["Output_name"] = document.getElementById("view-name-xrf").value == '' ? "vis_visible_" : replaceSpaces(document.getElementById("view-name-xrf").value) + '_';
+                parameters["Element_name"] = collection[i].value;
+                parameters["normalization"] = document.getElementById("normalization").checked;
+                parameters["position_normalization"] = document.getElementById("pos-normalization").options[getSelectedOption(document.getElementById("pos-normalization"))].value; // Get value name of selected option
+                parameters["probe"] = document.getElementById("probe-xrf").options[getSelectedOption(document.getElementById("probe-xrf"))].value; // Get value name of selected option
+                parameters["palette_number"] = 2;
+                console.log('Estos son los parametros en array', parameters);
+
+                let sent_parameters = await exec_server(parameters);
+                console.log('El front end ha enviado al servidor a ejecutar los parámetros: ', sent_parameters)
+
+                // Añadir capa en interfaz
                 console.log("Añadiendo la capa del elemento: ", collection[i].value);
                 addNewLayer(collection[i].value);
             }
@@ -195,7 +209,7 @@ class jsonStatus {
         } else {
             this.checked = false;
         }
-
+        console.log(botonesJson[tabNumber].Container[elementOrderNumber]);
         // Enviar al servidor nuevo JSON modificado
         let modificacion = await myButtonEvt("/receive", elementoJson);
         console.log('El front le he enviado al server la modificación: ', modificacion);
@@ -323,8 +337,8 @@ class jsonStatus {
         // Si el checkbox está dentro de un panel, tener en cuenta su posición dentro del panel que lo contiene
         var elementoJson = panelOrderNumber == undefined ? botonesJson[tabNumber].Container[elementOrderNumber] : botonesJson[tabNumber].Container[elementOrderNumber].components[panelOrderNumber];
         
-        elementoJson.inputvalue = inputObject.value;
-        elementoJson.slidervalue = inputObject.value;
+        elementoJson.inputvalue = replaceSpaces(inputObject.value);
+        // elementoJson.slidervalue = replaceSpaces(inputObject.value); // En text input no hay slider
 
         // Actualizar elemento HTML
         // inputObject.value = elementoJson.inputvalue;
@@ -858,7 +872,15 @@ function addNewLayer (element) {
     // Asignar atributos a la capa nueva a crear
     newLayer.setAttribute("class", "layers-nombreopt");
     newLayer.setAttribute("value", newLayerValue);
-    var newText = document.createTextNode("vis_visible_" + (lastValueNumber + 1) + "_" + element);
+
+    // Nombre de la capa. Si campo view name de pestaña XRF tiene valor, llamar así a capa. Si no, nombre por defecto
+    var layerName;
+    if (document.getElementById("view-name-xrf").value == '') {
+        layerName = "vis_visible";
+    } else {
+        layerName = replaceSpaces(document.getElementById("view-name-xrf").value);
+    }
+    var newText = document.createTextNode(layerName + "_" + (lastValueNumber + 1) + "_" + element);
     newLayer.appendChild(newText);
 
     // Aumentar el tamaño del select layers-nombre que lo contiene (evitar scroll) respecto al último tamaño
@@ -1363,10 +1385,7 @@ async function myButtonEvt (url= "", data = {}) {
         if (!response.ok) {
             console.error("Respuesta de red OK pero respuesta HTTP no OK", response.status);
         }
-        // console.log('Igualmente el response es: ', response.text());
         const buttons = await response.json();
-        // console.log('Buttons: ', buttons);
-        // console.log("Éxito: ", buttons);
 
         return buttons;
     } catch (error) {
@@ -1374,8 +1393,27 @@ async function myButtonEvt (url= "", data = {}) {
     }    
 }
 
+async function exec_server (parameters = {}) {
+    try {
+        const response = await fetch("/exec_server", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(parameters),
+            credentials: "include", // incluirá el id de sesión del usuario
+        });
+        if (!response.ok) {
+            console.error("Respuesta de red OK pero respuesta HTTP no OK. En envío petición AJAX a servidor", response.status);
+        }
+        const sent_parameters = await response.json();
+        return sent_parameters;
+    } catch (error) {
+        console.error("Hubo un problema con la petición Fetch del envío a ejecución del servidor: " + error.message);
+    }    
+}
+
 let data = await myButtonEvt("/receive", {"holi": "hola"});
-//const data = {"holi": "hola"};
 //myButtonEvt("/receive", data).then((data) => {
   console.log('Muestra de DATA:', data); // JSON data parsed by `data.json()` call
 //});
@@ -1383,6 +1421,8 @@ let data = await myButtonEvt("/receive", {"holi": "hola"});
 // DETECCIÓN DE EVENTOS DE CADA BOTÓN / ELEMENTO PARA NOTIFICAR AL SERVIDOR
 // Detectar si los botones de la aplicación han sido clicados y actualizar al servidor
 
+/****************************** */
+// PESTAÑA POSITIONS: EVENTOS DE SUS ELEMENTOS / BOTONES
 // Botón valid
 document.getElementById("valid-boton").addEventListener("click", function () {
     var tabNumber = 0;          // El botón Valid se encuentra en Pestaña Positions, la 0 en el JSON
@@ -1443,6 +1483,11 @@ function getSelectedOption(sel) {
             return i; // Posición comenzando en 0 de la opción seleccionada dentro del select
         }
     }
+}
+
+// Función para sustituir espacios en blanco de un string por _
+function replaceSpaces(str) {
+    return str.split(' ').join('_');
 }
 
 
@@ -1602,7 +1647,7 @@ document.getElementById("select-elements").addEventListener("change", function()
 });
 
 // VIEW NAME TEXT INPUT DE XRF
-document.getElementById("view-name-xrf").addEventListener("input", function() {
+document.getElementById("view-name-xrf").addEventListener("blur", function() {
     var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
     var elementOrderNumber = 1; // Nº orden del elemento en la pestaña en el JSON
     jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);

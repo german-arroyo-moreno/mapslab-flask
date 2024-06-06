@@ -4,10 +4,10 @@ from flask import request #peticiones
 from flask import jsonify #convertir en formato json en Python
 from flask import Response #poder devolver respuestas
 from flask import url_for, redirect 
-from flask_login import LoginManager, current_user, login_user, logout_user #manejo de sesiones de usuario (flask-login)
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required #manejo de sesiones de usuario (flask-login)
 from flask import session #almacenar info de la sesión de un usuario
 from models import users, get_user, User #importar objetos Users definido en models.py
-from forms import SignupForm, LoginForm #importar de forms.py
+from forms import SignupForm, LoginForm, EditProfileForm #importar de forms.py
 from werkzeug.urls import url_parse
 
 import json
@@ -15,11 +15,13 @@ import csv
 from pathlib import Path
 import os
 import shutil
+import tempfile
 
 # Global variables for the CSV files
 CSV_DELIMITER = ';'
 USER_CSV_LOCATION = './static/data/users.csv'
 PROJECTS_CSV_LOCATION = './static/data/projects.csv'
+JSON_LOCATION = './static/data/json/botones.json'
 
 USER_CSV_FIELDNAMES = ['user_id', 'username', 'password', 'id_projects_list_author', 'id_projects_list_reader', 'is_admin']
 PROJECTS_CSV_FIELDNAMES = ['project_id', 'name', 'author', 'url']
@@ -38,6 +40,10 @@ login_manager.login_view = "login"
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
+# Set salt for hash from secret key
+if 'SECURITY_PASSWORD_SALT' not in app.config:
+    app.config['SECURITY_PASSWORD_SALT'] = app.config['SECRET_KEY']
+
 #app.run(debug=True) # Debug mode
 
 # Allow multithreading in Flask
@@ -53,7 +59,7 @@ def open_project():
     author_projects = []
     readers_of_shown_projects = []
     authors_of_shown_projects = []
-
+    print('OPEN PROJECT: Es el current-user anonymous?', current_user.is_anonymous, 'por tanto está authenticated?', current_user.is_authenticated, 'El nombre del current user.nme es:', current_user)
     # print('se puede acceder a lista de lector?', current_user.get_id_projects_list_reader())
     if current_user.is_authenticated:
         projects_to_read, author_projects, readers_of_shown_projects, authors_of_shown_projects = get_projects_authors_readers()
@@ -61,17 +67,18 @@ def open_project():
         projects_file = Path(PROJECTS_CSV_LOCATION)
         if projects_file.is_file(): # if projects_file exists and is a file
             with projects_file.open("r") as project_csv:
-                project_data = csv.DictReader(project_csv, delimiter=CSV_DELIMITER)
+                project_data = csv.DictReader(decomment(project_csv), delimiter=CSV_DELIMITER)
 
                 for row in project_data:
-                    project_id = unhashtag_id(row['project_id']) #string id number
+                    project_id = row['project_id'] #string id number
                     if project_id in projects_to_read: # If the project is one of those which the user can read ... load data to show it
                         projects.append({
-                            "id": unhashtag_id(row['project_id']),
+                            "id": row['project_id'],
                             "nombre": row['name'],
                             "autor": row['author'],
                             "url": row['url']
                         })
+                print(projects)
         else: # create projects csv with header row
             projects_file.parent.mkdir(parents=True, exist_ok=True)
             with projects_file.open("w", encoding="utf-8") as new_projects_file:
@@ -84,36 +91,38 @@ def open_project():
 def main_app():
     return render_template('main-app.html')
 
-def hashtag_id(id_number):
-    return '#' + str(id_number)
-
-def unhashtag_id(hash_id):
-    return hash_id.replace('#', '')
-
-
 # Devolver objeto User a partir de string con su ID almacenado
 @login_manager.user_loader
 def load_user(user_id):
     for user in users:
-        if user.id == user_id: # string #id
+        print('Tipos de user.id y user_id por parámetro: ', type(str(user.id)), type(user_id))
+        if str(user.id) == user_id: # string #id
             return user
     return None
 
+# Store the whole content of users csv in a string
 def load_users():
     users_local = []
     users_file = Path(USER_CSV_LOCATION)
     if users_file.is_file():
         with open(USER_CSV_LOCATION) as users_csv:
-            users_data = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
+            # Load users csv content ignoring the comments as string
+            users_data = csv.DictReader(decomment(users_csv), delimiter=CSV_DELIMITER)
 
+            # Convert is_admin to boolean type
             for row in users_data:
+                if row['is_admin'] == 'True':
+                    row_is_admin = True
+                if row['is_admin'] == 'False':
+                    row_is_admin = False
+
                 users_local.append({
                     "user_id": row['user_id'],
                     "username": row['username'],
                     "password": row['password'],
                     "id_projects_list_author": row['id_projects_list_author'],
                     "id_projects_list_reader": row['id_projects_list_reader'],
-                    "is_admin": row['is_admin']
+                    "is_admin": row_is_admin
                 })
         
     return users_local
@@ -129,8 +138,9 @@ def load_Users_array():
             user["password"],
             user["id_projects_list_author"],
             user["id_projects_list_reader"],
-            bool(user["is_admin"])
+            user["is_admin"] # Even though it's a string, it will be recognised as a Boolean
         ))
+        print(users)
 
 
 def get_projects_authors_readers():
@@ -140,6 +150,7 @@ def get_projects_authors_readers():
     authors_of_shown_projects = []
     users_local = load_users()
 
+    # Obtain the projects which the current user reads and is author of
     for user in users_local:
         if user["username"] == current_user.name:
             if len(user["id_projects_list_reader"]) > 0:
@@ -152,6 +163,7 @@ def get_projects_authors_readers():
             else:
                 author_projects = list(user["id_projects_list_author"])
 
+    # Search other users who can co-read and co-modify the projects with the current user
     for user in users_local:
         for reader_permission in user["id_projects_list_reader"].split(","): 
             if reader_permission in author_projects or reader_permission in projects_to_read: 
@@ -176,18 +188,23 @@ def receiver():
     data = request.get_json(force=True)
     data["Al servidor ha llegado"] = "este JSON"
     print(data)
-    result = {"adio": "adio"}
-    print(result)
 
     if not request.is_json:
         print('No reconoce que sea application/json archivo ')
     else:
         print('Reconoce que es application/json')
 
-    # for item in data:
-    #    result += str(item) + '\n'
-
     return jsonify(data)
+
+# Function to overwrite json file
+# def save_json(data):
+#     with open(JSON_LOCATION, mode='w') as json_file:
+#         # If data is still a dictionary, jsonify
+#         data = jsonify(data)
+#         # data = json.dumps(data, indent = 4)
+
+#         # Overwrite json file with new data
+#         json_file.write(data)
 
 
 @app.route("/longpolling", methods = ['POST', 'GET'])
@@ -207,7 +224,7 @@ def login():
     
     form = LoginForm()
     users_local = load_users() #  Show user names in login page
-
+    print('LOGIN: Entré en login')
     if form.validate_on_submit(): # if login submit button is clicked
         name = form.name.data
         
@@ -215,14 +232,19 @@ def login():
         for row in users_local:
             usernames.append(row['username'])
         
+        # The next check is also in forms.py (only for console)
         if str(name) not in usernames:
             print("Sorry, that username doesn't exist")
         else:
             user = get_user(str(name))
+            print('LOGIN: he cogido el user: ', user, 'cuyo nombre es: ', user.name, ' y password es: ', user.password, ' que es admin?', user.is_admin)
+            print('LOGIN: procedo a checkear la password con check_password usando como "original" la del formulario: ', form.password.data)
             if user is not None and user.check_password(form.password.data):
                 login_user(user, remember=form.remember_me.data)
-                session['username'] = name
+                print('LOGIN: Se ha procedido a loggear. Es el current-user anonymous?', current_user.is_anonymous, 'por tanto está authenticated?', current_user.is_authenticated, 'El nombre del current user.nme es:', current_user)
+                session['username'] = user.name
                 next_page = request.args.get('next')
+                print('LOGIN: Se ha procedido a loggear. Es el current-user anonymous?', current_user.is_anonymous, 'por tanto está authenticated?', current_user.is_authenticated, 'El nombre del current user.nme es:', current_user)
                 if not next_page or url_parse(next_page).netloc != '':
                     next_page = url_for('open_project')
                 return redirect(next_page)
@@ -238,62 +260,82 @@ def logout():
     session.pop('username', default=None)
     return redirect(url_for('open_project'))
 
+#Filter to ignore comments of the CSV file
+def decomment(csvfile):
+    for row in csvfile:
+        raw = row.split('#')[0].strip()
+        if raw: yield raw # Returns a generator
+
 def signup_user_from_form(name, password, is_admin):
     with open(USER_CSV_LOCATION, mode='r+') as users_csv:
-        users_data_r = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
+        users_data_r = csv.DictReader(decomment(users_csv), delimiter=CSV_DELIMITER)
 
         all_users = list(users_data_r)
+        print('SIGNUP_USER_FROM FORM: qué users lee el signup DEL CSV', all_users)
         if len(all_users) > 0:
-            new_user_id =  int(unhashtag_id(all_users[-1]['user_id'])) + 1 # last user's id + 1
+            new_user_id =  int(all_users[-1]['user_id']) + 1 # last user's id + 1 
         else:
             new_user_id = 1 
 
-        new_user_id = hashtag_id(new_user_id)           
+        user = User(str(new_user_id), name, '', '', '', is_admin) # Password will NOT be hashed this way. Id MUST be a string
+        user.set_password(password) # Hashes password
+        print('SIGNUP USER FROM FORM da de alta al usuario en array users: ', user.id, user.name, password, 'genera en user', user.password, user.is_admin, 'a partir de datos: ', new_user_id, name, password, is_admin)
+        users.append(user) 
+        print('SIGNUP USER FROM FORM: users en signup', users)
 
-        user = User(new_user_id, name, '', '', '', is_admin) #Empty password for now
-        user.set_password(password) #Hash password
-        users.append(user)
-
-        users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER)
         users_data_w.writerow([new_user_id, name, user.password, '', '', is_admin]) # Write new user's data in csv with hashed password
 
+'''
         if is_admin:
-            login_user(user, remember=True)
+            print('ha detectado que es admin en signup y se logea supuestamente')
+            login_user(user, remember=True, force=True)
+            print('Quién es el current user ahora', current_user)
+            print('y cuál es su estatus como admin?', current_user.is_admin)
             session['username'] = name
+'''
 
 
-#Registro de usuarios si se usa el archivo users.csv (2º alternativa)
+#Registro de usuarios si se usa el archivo users.csv
 @app.route("/signup/", methods=["GET", "POST"])
 def show_signup_form():
+    users_file = Path(USER_CSV_LOCATION)
+    # If it's not the first time to load the signup page
+    if users_file.is_file(): # if users_file exists and is a file
+        if (current_user.is_anonymous or not current_user.is_admin or 
+            current_user.is_anonymous == 'True' or current_user.is_admin == 'False'): # if current user is not logged or is not admin
+            print('You have to be an ADMIN to have access to the sign up page')
+            return f"Log in as an ADMIN to add a new user",{"Refresh": "3; url=/login"}
+
+    # It's the first time loading sign up page (no previous users)
+    else: # users_file doesn't exist or it's not a file
+
+        # Create directory /static/data and users.csv
+        users_file.parent.mkdir(parents=True, exist_ok=True)
+        with users_file.open("w", encoding="utf-8") as new_file:
+            new_file_w = csv.DictWriter(new_file, delimiter=CSV_DELIMITER, fieldnames=USER_CSV_FIELDNAMES)
+            new_file_w.writeheader() # write header row
+            
+        # Register first user of application as admin
+        newuser_is_admin = True
+        signup_user_from_form("admin", "admin", newuser_is_admin)
+        user = get_user(str("admin"))
+        print('SHOW SIGNUP FORM: el models almacenó esta contraseña: ', user.password, 'de ', user.name)
+        # user.password = "admin"
+        print('SHOW SIGNUP FORM: check-password-hash con contraseña "admin"??', user.check_password("admin"))
+
+        # Login admin after signing up user admin
+        login_user(user, remember=True)
+        session['username'] = user.name
+
+        return redirect(url_for('admin_panel'))
+
     form = SignupForm()
     if form.validate_on_submit():
         name = form.name.data
         password = form.password.data
-
-        users_file = Path(USER_CSV_LOCATION)
-        if users_file.is_file(): # if users_file exists and is a file
-            if (current_user.is_anonymous or not current_user.is_admin or 
-                current_user.is_anonymous == 'True' or current_user.is_admin == 'False'): # if current user is not logged or is not admin
-                print('You have to be an ADMIN to have access to the sign up page')
-                return f"Log in as an ADMIN to add a new user",{"Refresh": "3; url=/login"} #redirect(url_for('open_project'))
-
-            users_local = load_users()
-            newuser_is_admin = True
-            for user in users_local:
-                if user['is_admin'] == 'True': #if users file contains user information and at least one admin already exists
-                    # current_user is already an admin and signs new user up, who is not admin
-                    newuser_is_admin = False
-            
-        else: # users_file doesn't exist or it's not a file
-            # Create directory /static/data and users.csv
-            users_file.parent.mkdir(parents=True, exist_ok=True)
-            with users_file.open("w", encoding="utf-8") as new_file:
-                new_file_w = csv.DictWriter(new_file, delimiter=CSV_DELIMITER, fieldnames=USER_CSV_FIELDNAMES)
-                new_file_w.writeheader() # write header row
-                #new_file.write(';'.join(str(element) for element in USER_CSV_FIELDNAMES)) #write header row
-                
-            # Register first user of application as admin
-            newuser_is_admin = True
+        newuser_is_admin = False 
+        print('SHOW SIGNUP FORM: El usuario quiere dar de alta a: ', name, password, newuser_is_admin)
 
         signup_user_from_form(name, password, newuser_is_admin)
 
@@ -304,42 +346,20 @@ def show_signup_form():
     
     return render_template("signup_form.html", form=form)
 
-'''
-    if current_user.is_authenticated:
+
+@app.route('/admin_panel')
+@login_required
+def admin_panel():
+    # If not a logged admin, forbidden access
+    if (current_user.is_anonymous or not current_user.is_admin or 
+        current_user.is_anonymous == 'True' or current_user.is_admin == 'False'):
         return redirect(url_for('open_project'))
-    form = SignupForm()
-    if form.validate_on_submit():
-        name = form.name.data
-        password = form.password.data
+    else:
+        return render_template("create_admin.html", username='admin', password='admin')
 
-        try:
-            with open('./static/data63821/users365.csv', mode='r+') as users_csv:
-                users_data_r = csv.DictReader(users_csv, delimiter=CSV_DELIMITER)
-                usernames = []
-                last_user_id = 0
-                for row in users_data_r:
-                    usernames.append(row['username'])
-                    last_user_id = row['user_id']
+    # return render_template("create_admin.html", username='admin', password='admin')
 
-                if name in usernames:
-                    print("Sorry, that username is already in use. Choose another one")
-                else:
-                    users_data_w = csv.writer(users_csv, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                    users_data_w.writerow([int(last_user_id) + 1, name, password, '', '']) # Grabamos datos de nuevo usuario en csv
-                    user = User(int(last_user_id) + 1, name, '', '', '') #Empty password for now
-                    user.set_password(password) #Hash password
-                    users.append(user)
 
-                    login_user(user, remember=True)
-                    session['username'] = name
-                    next_page = request.args.get('next', None)
-                    if not next_page or url_parse(next_page).netloc != '':
-                        next_page = url_for('open_project')
-                    return redirect(next_page)
-        except FileNotFoundError:
-            print('No he encontrado el archivo!!')
-    return render_template("signup_form.html", form=form)
-'''    
 
 
 @app.route('/upload_project', methods={"GET", "POST"})
@@ -361,22 +381,24 @@ def upload_project():
             if projects_file.is_file(): # add project info to projects.csv and assign permissions to current user
                 with open(PROJECTS_CSV_LOCATION, mode='r+') as csv_file:
                     project_data = csv.writer(csv_file, delimiter=CSV_DELIMITER, quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                    data_r = csv.DictReader(csv_file, delimiter=CSV_DELIMITER)
+                    data_r = csv.DictReader(decomment(csv_file), delimiter=CSV_DELIMITER)
                     
                     all_projects = list(data_r) #Last project's id + 1
+                    print(all_projects)
                     if len(all_projects) > 0:
-                        id_new_project =  int(unhashtag_id(all_projects[-1]['project_id'])) + 1
+                        id_new_project =  int(all_projects[-1]['project_id']) + 1
                     else:
                         id_new_project = 1
 
-                    project_data.writerow([hashtag_id(id_new_project), name, author, url])
+                    project_data.writerow([id_new_project, name, author, url])
                     username_with_projectadded = add_project_to_user(id_new_project) # Añadir obra a usuario (autor y lector)
-            else: # create projects.csv if it doesn't exist. Add project info and assign permissions to current user
+            else: 
+                # Create projects.csv if it doesn't exist. Add project info and assign permissions to current user
                 projects_file.parent.mkdir(parents=True, exist_ok=True)
                 with projects_file.open("w", encoding="utf-8") as new_file:
                     new_file_w = csv.DictWriter(new_file, delimiter=CSV_DELIMITER, fieldnames=PROJECTS_CSV_FIELDNAMES)
                     new_file_w.writeheader() # write header row
-                    new_file_w.writerow([1, name, author, url])
+                    new_file_w.writerow([1, name, author, url]) # Id number 1 (first project to be created)
                     username_with_projectadded = add_project_to_user(1) # Add project to user (author and reader permissions)
 
             # Create folder and files of new project
@@ -393,7 +415,7 @@ def delete_project(id):
         with open(PROJECTS_CSV_LOCATION, 'r') as readFile:
             reader = csv.DictReader(readFile, delimiter=CSV_DELIMITER)
             for row in reader:
-                if unhashtag_id(row['project_id']) != str(id): #Not to include the project to delete
+                if row['project_id'] != str(id): #Not to include the project to delete
                     lines.append(dict(row))
 
         with open(PROJECTS_CSV_LOCATION, 'w') as writeFile:
@@ -519,6 +541,141 @@ def delete_project_files(id_project):
     except OSError as error:
         print(f"Error Type: {error}.\n Project files not found")
 
+# Profile page (form to modify password)
+@app.route('/profile/<username>', methods = ['POST', 'GET'])
+@login_required
+def profile(username):
+    # Get current user object
+    user = get_user(str(username))
+    # Load form
+    form = EditProfileForm()
+    # Show name of current user in form name field
+    form.name.data = user.name
+    
+    # If submit button is clicked
+    if form.validate_on_submit():
+        oldpassword = form.oldpassword.data
+        password = form.password.data
+        password2 = form.password2.data
+        
+        # If object user exists and password is correct
+        if user is not None and user.check_password(form.oldpassword.data):
+            # If new passwords coincide, change old password and substitute it with new password
+            if password == password2: # This is also checked in the form validation (EqualTo)
+                # Substitute new password in flask-login
+                user.set_password(password)
+                # Substitute new password in csv
+                with open(USER_CSV_LOCATION, mode='r') as users_csv:
+                    users_data_r = csv.DictReader(users_csv, delimiter=CSV_DELIMITER) # with comments
+                    lines = []
+                    for row in users_data_r:
+                        lines.append(dict(row))
+
+                for line in lines:
+                    if line['user_id'] == user.id:
+                        line['password'] = user.password # Modify only password field
+
+                # Overwrite users file with new information
+                with open(USER_CSV_LOCATION, mode='w') as writeFile:
+                    users_data_w = csv.DictWriter(writeFile, delimiter=CSV_DELIMITER, fieldnames=USER_CSV_FIELDNAMES)
+                    users_data_w.writeheader()
+                    users_data_w.writerows(lines) 
+
+            # Redirect to previous page. If not, to home page
+            next_page = request.args.get('next', None)
+            if not next_page or url_parse(next_page).netloc != '':
+                next_page = url_for('open_project')
+                return redirect(next_page)
+
+    return render_template('profile.html', username=user.name, form=form)
+
+
+# ----------------------------------------------------------------------
+#                     SERVER EXECUTION
+# ----------------------------------------------------------------------
+
+# Get parameters of the new layer to be created
+@app.route("/exec_server", methods = ['POST', 'GET'])
+def exec_server():
+    # Get the data
+    data = request.get_json(force=True)
+
+    # Transform data into server parameters' format
+    data['normalization'] = str(data['normalization']).upper()
+    if data['position_normalization'] == 'heterogeneous':
+        data['position_normalization'] = 'HET'
+    if data['position_normalization'] == 'homogeneous':
+        data['position_normalization'] = 'HOM'
+    
+    # Execute server with received parameters
+    exec_server_parameters(data)
+
+    # Send back transformed data to user 
+    return jsonify(data)
+
+# Auxiliary function to add and convert new parameters to original string
+def add_param(parameters, new_parameter):
+    return parameters + " " + str(new_parameter)
+
+# ----------------------------------------------------------------------
+
+# Execution of server core with parameters
+def exec_server_parameters(parameters):
+    '''
+    usage: maplab-core.bin  Input_data[name of CSV file (included in input_data folder)] 
+                            Input_image[name of PNG file(included in input_data folder)] 
+                            Output_name[saved in output_data folder] 
+                            Element_name 
+                            Save_data[Y|N]  
+                            Save_image[Y|N] 
+                            Output_data_file_type[TXT|BIN] 
+                            color_model[RGB|HLS|HSV|LAB|LUB] 
+                            color1[TRUE|FALSE] 
+                            color2[TRUE|FALSE] 
+                            color3[TRUE|FALSE] 
+                            position1[TRUE|FALSE] 
+                            position2[TRUE|FALSE] 
+                            normalization[TRUE|FALSE] 
+                            position_normalization[HOM|HET] 
+                            probe[1|2|...|49] 
+                            palette_number[0|1|2|...|15] 
+                            Num_points(from 1 to 165) 
+                            Seed(-1 for random) 
+                            Random_distribution(UNIFORM|COLOR)
+    # Example : maplab-core.bin data.csv vis_image.png prueba As Y Y TXT RGB TRUE TRUE TRUE TRUE TRUE TRUE HET 1 3 100 230 UNIFORM
+    '''
+    param = 'podman run -it -w /mnt/server/maplab-core -v ./salida:/mnt/server/maplab-core/output_data --rm imagen-de-domingo ./maplab-core.bin'
+    param = add_param(param, "data.csv")    #param = add_param(param, parameters["Input_data"])
+    param = add_param(param, "vis_image.png") # param = add_param(param, parameters["Input_image"])
+    # param = add_param(param, parameters["Output_name"])
+    
+    # Assign temporary name to file
+    with tempfile.NamedTemporaryFile(prefix="layer_", dir="./salida") as tf:
+        parameters["Output_name"] = tp.name
+        param = add_param(param, parameters["Output_name"]) # Add temporary output name
+
+    param = add_param(param, parameters["Element_name"])
+    param = add_param(param, "N") # param = add_param(param, parameters["save_data"])
+    param = add_param(param, "Y") # param = add_param(param, parameters["save_image"])
+    param = add_param(param, "TXT") # param = add_param(param, parameters["output_data_file_type"])
+    param = add_param(param, "RGB") # param = add_param(param, parameters["color_model"])
+    param = add_param(param, "TRUE") # param = add_param(param, parameters["color1"])
+    param = add_param(param, "TRUE") # param = add_param(param, parameters["color2"])
+    param = add_param(param, "TRUE") # param = add_param(param, parameters["color3"])
+    param = add_param(param, "TRUE") # param = add_param(param, parameters["position1"])
+    param = add_param(param, "TRUE") # param = add_param(param, parameters["position2"])
+    param = add_param(param, parameters["normalization"])
+    param = add_param(param, parameters["position_normalization"])
+    param = add_param(param, "1") # param = add_param(param, parameters["probe"])
+    param = add_param(param, parameters["palette_number"])
+    param = add_param(param, "100") # param = add_param(param, parameters["num_points"])
+    param = add_param(param, "230") # param = add_param(param, parameters["seed"])
+    param = add_param(param, "UNIFORM") # param = add_param(param, parameters["random_distribution"])
+    print('El servidor calcula que hay que enviar estos praámetros al núcleo:', param)
+
+    os.system(param)
+
 #Load only once in app
 with app.app_context():
+    #logout_user()  # Pop previous users sessions # Error if working outside of request context
     load_Users_array()

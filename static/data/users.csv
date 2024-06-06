@@ -1,8 +1,17 @@
 user_id;username;password;id_projects_list_author;id_projects_list_reader;is_admin
-#1;eladmin2;2;1,2;1,2;True
-#2;rosa;rosa;2,3,4,5,6,7;2,3,4,5,6,7;False
+1;eladmin2;2;1,2,11,12,13;1,2,11,12,13;True
+2;rosa;rosa;2,3,4,5,6,7;2,3,4,5,6,7;False
 #3;manolo tiene hash;pbkdf2:sha256:600000$YwXPZlenapCOrikj$eb8d416e9784aa7fd4723ef43d09f1a938310e146389a529a79ea3bf8a086994;;;False
 #4;rosa tiene el hash de manolo;pbkdf2:sha256:600000$bYHAEIc4ci9RouKu$adb9380c3eb9211712f91dc97525440912a381fa6483c49e91a5ef9677c658d1;;;False
-#6;josé;j;1;1;False
-#7;tino;pbkdf2:sha256:600000$gbm8clxCf31cECJI$21f312c12fa7db325c54ce492a6713bae52a2f4331dacc8c86c71b8e437702f2;;;False
-#8;herminia;pbkdf2:sha256:600000$uSFwwgX8qJ4WXpCN$761294a75c9f41afd5b92fe4fb4b1c8f3bff9124c0f24f7b12cea05ee77c9aab;8,10;8,10;False
+6;josé;j;1,2,3;1,2,3;False
+7;tino;pbkdf2:sha256:600000$gbm8clxCf31cECJI$21f312c12fa7db325c54ce492a6713bae52a2f4331dacc8c86c71b8e437702f2;;;False
+14;probandoadmins1;pbkdf2:sha256:600000$ryLijbkrcAtNcMvL$c1d9b2f368851d91f92d4b9cd24020f717a5d7e329fa669b195e356adcfa634e;;;False
+15;probandoadmins2;pbkdf2:sha256:600000$PIKdcs5NUACYhZWu$a79a3b87255e12ce7787728be3120f511f9c6dabea432f6d961ae52f0cbce05b;;;False
+21;nosoyadmin6;pbkdf2:sha256:600000$sFU7a6tQ5KD8kVCs$3ce3413c69e56b0b3f9868428cf4bee7ca65324611409272f9cc4f7ead3d0d07;;;False
+22;nosoyadmin7;pbkdf2:sha256:600000$SIhYCnIiAqTjMVWa$d20c914ea4bd85f9ef1c8e44cb7d8ff660aa5470c1b93dc1eb91cdde6f40a617;;;False
+23;newusrthissession;pbkdf2:sha256:600000$ueIOUv1JlwMyaEaw$ff4412d133c58ea3633bc5b4c9980a5d1116438c1b1796b4d7fc10e6d1193547;;;False
+26;manuel;m;1,2;1,2,3;False
+29;newusrthissession6;pbkdf2:sha256:600000$EbGHVxe1iOfATqnX$92cf1d62b845b4b84ba98da4a6d6b9925d63d9333c2e742a2e8b231d85e06e7b;;;False
+30;newusrthissession7;pbkdf2:sha256:600000$z0nCh7fc2H7TJSnY$f74c085bd13ad1c575178e6031d40726e460c460e642a6f45f2bffb7ea2ec1b5;;;False
+34;dadodealtaporeladmin4;pbkdf2:sha256:600000$xWSGiaC1SrNJ0lA5$15ec012fc2617da5527ddbc99f8841bd3c462183380f188cbcc3ca3eaa09d1cd;;;True
+36;dadodealtaporeladmin5;pbkdf2:sha256:600000$2pd1G3s4NKpyx4et$a208d5e491321bf824be222a850769f5e200dcf7700681ca6d58514404a4f51a;;;False

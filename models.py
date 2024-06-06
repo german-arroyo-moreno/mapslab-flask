@@ -5,7 +5,7 @@ class User(UserMixin):
     def __init__(self, id, name, password, id_projects_list_author, id_projects_list_reader, is_admin=False):
         self.id = id
         self.name = name
-        self.password = generate_password_hash(password) # Se cargará desde un csv. Y la contraseña se guardará cifrada directamente. Y cargarla igual.
+        self.password = password # Password will NOT be hashed if defined initially. For hashing -> set_password method
         self.id_projects_list_author = id_projects_list_author
         self.id_projects_list_reader = id_projects_list_reader
         self.is_admin = is_admin
@@ -14,10 +14,8 @@ class User(UserMixin):
         self.password = generate_password_hash(password)
 
     def check_password(self, password):
-        return check_password_hash(self.password, password)
-
-    def get_id_projects_list_reader(self):
-        return self.id_projects_list_reader
+        print('MODELS: aquí compruebo si estsa dos son la mism: ', self.password, password, 'de tipos', type(self.password), type(password), 'RESULTADO CHECK: ', check_password_hash(self.password, password))
+        return check_password_hash(self.password, password) # (Hashed password, original password)
 
     def __repr__(self):
         return '<User {}>'.format(self.name)

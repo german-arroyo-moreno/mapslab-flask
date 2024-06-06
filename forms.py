@@ -34,6 +34,23 @@ class LoginForm(FlaskForm):
 
         if user is None: #Username was not valid and it doesn't exist
             raise ValidationError("")
-
+        print('FORMS: passwd que me llega: ', password.data)
         if not user.check_password(password.data):
+            print('FORMS: según models el check psasword da incorrect', user.check_password(password.data))
             raise ValidationError("Password is not correct. Try again")
+
+# Form to change your password in your profile page
+class EditProfileForm(FlaskForm):
+    name = StringField('Username')
+    oldpassword = PasswordField('Current password', validators=[DataRequired()])
+    password = PasswordField('New password', validators=[DataRequired()])
+    password2 = PasswordField('Repeat new password', validators=[DataRequired(), EqualTo('password')])
+    submit = SubmitField('Set new password')
+    
+    def validate_oldpassword(self, oldpassword):
+        user = get_user(self.name.data)
+        if user is None: #Username was not valid and it doesn't exist
+            raise ValidationError("")
+        if not user.check_password(oldpassword.data):
+            raise ValidationError("Password is not correct. Try again")
+    

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}User admin panel - {% endblock %}
+
+{% block content %}
+<div class="form-wrapper">
+    <div class="form-signin">
+        <h1 class="h3 mb-3 font-weight-normal">New user admin created</h1>
+        <p>Admin user credentials are:</p>
+        <strong>Username: </strong> <p>{{ username }}</p>
+        <strong>Password: </strong> <p>{{ password }}</p>
+
+        <p>You'll be able to sign new users up when logging as an admin</p>
+        <p>Please change admin's password as soon as possible!</p>
+
+        <a type="button" class="btn btn-lg btn-primary btn-block" href="{{ url_for('open_project') }}">Return home</a>
+    </div>
+
+</div>
+{% endblock %}
