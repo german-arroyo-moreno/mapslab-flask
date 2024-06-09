@@ -17,18 +17,22 @@ import os
 import shutil
 import tempfile
 
-# Global variables for the CSV files
+# Global variables for the CSV, JSON and static files
 CSV_DELIMITER = ';'
 USER_CSV_LOCATION = './static/data/users.csv'
 PROJECTS_CSV_LOCATION = './static/data/projects.csv'
-JSON_LOCATION = './static/data/json/botones.json'
-
 USER_CSV_FIELDNAMES = ['user_id', 'username', 'password', 'id_projects_list_author', 'id_projects_list_reader', 'is_admin']
 PROJECTS_CSV_FIELDNAMES = ['project_id', 'name', 'author', 'url']
 
 PROJECTS_DIR = './projects/project_'
 PROJECT_FILES_CSV = 'proj_files.csv'
 PROJECT_FILES_FIELDNAMES = ['file_id', 'file_name']
+
+JSON_LOCATION = './static/data/json/botones.json'
+STATIC_IMAGES_DIR = './static/images'
+
+# Cache for temp images in static folder
+cache = {}
 
 app = Flask(__name__)
 
@@ -39,10 +43,6 @@ login_manager.login_view = "login"
 
 # Set the secret key to some random bytes. Keep this really secret!
 app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
-
-# Set salt for hash from secret key
-if 'SECURITY_PASSWORD_SALT' not in app.config:
-    app.config['SECURITY_PASSWORD_SALT'] = app.config['SECRET_KEY']
 
 #app.run(debug=True) # Debug mode
 
@@ -78,7 +78,6 @@ def open_project():
                             "autor": row['author'],
                             "url": row['url']
                         })
-                print(projects)
         else: # create projects csv with header row
             projects_file.parent.mkdir(parents=True, exist_ok=True)
             with projects_file.open("w", encoding="utf-8") as new_projects_file:
@@ -86,10 +85,10 @@ def open_project():
                 new_projects_file_w.writeheader()
     return render_template('open-create.html', obras=projects, reader_users=readers_of_shown_projects, authors=authors_of_shown_projects, author_projects=author_projects)
 
-@app.route("/app")
+@app.route("/app/<id>")
 #@login_required
-def main_app():
-    return render_template('main-app.html')
+def main_app(id):
+    return render_template('main-app.html', project_id=id)
 
 # Devolver objeto User a partir de string con su ID almacenado
 @login_manager.user_loader
@@ -590,6 +589,29 @@ def profile(username):
     return render_template('profile.html', username=user.name, form=form)
 
 
+@app.route("/delete_layer", methods = ['POST', 'GET'])
+def delete_layer():
+    # Get layer path from request
+    layer_path = request.get_json(force=True)
+    print('path que me llega', layer_path)
+    print('se supone que va a borrar ese pth')
+    
+    # Error filtering...
+    if not layer_path:
+        return jsonify({'error': 'No se proporcionó la ruta del archivo'}), 400
+
+    if not os.path.exists(layer_path):
+        return jsonify({'error': 'El archivo no existe'}), 400
+    '''
+    # Remove file
+    try:
+        os.remove(layer_path)
+        return jsonify({'message': 'Archivo eliminado correctamente'})
+    except OSError as e:
+        return jsonify({'error': str(e)}), 500
+    '''
+
+
 # ----------------------------------------------------------------------
 #                     SERVER EXECUTION
 # ----------------------------------------------------------------------
@@ -598,20 +620,91 @@ def profile(username):
 @app.route("/exec_server", methods = ['POST', 'GET'])
 def exec_server():
     # Get the data
-    data = request.get_json(force=True)
+    parameters = request.get_json(force=True)
 
     # Transform data into server parameters' format
-    data['normalization'] = str(data['normalization']).upper()
-    if data['position_normalization'] == 'heterogeneous':
-        data['position_normalization'] = 'HET'
-    if data['position_normalization'] == 'homogeneous':
-        data['position_normalization'] = 'HOM'
-    
-    # Execute server with received parameters
-    exec_server_parameters(data)
+    parameters['normalization'] = str(parameters['normalization']).upper()
+
+    # Get the output image name. Format: vis_visible_Fe_RGB_c123p12_NY_HO_P1_NP100.png
+    output_image_name = get_output_image_name(parameters)
+
+    # If the image is not in the cache dictionary
+    if cache.get(output_image_name) is None:
+        # Get full path inside static folder of a unique temp filename. Png format.
+        parameters["temp_filename_path"] = create_temp_filename()
+        
+        # Execute server with received parameters from the client
+        exec_server_parameters(parameters)
+
+        # Copy generated image into new file with the temporary filename inside the static folder
+        copy_file(PROJECTS_DIR + str(parameters["idCurrentProject"]) + '/' + output_image_name, parameters["temp_filename_path"])
+
+        # Add image name and temp name in project files CSV
+        register_temp_image(parameters["idCurrentProject"], parameters["temp_filename_path"], output_image_name)
+
+    # If the image was already generated and is in the cache
+    else:
+        parameters["temp_filename_path"] = cache.get(output_image_name)
 
     # Send back transformed data to user 
-    return jsonify(data)
+    return jsonify(parameters)
+
+# Auxiliary function to copy a file to a given location
+def copy_file(source, destination):
+    # Verify if the source file exists
+    if not os.path.exists(source):
+        print("El archivo de origen no existe.")
+        return
+
+    # Create destination if it doesn't exist
+    # If it already exists, it does nothing and raises no error messages
+    os.makedirs(os.path.dirname(destination), exist_ok=True)
+
+    # Copy the file
+    try:
+        shutil.copy2(source, destination)
+        print("Archivo copiado con éxito.")
+    except shutil.Error as e:
+        print("Error al copiar el archivo:", e)
+    except IOError as e:
+        print("Error de entrada/salida:", e)
+
+
+# Auxiliary function to create a temp file
+def create_temp_filename():
+    # Create an empty temp file, save only its temp name. Empty temp file will be deleted right afterwards
+    with tempfile.NamedTemporaryFile(prefix="layer_", dir=STATIC_IMAGES_DIR) as tmp_file:
+
+        # Returns relative working directory of new temp file. E.g.: static/images/layer_16pzxy1j.png
+        temporal_name = os.path.relpath(tmp_file.name)
+    
+    return temporal_name + '.png'
+
+# Auxiliary function to modify project CSV files
+def register_temp_image(id_project, temporal_name, output_image_name):
+    # Add new row in project CSV file relating the temp file and the original name of the image
+    with open(PROJECTS_DIR + str(id_project) + '/' + PROJECT_FILES_CSV, "a") as proj_files_csv:
+        writer = csv.DictWriter(proj_files_csv, delimiter=CSV_DELIMITER, fieldnames=PROJECT_FILES_FIELDNAMES)
+        writer.writerow({'file_id': str(temporal_name), 'file_name': output_image_name})
+
+    # Save tmp file in global cache dictionary with original image name
+    cache[output_image_name] = temporal_name
+
+
+# Auxiliary function to get the name of the output image name
+def get_output_image_name(parameters):
+    # Format translation
+    if parameters["normalization"] == 'TRUE':
+        normalization_yesno = 'Y'
+    else:
+        normalization_yesno = 'N'
+    
+    # Get the whole name of the image
+    output_image_name = parameters["Output_name"] + "_" + parameters["Element_name"] + "_" + "RGB" + "_" + "c123p12" + "_N" + normalization_yesno + \
+                        "_" + parameters["position_normalization"].rstrip(parameters["position_normalization"][-1]) + "_P" + parameters["probe"] +  \
+                        "_NP" + "100" + ".png" # for images
+    print("adivino que el output name va a ser:", output_image_name)
+    return str(output_image_name)
 
 # Auxiliary function to add and convert new parameters to original string
 def add_param(parameters, new_parameter):
@@ -644,16 +737,10 @@ def exec_server_parameters(parameters):
                             Random_distribution(UNIFORM|COLOR)
     # Example : maplab-core.bin data.csv vis_image.png prueba As Y Y TXT RGB TRUE TRUE TRUE TRUE TRUE TRUE HET 1 3 100 230 UNIFORM
     '''
-    param = 'podman run -it -w /mnt/server/maplab-core -v ./salida:/mnt/server/maplab-core/output_data --rm imagen-de-domingo ./maplab-core.bin'
+    param = f'podman run -it -w /mnt/server/maplab-core -v {PROJECTS_DIR}{parameters["idCurrentProject"]}:/mnt/server/maplab-core/output_data --rm imagen-de-domingo ./maplab-core.bin'
     param = add_param(param, "data.csv")    #param = add_param(param, parameters["Input_data"])
     param = add_param(param, "vis_image.png") # param = add_param(param, parameters["Input_image"])
-    # param = add_param(param, parameters["Output_name"])
-    
-    # Assign temporary name to file
-    with tempfile.NamedTemporaryFile(prefix="layer_", dir="./salida") as tf:
-        parameters["Output_name"] = tp.name
-        param = add_param(param, parameters["Output_name"]) # Add temporary output name
-
+    param = add_param(param, parameters["Output_name"])
     param = add_param(param, parameters["Element_name"])
     param = add_param(param, "N") # param = add_param(param, parameters["save_data"])
     param = add_param(param, "Y") # param = add_param(param, parameters["save_image"])
@@ -666,7 +753,7 @@ def exec_server_parameters(parameters):
     param = add_param(param, "TRUE") # param = add_param(param, parameters["position2"])
     param = add_param(param, parameters["normalization"])
     param = add_param(param, parameters["position_normalization"])
-    param = add_param(param, "1") # param = add_param(param, parameters["probe"])
+    param = add_param(param, parameters["probe"]) # param = add_param(param, "1")
     param = add_param(param, parameters["palette_number"])
     param = add_param(param, "100") # param = add_param(param, parameters["num_points"])
     param = add_param(param, "230") # param = add_param(param, parameters["seed"])
@@ -676,6 +763,21 @@ def exec_server_parameters(parameters):
     os.system(param)
 
 #Load only once in app
+def delete_static_images():
+    try:
+        # Get a list of all files in /static/images folder # Obtener una lista de todos los archivos en la carpeta /static/images
+        files = os.listdir(STATIC_IMAGES_DIR)
+        
+        # Delete all files from that folder # Iterar sobre los archivos y eliminarlos
+        for file in files:
+            file_path = os.path.join(STATIC_IMAGES_DIR, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                print('Image in static folder to be removed:', file_path)
+    except OSError as error:
+        print(f"Error Type: {error}.\n Images in static folder not found")
+
 with app.app_context():
     #logout_user()  # Pop previous users sessions # Error if working outside of request context
+    delete_static_images()
     load_Users_array()

@@ -12,6 +12,6 @@ user_id;username;password;id_projects_list_author;id_projects_list_reader;is_adm
 23;newusrthissession;pbkdf2:sha256:600000$ueIOUv1JlwMyaEaw$ff4412d133c58ea3633bc5b4c9980a5d1116438c1b1796b4d7fc10e6d1193547;;;False
 26;manuel;m;1,2;1,2,3;False
 29;newusrthissession6;pbkdf2:sha256:600000$EbGHVxe1iOfATqnX$92cf1d62b845b4b84ba98da4a6d6b9925d63d9333c2e742a2e8b231d85e06e7b;;;False
-30;newusrthissession7;pbkdf2:sha256:600000$z0nCh7fc2H7TJSnY$f74c085bd13ad1c575178e6031d40726e460c460e642a6f45f2bffb7ea2ec1b5;;;False
-34;dadodealtaporeladmin4;pbkdf2:sha256:600000$xWSGiaC1SrNJ0lA5$15ec012fc2617da5527ddbc99f8841bd3c462183380f188cbcc3ca3eaa09d1cd;;;True
-36;dadodealtaporeladmin5;pbkdf2:sha256:600000$2pd1G3s4NKpyx4et$a208d5e491321bf824be222a850769f5e200dcf7700681ca6d58514404a4f51a;;;False
+30;newusrthissession7;pbkdf2:sha256:600000$z0nCh7fc2H7TJSnY$f74c085bd13ad1c575178e6031d40726e460c460e642a6f45f2bffb7ea2ec1b5;1,2,3;1,2,3,4;False
+34;dadodealtaporeladmin4;pbkdf2:sha256:600000$xWSGiaC1SrNJ0lA5$15ec012fc2617da5527ddbc99f8841bd3c462183380f188cbcc3ca3eaa09d1cd;1,2,3;1,2,3,4;True
+36;dadodealtaporeladmin5;pbkdf2:sha256:600000$2pd1G3s4NKpyx4et$a208d5e491321bf824be222a850769f5e200dcf7700681ca6d58514404a4f51a;1,2;1,2,3,4,5,6;False

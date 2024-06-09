@@ -125,8 +125,15 @@ class DOGLayer extends BackgroundLayer {
 // CLASE PARA MANEJAR JSON CON MÉTODOS
 
 // Se cargará el JSON 1 sóla vez y se almacena en esta variable
-var botonesPromise = loadJSON("static/json/botones.json");
+var botonesPromise = loadJSON("/static/json/botones.json");
 var botonesJson = await botonesPromise;
+
+// Auxiliary function to get the id of the current project from the url // Función auxiliar para extraer id del proyecto actual de la url
+function getProjectId() {
+    let currentUrl = window.location.href;
+    // Return the id number from current url ./app/<id>
+    return currentUrl.split('/')[4];
+}
 
 // Clase con todos los métodos de modificación y actualización del JSON en el servidor, y actualización del HTML en el front
 class jsonStatus {
@@ -152,39 +159,10 @@ class jsonStatus {
         }
 
         // Actualizar el elemento HTML botón que ha cambiado (volver a generarlo con el cambio aplicado)
-        if (buttonid == "valid-boton") {
-            clickCheckPositions();
-        }
-
-        if (buttonid == "create-some-maps") {
-            // Obtener todos los elementos seleccionados (uno o múltiples elementos seleccionados)
-            var collection = document.getElementById("select-elements").selectedOptions;
-
-            // Crear una nueva capa por cada elemento seleccionado en la interfaz
-            for (var i = 0; i < collection.length; i++) {
-                // Send parameters of the values of the elements in the XRF Tab to the server
-                var parameters = {};
-                parameters["Output_name"] = document.getElementById("view-name-xrf").value == '' ? "vis_visible_" : replaceSpaces(document.getElementById("view-name-xrf").value) + '_';
-                parameters["Element_name"] = collection[i].value;
-                parameters["normalization"] = document.getElementById("normalization").checked;
-                parameters["position_normalization"] = document.getElementById("pos-normalization").options[getSelectedOption(document.getElementById("pos-normalization"))].value; // Get value name of selected option
-                parameters["probe"] = document.getElementById("probe-xrf").options[getSelectedOption(document.getElementById("probe-xrf"))].value; // Get value name of selected option
-                parameters["palette_number"] = 2;
-                console.log('Estos son los parametros en array', parameters);
-
-                let sent_parameters = await exec_server(parameters);
-                console.log('El front end ha enviado al servidor a ejecutar los parámetros: ', sent_parameters)
-
-                // Añadir capa en interfaz
-                console.log("Añadiendo la capa del elemento: ", collection[i].value);
-                addNewLayer(collection[i].value);
-            }
-        }
-
         if (buttonid == "create-all-maps") {
             // Crear una nueva capa por cada elemento que haya en el selector de elementos
             for (var i = 0; i < document.getElementById("select-elements").options.length; i++) {
-                addNewLayer(document.getElementById("select-elements").options[i].value);
+                addNewLayerButtons(document.getElementById("select-elements").options[i].value);
             }
         }
 
@@ -245,12 +223,17 @@ class jsonStatus {
         }
 
         // Actualizar HTML con la funcionalidad que supondría clicar este botón
-        var layNumber = buttonid.slice(6);  // Obtener Layer6 de 'ButtonLayer6'
+        var layNumber;
+        if (buttonid.startsWith('ButtonLayer')) {
+            layNumber = buttonid.slice(6);  // Obtener Layer6 de 'ButtonLayer6'
+        } else {
+            layNumber = buttonid;
+        }
         clickCheckLayer(layNumber);         // Esta función requiere pasarle formato 'Layer4'
 
         // Enviar al servidor nuevo JSON modificado
         let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber]);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        console.log('El front le he enviado al server la modificación por presionar botón de filacapa: ', modificacion);
     }
 
     static async SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, selectObject) {
@@ -440,7 +423,7 @@ function createHtmlSelectorCapa () {
                                     <strong>View</strong>
                                     <div class="fila" id="fila-capa1">
                                         <button>1</button>
-                                        <button onclick="clickCheckLayer('Layer1')">
+                                        <button> <!-- Añadir cuando se elimine html original id="ButtonLayer1"-->
                                             <i class="fa fa-eye" id="Layer1"></i>
                                         </button>
                                     </div>
@@ -689,11 +672,11 @@ function clickCheckLayer(layer) {
     var layerNumber = obtainNumberLayer(layer) - 1; // empezando en 1 - 1
     
     // Cambiar visibibilidad de la capa según botón visibilidad
-    if (materials[layerNumber].map.source.data !== null) { // Si se ha creado restricción en addNewLayer(): materials[layerNumber] !== undefined
+    if (materials[layerNumber].map.source.data !== null) { // Si se ha creado restricción en addNewLayerButtons(): materials[layerNumber] !== undefined
         materials[layerNumber].visible = (materials[layerNumber].visible == true) ? false : true;
-        console.log('no está indefinido el material de esta capa. materials[layerNumber]: ', materials[layerNumber].map.source.data);
+        console.log('clickCheckLayer: está definido el material de esta capa. materials[layerNumber]: ', materials[layerNumber].map.source.data);
     } else {
-        console.log('El material de esta capa no está definido aún');
+        console.log('clickCheckLayer: El material de esta capa no está definido aún');
         document.getElementById("alertMaterialUndefined").style.display = "block";
     }
 }
@@ -821,21 +804,11 @@ function removeLayer (index) {
     } else {
         selectLayers.setAttribute("size", 2); // 1 capa del fondo + 1 hueco libre como mínimo
     }
-    console.log("selectLayers (nombres) tras borrar nombre + ajuste size: ", selectLayers); 
     
     // Eliminar los botones asociados a la capa eliminada
     var botonesCapa = document.getElementById("layers-botones").children.item(`${index + 1}`); // Los botones no se reindexan
-    console.log("botonesCapa con ese fila-capa: ", botonesCapa);
     botonesCapa.remove();
 }
-
-document.getElementById("remove-selected-layer").onclick = function () {
-    // Eliminar el nombre de la capa seleccionada
-    var selectLayers = document.getElementById("layers-nombre");
-    var removedIndex = selectLayers.selectedIndex; //selectedIndex es dinámico, se reindexa al borrar una opción
-    console.log("selectedIndex del selectLayers (nombre): ", removedIndex);
-    removeLayer(removedIndex);
-};
 
 /************************************************ */
 // PESTAÑA LAYERS: Botón de Remove All Layers
@@ -853,21 +826,17 @@ document.getElementById("remove-all-layers").onclick = function () {
 
 /************************************************ */
 // PESTAÑA XRF: Botón Create Some Maps
-function addNewLayer (element) {
+function addNewLayerButtons (element) {
     //If está todo el formulario de la pestaña XRF relleno y señalado:
-    //else
     //console.warning("Es obligatorio rellenar todas las opciones del formulario");
 
     // Crear el nombre de la capa nueva con una nueva opción de selección
     var newLayer = document.createElement("option");
 
     // Obtener el número y el nombre de la capa a crear
-    var lastValue = document.querySelector("#layers-nombre > .layers-nombreopt:last-child").value;
-    console.log("Valor de query es: ", lastValue); // Comenzando en 0
-    var lastValueNumber = obtainNumberLayer(lastValue);
-    console.log('lastValueNumber es: ', lastValueNumber);
-    var newLayerValue = 'layer' + (lastValueNumber + 1);
-    console.log('newLayerValue es: ', newLayerValue);
+    var lastValue = document.querySelector("#layers-nombre > .layers-nombreopt:last-child").value; // E.g.: lastValue = layer2 (beginning at 0)
+    var lastValueNumber = obtainNumberLayer(lastValue); // E.g.: lastValueNumber = 2
+    var newLayerValue = 'layer' + (lastValueNumber + 1); // E.g.: newLayerValue = layer3
 
     // Asignar atributos a la capa nueva a crear
     newLayer.setAttribute("class", "layers-nombreopt");
@@ -880,8 +849,9 @@ function addNewLayer (element) {
     } else {
         layerName = replaceSpaces(document.getElementById("view-name-xrf").value);
     }
-    var newText = document.createTextNode(layerName + "_" + (lastValueNumber + 1) + "_" + element);
-    newLayer.appendChild(newText);
+    element = element == '' ? 'base' : element;
+    var newLayernameText = document.createTextNode(layerName + "_" + (lastValueNumber + 1) + "_" + element);
+    newLayer.appendChild(newLayernameText);
 
     // Aumentar el tamaño del select layers-nombre que lo contiene (evitar scroll) respecto al último tamaño
     var lastLength = document.getElementById("layers-nombre").options.length;
@@ -912,7 +882,7 @@ function addNewLayer (element) {
     // Crear botones acompañantes a la capa (2ª TÉCNICA: Creando todo el html directamente con función auxiliar)
     var newRowString =    `<div class="fila" id="fila-capa${lastValueNumber + 2}">
                                 <button>${lastValueNumber + 2}</button>
-                                <button onclick="clickCheckLayer('Layer${lastValueNumber + 2}')">
+                                <button id="ButtonLayer${lastValueNumber + 2}">
                                     <i class="fa fa-eye-slash" id="Layer${lastValueNumber + 2}"></i>
                                 </button>
                             </div>`;
@@ -920,32 +890,34 @@ function addNewLayer (element) {
 
     // Crear botones añadiéndolos debajo de los anteriores
     document.getElementById("layers-botones").appendChild(newRowHtml);  
-    
 
+    return newLayernameText;
+}
+
+// Load and show image of new layer with Three.js
+function addNewLayerImage (element, temp_filename_path) {
     // Asociar elemento al array de capas (clase implementada)
     var layerAux = new AuxiliaryLayer("vis_visible", element, AuxiliaryLayer.InterpolationType.MinCartesianDistance, false, AuxiliaryLayer.PosNormalization.Homogeneous, AuxiliaryLayer.Probe[1], AuxiliaryLayer.Palette.Discrete_color_2_interval);
     arrayLayers.push(layerAux);
-    console.log('arrayLayers tras añadir: ', arrayLayers);
 
     // Crear y añadir la textura al array de capas de Three.js
-    var burbuja = new THREE.TextureLoader().load(`static/images/burbuja${lastValueNumber + 1}.png`);
-    burbuja.format = THREE.RGBAFormat;
-    burbuja.colorSpace = THREE.SRGBColorSpace;
-    var materialburbuja = new THREE.MeshBasicMaterial( { 
-        map: burbuja,
+    var textureImage = new THREE.TextureLoader().load('/' + temp_filename_path);
+    textureImage.format = THREE.RGBAFormat;
+    textureImage.colorSpace = THREE.SRGBColorSpace;
+    var materialImage = new THREE.MeshBasicMaterial( { 
+        map: textureImage,
         depthTest: false,
         transparent: true,
         visible: false
     });
 
     plano.addGroup( 0, Infinity, materials.length ); // Debería ser lastValueNumber
-    materials.push(materialburbuja);
-    console.log('array materials tras añadir: ', materials);
-    console.log('nº de la nueva capa en el array de materiales: ', materials.length);
+    materials.push(materialImage);
 
     mesh3 = new THREE.Mesh( plano, materials ); //se van creando objetos que sobrecargan el programa. Destruirlos
     scene.add( mesh3 );
 }
+
 /*
 // Comportamiento al clicar el botón 'Create Some Maps' de XRF
 document.getElementById("create-some-maps").onclick = function () {
@@ -955,7 +927,7 @@ document.getElementById("create-some-maps").onclick = function () {
     // Crear una nueva capa por cada elemento seleccionado
     for (var i = 0; i < collection.length; i++) {
         console.log("Añadiendo la capa del elemento: ", collection[i].value);
-        addNewLayer(collection[i].value);
+        addNewLayerButtons(collection[i].value);
     }
 };
 */
@@ -965,7 +937,7 @@ document.getElementById("create-all-maps").onclick = function () {
     console.log(document.getElementById("select-elements").options.length, "elementos nuevos"); // 18 elementos
     // Crear una nueva capa por cada elemento que haya en el selector de elementos
     for (var i = 0; i < document.getElementById("select-elements").options.length; i++) {
-        addNewLayer(document.getElementById("select-elements").options[i].value);
+        addNewLayerButtons(document.getElementById("select-elements").options[i].value);
     }
 };
 */
@@ -976,6 +948,8 @@ document.getElementById("create-all-maps").onclick = function () {
 
 /************************************************ */
 // FUNCIONALIDADES PARA EL CANVAS
+// Global variable to store path of layer images and its names
+var cache_image_path = [];
 var canvReference = document.getElementById("canvas1");	// Seleccionar el canvas
 
 /************************************************ */
@@ -1003,7 +977,7 @@ renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize( window.innerWidth, window.innerHeight, false); // Se previene cualquier cambio al aspecto del canvas
 
 // Configuración para la textura del fondo
-const textura = new THREE.TextureLoader().load('static/images/transfiguracion.png');
+const textura = new THREE.TextureLoader().load('/static/images_backup/transfiguracion.png');
 textura.colorSpace = THREE.SRGBColorSpace;
 textura.format = THREE.RGBAFormat;
 const material = new THREE.MeshBasicMaterial( { 
@@ -1023,36 +997,36 @@ const plano = new THREE.PlaneGeometry(104.2, 108.74);
 ///MULTICAPA: VERSIÓN SIMPLEMENTE AÑADIENDO OBJETOS A LA ESCENA
 //renderer.sortObjects = true;
 // Crear textura y material con Darth Vader 1
-var darthvader = new THREE.TextureLoader().load('static/images/darth-vader.png');
-darthvader.format = THREE.RGBAFormat;
-darthvader.colorSpace = THREE.SRGBColorSpace;
-var materialvader = new THREE.MeshBasicMaterial( { 
-    map: darthvader,
-    depthTest: false,
-    transparent: true,
-    visible: false
-});
+// var darthvader = new THREE.TextureLoader().load('/static/images/darth-vader.png');
+// darthvader.format = THREE.RGBAFormat;
+// darthvader.colorSpace = THREE.SRGBColorSpace;
+// var materialvader = new THREE.MeshBasicMaterial( { 
+//     map: darthvader,
+//     depthTest: false,
+//     transparent: true,
+//     visible: false
+// });
 //var mesh = new THREE.Mesh(plano, materialvader);
 //scene.add(mesh);
 
 // Crear textura y material con Darth Vader 2
-var darthvader2 = new THREE.TextureLoader().load('static/images/darth-vader2.png');
-var materialvader2 = new THREE.MeshBasicMaterial( {
-    map: darthvader2,
-    depthTest: false,
-    transparent: true,
-    visible: false
-});
+// var darthvader2 = new THREE.TextureLoader().load('/static/images/darth-vader2.png');
+// var materialvader2 = new THREE.MeshBasicMaterial( {
+//     map: darthvader2,
+//     depthTest: false,
+//     transparent: true,
+//     visible: false
+// });
 //var mesh2 = new THREE.Mesh(plano, materialvader2);
 //scene.add(mesh2);
 ///////////////////////////////////////////////////////////////////////
 ///VERSIÓN ALTERNATIVA MULTICAPAS CON TEXTURAS DISTINTAS Y TRANSPARENCIA SOBRE EL MISMO PLANO
 plano.clearGroups();
 plano.addGroup( 0, Infinity, 0 );
-plano.addGroup( 0, Infinity, 1 );
-plano.addGroup( 0, Infinity, 2 );
+// plano.addGroup( 0, Infinity, 1 );
+// plano.addGroup( 0, Infinity, 2 );
 
-var materials = [ material, materialvader, materialvader2 ];
+var materials = [ material];//, materialvader, materialvader2 ];
 
 // mesh
 var mesh3 = new THREE.Mesh( plano, materials );
@@ -1060,9 +1034,9 @@ scene.add( mesh3 );
 
 // Crear array de objetos con clase personalizada para las capas
 var layer0 = new AuxiliaryLayer("vis_visible", "Ca", AuxiliaryLayer.InterpolationType.MinCartesianDistance, false, AuxiliaryLayer.PosNormalization.Homogeneous, AuxiliaryLayer.Probe[1], AuxiliaryLayer.Palette.Discrete_color_2_interval);
-var layer1 = new AuxiliaryLayer("vis_visible", "Ti", AuxiliaryLayer.InterpolationType.MinCartesianDistance, false, AuxiliaryLayer.PosNormalization.Homogeneous, AuxiliaryLayer.Probe[1], AuxiliaryLayer.Palette.Discrete_color_2_interval);
-var layer2 = new AuxiliaryLayer("vis_visible", "Hg", AuxiliaryLayer.InterpolationType.MinCartesianDistance, false, AuxiliaryLayer.PosNormalization.Homogeneous, AuxiliaryLayer.Probe[1], AuxiliaryLayer.Palette.Discrete_color_2_interval);
-var arrayLayers = [layer0, layer1, layer2];
+// var layer1 = new AuxiliaryLayer("vis_visible", "Ti", AuxiliaryLayer.InterpolationType.MinCartesianDistance, false, AuxiliaryLayer.PosNormalization.Homogeneous, AuxiliaryLayer.Probe[1], AuxiliaryLayer.Palette.Discrete_color_2_interval);
+// var layer2 = new AuxiliaryLayer("vis_visible", "Hg", AuxiliaryLayer.InterpolationType.MinCartesianDistance, false, AuxiliaryLayer.PosNormalization.Homogeneous, AuxiliaryLayer.Probe[1], AuxiliaryLayer.Palette.Discrete_color_2_interval);
+var arrayLayers = [layer0];//, layer1, layer2];
 ///////////////////////////////////////////////////////////////////////
 /************************************************ */
 // CONTROLES DE ZOOM Y ARRASTRE
@@ -1294,129 +1268,6 @@ colorBar("Ca", 0);
 // Si se selecciona otro color en la ventana modal, se actualiza en la barra
 document.getElementById("ok-color").onclick = colorBar;
 
-////////////////////////////////////////////////////////////////////////////////////
-/////////////      6.FUNCIONES ASÍNCRONAS CON AJAX (FETCH)    //////////////////
-////////////////////////////////////////////////////////////////////////////////////
-
-/*
-window.onload = function() {
-    document.getElementById("theButton").onclick = doWork;
-}
-function doWork() {
-    // ajax the JSON to the server
-    $.post("receiver", cars, function() {
-
-    });
-    // stop link reloading the page
-    event.preventDefault();
-}
-
-// Comprobando que la petición es satisfactoria
-fetch(url, {
-    method: "POST", // or 'PUT'
-    body: JSON.stringify(data), // data can be `string` or {object}!
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
-
-
-  .then((response) => {
-    if (response.ok) {
-        return response.json();
-        /*
-      response.blob().then(function (miBlob) {
-        var objectURL = URL.createObjectURL(miBlob);
-        miImagen.src = objectURL;
-      });*//*
-    } else {
-        console.log("Respuesta de red OK pero respuesta HTTP no OK");
-    }
-  })
-  .then((res) => res.json())
-  .catch(function (error) {
-    console.log("Hubo un problema con la petición Fetch:" + error.message);
-  })
-  .then((response) => console.log("Success:", response));
-
-
-
-fetch(url, {
-  method: "POST", // or 'PUT'
-  body: JSON.stringify(data), // data can be `string` or {object}!
-  headers: {
-    "Content-Type": "application/json",
-  },
-})
-  .then((res) => res.json())
-  .catch((error) => console.error("Error:", error))
-  .then((response) => console.log("Success:", response));
-*/
-////////////
-/*
-const initFetch = {
-    // method: "POST", // *GET, POST, PUT, DELETE, etc.
-    // mode: "cors", // no-cors, *cors, same-origin
-    // cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-    // credentials: "same-origin", // include, *same-origin, omit
-    headers: {
-      "Content-Type": "application/json",
-      // 'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    // redirect: "follow", // manual, *follow, error
-    // referrerPolicy: "no-referrer", // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-    body: JSON.stringify(data), // body data type must match "Content-Type" header
-}
-/*
-var url = "https://example.com/profile";
-var data = { username: "example" };
-*/
-
-async function myButtonEvt (url= "", data = {}) {
-    try {
-        const response = await fetch(url, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-            credentials: "include", // incluirá el id de sesión del usuario
-        });
-        if (!response.ok) {
-            console.error("Respuesta de red OK pero respuesta HTTP no OK", response.status);
-        }
-        const buttons = await response.json();
-
-        return buttons;
-    } catch (error) {
-        console.error("Hubo un problema con la petición Fetch: " + error.message);
-    }    
-}
-
-async function exec_server (parameters = {}) {
-    try {
-        const response = await fetch("/exec_server", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(parameters),
-            credentials: "include", // incluirá el id de sesión del usuario
-        });
-        if (!response.ok) {
-            console.error("Respuesta de red OK pero respuesta HTTP no OK. En envío petición AJAX a servidor", response.status);
-        }
-        const sent_parameters = await response.json();
-        return sent_parameters;
-    } catch (error) {
-        console.error("Hubo un problema con la petición Fetch del envío a ejecución del servidor: " + error.message);
-    }    
-}
-
-let data = await myButtonEvt("/receive", {"holi": "hola"});
-//myButtonEvt("/receive", data).then((data) => {
-  console.log('Muestra de DATA:', data); // JSON data parsed by `data.json()` call
-//});
 
 // DETECCIÓN DE EVENTOS DE CADA BOTÓN / ELEMENTO PARA NOTIFICAR AL SERVIDOR
 // Detectar si los botones de la aplicación han sido clicados y actualizar al servidor
@@ -1428,6 +1279,8 @@ document.getElementById("valid-boton").addEventListener("click", function () {
     var tabNumber = 0;          // El botón Valid se encuentra en Pestaña Positions, la 0 en el JSON
     var buttonOrderNumber = 0;  // Posición del botón Valid en el orden de aparición de botones de cada pestaña (aparece el primero)
     jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "valid-boton");
+
+    clickCheckPositions();
 });
 
 //Función para extraer el número entero del nombre de una capa (auxiliar para otras funciones)
@@ -1494,15 +1347,24 @@ function replaceSpaces(str) {
 /****************************** */
 // PESTAÑA LAYERS: EVENTOS DE SUS ELEMENTOS / BOTONES
 // BOTONES DE VISIBILIDAD DEL SELECTOR DE CAPAS, PESTAÑA LAYERS
-document.querySelectorAll("#Layers > #layer-selector > #layers-botones > .fila button:nth-child(2)").forEach(function(element) {
+// document.getElementById("ButtonLayer").addEventListener("click", function() {
+
+// document.querySelectorAll("#Layers > #layer-selector > #layers-botones > .fila button:nth-child(2)").forEach(function(element) {
+// document.querySelectorAll('[id^="ButtonLayer"]').forEach(function(element) {
+document.querySelector("#Layers > #layer-selector > #layers-botones").addEventListener("click", function(evt) {
+    // e.target was the clicked element
     //addEventListener sólo para el botón que se ha clicado dentro del conjunto de botones posibles
-    element.addEventListener("click", function() {
-        console.log('he clicado la layer tal', this.id);
+    if (evt.target && (evt.target.id.startsWith("ButtonLayer") || evt.target.id.startsWith("Layer"))) {
         var tabNumber = 1;          // El panel de selector-capa se encuentra en Pestaña Layers, la 1 en el JSON
         var buttonOrderNumber = 0;  // Posición del panel selector en el orden de aparición de cada pestaña (comienza en 0)
-        var buttonIdNumber = obtainNumberLayer(this.firstElementChild.id) - 1; // Obtener el '6' de Layer6
-        jsonStatus.FilaSelectorCapa_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, this.id);
-    });
+        if (evt.target.id.startsWith("ButtonLayer")) {
+            var layerId = evt.target.firstElementChild.id;  // Obtener Layer5
+        } else {
+            var layerId = evt.target.id; 
+        }
+        var buttonIdNumber = obtainNumberLayer(layerId) - 1; // Obtener el '6' de Layer6
+        jsonStatus.FilaSelectorCapa_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, evt.target.id);
+    }
 });
 
 // SELECTOR INDIVIDUAL DE CAPAS (seleccionar sólo nombre de capas)
@@ -1615,7 +1477,7 @@ document.getElementById("small-gaussian-size").addEventListener("change", functi
 });
 
 // SELECTOR INDIVIDUAL INTERPOLATION TYPE
-document.getElementById("add-auxiliary-layers").addEventListener("change", function() {
+document.getElementById("add-aux-layers").addEventListener("change", function() {
     var selectedOption = getSelectedOption(this);
     var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
     var elementOrderNumber = 5; // Nº orden del elemento en la pestaña en el JSON
@@ -1627,6 +1489,28 @@ document.getElementById("remove-selected-layer").addEventListener("click", funct
     var tabNumber = 1;          // El botón Remove Selected Layer se encuentra en Pestaña Layers, la 1 en el JSON (comienza en 0)
     var buttonOrderNumber = 6;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
     jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-selected-layer");
+
+    // Seleccionar el índice y nombre de la capa seleccionada
+    var removedIndex = document.getElementById("layers-nombre").selectedIndex; //selectedIndex es dinámico, se reindexa al borrar una opción
+    let removedLayerName = document.getElementById("layers-nombre").options[removedIndex].text;
+
+    // // Get the path of the layer image to be removed
+    // for (let i = 0; i < cache_image_path.length; i++) {
+    //     if (cache_image_path[i].layerName === removedLayerName) {
+    //         var removedLayerPath =  cache_image_path[i].layerStaticPath;
+    //     }
+    // }
+
+    // Informar al servidor para que elimine archivo de imagen de capa eliminada. No se espera respuesta
+    // fetch("/delete_layer", {headers: {"Content-Type": "application/json"}, body: JSON.stringify(removedLayerPath), credentials: "include"});
+
+    // Delete layer from the cache
+    console.log('cache antes del filtro de delete', cache_image_path);
+    cache_image_path = cache_image_path.filter(cache_image_path => cache_image_path.layerName !== removedLayerName);
+    console.log('cache ha quedaado así despues del filtro de delete', cache_image_path, 'nombre buscado', removedLayerName, removedLayerPath);
+
+    // Eliminar botones y nombre de la interfaz asociados a esa capa
+    removeLayer(removedIndex);    
 });
 
 // BOTÓN REMOVE SELECTED LAYER DE LA PESTAÑA LAYERS
@@ -1697,6 +1581,15 @@ document.getElementById("create-some-maps").addEventListener("click", function()
     var tabNumber = 2;          // El botón Create Some Maps de XRF se encuentra en Pestaña XRF, la 2 en el JSON (comienza en 0)
     var buttonOrderNumber = 8;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
     jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-some-maps");
+
+    // Obtener todos los elementos seleccionados (uno o múltiples elementos seleccionados)
+    var collection = document.getElementById("select-elements").selectedOptions;
+
+    // Crear una nueva capa por cada elemento seleccionado en la interfaz
+    for (var i = 0; i < collection.length; i++) {
+        // Inform the server, generate temp image, create buttons of layer in UI and save it in cache dictionary
+        addNewLayer(collection[i].value);
+    }
 });
 
 // BOTÓN CREATE SOME MAPS DE LA PESTAÑA XRF
@@ -1753,8 +1646,81 @@ document.getElementById("create-all-individual-maps").addEventListener("click", 
     jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-all-individual-maps");
 });
 
+async function addNewLayer (selectedElement) {
+    // Send parameters of the values of the elements in the XRF Tab to the server
+    var parameters = {};
+    parameters["Output_name"] = document.getElementById("view-name-xrf").value == '' ? "vis_visible" : replaceSpaces(document.getElementById("view-name-xrf").value);
+    parameters["Element_name"] = selectedElement;
+    parameters["normalization"] = document.getElementById("normalization").checked;
+    parameters["position_normalization"] = document.getElementById("pos-normalization").options[getSelectedOption(document.getElementById("pos-normalization"))].value; // Get value name of selected option
+    parameters["probe"] = document.getElementById("probe-xrf").options[getSelectedOption(document.getElementById("probe-xrf"))].value; // Get value name of selected option
+    parameters["palette_number"] = document.getElementById("palette-xrf").options[getSelectedOption(document.getElementById("palette-xrf"))].value;
+
+    // Get the id of the current project from the url // Extraer id del proyecto actual de la url
+    parameters["idCurrentProject"] = getProjectId();
+
+    // Saves the output image in current project folder
+    let sent_parameters = await exec_server("/exec_server", parameters);
+    console.log('El front end ha recibido del servidor tras ejecutar los parámetros: ', sent_parameters)
+
+    // Añadir botones de capa en interfaz y obtener nombre de capa. Formato: vis_visible_5_Cd
+    let newLayernameText = addNewLayerButtons(selectedElement);
+    addNewLayerImage(selectedElement, sent_parameters["temp_filename_path"]);
+                   
+    // Store relationship between layer name and its path of static folder in global cache variable
+    let new_cache_entry = {
+        layerName: newLayernameText,
+        layerStaticPath: sent_parameters["temp_filename_path"]
+    }
+
+    cache_image_path.push(new_cache_entry);
+}
+
+////////////////////////////////////////////////////////////////////////////////////
+/////////////      6.FUNCIONES ASÍNCRONAS CON AJAX (FETCH)    //////////////////
+////////////////////////////////////////////////////////////////////////////////////
 
 
+async function myButtonEvt (url= "", data = {}) {
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+            credentials: "include", // incluirá el id de sesión del usuario
+        });
+        if (!response.ok) {
+            console.error("Respuesta de red OK pero respuesta HTTP no OK", response.status);
+        }
+        const buttons = await response.json();
+
+        return buttons;
+    } catch (error) {
+        console.error("Hubo un problema con la petición Fetch: " + error.message);
+    }    
+}
+
+async function exec_server (url="", parameters = {}) {
+    try {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(parameters),
+            credentials: "include", // incluirá el id de sesión del usuario
+        });
+        if (!response.ok) {
+            console.error("Respuesta de red OK pero respuesta HTTP no OK. En envío petición AJAX a servidor", response.status);
+        }
+        const sent_parameters = await response.json();
+        return sent_parameters;
+    } catch (error) {
+        console.error("Hubo un problema con la petición Fetch del envío a ejecución del servidor: " + error.message);
+    }    
+}
 
 
 

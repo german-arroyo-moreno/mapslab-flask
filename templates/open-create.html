@@ -47,11 +47,12 @@
                         {% if current_user.is_anonymous %}
                         <li class="nav-item">
                             <a type="button" class="active link-dark nav-link" aria-current="page" href="{{ url_for('login') }}">
-                                Log in (Session: {{session['username']}}, Current_user: {{ current_user.name }} is_admin?: {{ current_user.is_admin }})</a>
+                                Log in</a>
                         </li>
                         {% else %}
                         <li class="nav-item">
-                            <a class="nav-link link-dark" href="{{ url_for('profile', username=current_user.name)}}">Welcome {{ current_user.name }}, Session {{session['username']}}! is_admin?: {{ current_user.is_admin }}</a>
+                            <a class="nav-link link-dark" href="{{ url_for('profile', username=current_user.name)}}">
+                                Welcome {{ current_user.name }}!</a>
                         </li>
                         <li class="nav-item">
                             <a class="active nav-link link-dark" aria-current="page" href="{{ url_for('logout') }}">Log out</a>
@@ -106,7 +107,7 @@
                     </th>
 
                     <td>
-                        <a href="/app" target="_blank">{{obra.nombre}}</a>
+                        <a href="/app/{{ obra.id }}" target="_blank">{{obra.nombre}}</a>
                         <hr/>
                         {% for project in author_projects %}
                             {% if project == obra.id %}

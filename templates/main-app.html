@@ -210,28 +210,12 @@
                             </button>
                         </div>
         
-                        <div class="fila" id="fila-capa2">
-                            <button>2</button>
-                            <button id="ButtonLayer2">
-                                <i class="fa fa-eye-slash" id="Layer2"></i>
-                            </button>
-                        </div>
-
-                        <div class="fila" id="fila-capa3">
-                            <button>3</button>
-                            <button id="ButtonLayer3">
-                                <i class="fa fa-eye-slash" id="Layer3"></i>
-                            </button>
-                        </div>
-        
                     </div> <!-- Fin de las filas de botones de las capas / layers -->
 
                     <div class="layers-nombre"> <!-- Nombre de las capas (7 seleccionables) -->
                         <strong>Name</strong>
                         <select size="7" class="select" id="layers-nombre"> 
                             <option value="layer0" class="layers-nombreopt">vis_visible_0</option>
-                            <option value="layer1" class="layers-nombreopt">vis_visible_1_Ti</option>
-                            <option value="layer2" class="layers-nombreopt">vis_visible_2_Hg</option>
                         </select>
                     </div>
                 </div> <!-- Fin de las capas (botones + nombres elegibles) -->
@@ -390,47 +374,47 @@
                     <div class="panel">
                         <label for="pos-normalization">Pos. normalization</label>
                         <select id="pos-normalization" class="form-control">
-                            <option value="homogeneous">Homogeneous</option>
-                            <option value="heterogeneous">Heterogeneous</option>
+                            <option value="HOM">Homogeneous</option>
+                            <option value="HET">Heterogeneous</option>
                         </select>
                     </div>
 
                     <div class="panel">
                         <label for="probe-xrf">Probe</label>
                         <select id="probe-xrf" class="form-control">
-                            <option value="1">1x1</option>
-                            <option value="3">3x3</option>
-                            <option value="5">5x5</option>
-                            <option value="7">7x7</option>
-                            <option value="9">9x9</option>
-                            <option value="11">11x11</option>
-                            <option value="13">13x13</option>
-                            <option value="15">15x15</option>
-                            <option value="25">25x25</option>
-                            <option value="49">49x49</option>
+                            <option value="0">1x1</option>
+                            <option value="1">3x3</option>
+                            <option value="2">5x5</option>
+                            <option value="3">7x7</option>
+                            <option value="4">9x9</option>
+                            <option value="5">11x11</option>
+                            <option value="6">13x13</option>
+                            <option value="7">15x15</option>
+                            <option value="8">25x25</option>
+                            <option value="9">49x49</option>
                         </select>
                     </div>
 
                     <div class="panel">
                         <label for="palette-xrf">Palette</label>
                         <select id="palette-xrf" class="form-control">
-                            <option value="disc-tone-2">Discrete_tone_2_interval</option>
-                            <option value="disc-tone-3">Discrete_tone_3_interval</option>
-                            <option value="disc-tone-4">Discrete_tone_4_interval</option>
-                            <option value="disc-tone-5">Discrete_tone_5_interval</option>
-                            <option value="disc-color-2">Discrete_color_2_interval</option>
-                            <option value="disc-color-3">Discrete_color_3_interval</option>
-                            <option value="disc-color-4">Discrete_color_4_interval</option>
-                            <option value="disc-color-5">Discrete_color_5_interval</option>
-                            <option value="cont-color-1">Continuous_color_1_interval</option>
-                            <option value="cont-color-2">Continuous_color_2_interval</option>
-                            <option value="cont-color-3">Continuous_color_3_interval</option>
-                            <option value="cont-color-4">Continuous_color_4_interval</option>
-                            <option value="cont-color-5">Continuous_color_5_interval</option>
-                            <option value="cont-tone-2">Continuous_tone_2_interval</option>
-                            <option value="cont-tone-3">Continuous_tone_3_interval</option>
-                            <option value="cont-tone-4">Continuous_tone_4_interval</option>
-                            <option value="cont-tone-5">Continuous_tone_5_interval</option>
+                            <option value="0">Discrete_tone_2_interval</option>
+                            <option value="1">Discrete_tone_3_interval</option>
+                            <option value="2">Discrete_tone_4_interval</option>
+                            <option value="3">Discrete_tone_5_interval</option>
+                            <option value="4">Discrete_color_2_interval</option>
+                            <option value="5">Discrete_color_3_interval</option>
+                            <option value="6">Discrete_color_4_interval</option>
+                            <option value="7">Discrete_color_5_interval</option>
+                            <option value="8">Continuous_color_1_interval</option>
+                            <option value="9">Continuous_color_2_interval</option>
+                            <option value="10">Continuous_color_3_interval</option>
+                            <option value="11">Continuous_color_4_interval</option>
+                            <option value="12">Continuous_color_5_interval</option>
+                            <option value="13">Continuous_tone_2_interval</option>
+                            <option value="14">Continuous_tone_3_interval</option>
+                            <option value="15">Continuous_tone_4_interval</option>
+                            <option value="16">Continuous_tone_5_interval</option>
                         </select>
                     </div>
                 </form>
@@ -464,46 +448,46 @@
                 <div class="panel">
                     <label for="probe-compounds">Probe</label>
                     <select id="probe-compounds" class="form-control">
-                        <option value="1">1x1</option>
-                        <option value="3">3x3</option>
-                        <option value="5">5x5</option>
-                        <option value="7">7x7</option>
-                        <option value="9">9x9</option>
-                        <option value="11">11x11</option>
-                        <option value="13">13x13</option>
-                        <option value="15">15x15</option>
-                        <option value="25">25x25</option>
-                        <option value="49">49x49</option>
+                        <option value="0">1x1</option>
+                        <option value="1">3x3</option>
+                        <option value="2">5x5</option>
+                        <option value="3">7x7</option>
+                        <option value="4">9x9</option>
+                        <option value="5">11x11</option>
+                        <option value="6">13x13</option>
+                        <option value="7">15x15</option>
+                        <option value="8">25x25</option>
+                        <option value="9">49x49</option>
                     </select>
                 </div>
                 
                 <div class="panel">
                     <label for="palette-compounds">Palette</label>
                     <select id="palette-compounds" class="form-control">
-                        <option value="disc-tone-2">Discrete_tone_2_interval</option>
-                        <option value="disc-tone-3">Discrete_tone_3_interval</option>
-                        <option value="disc-tone-4">Discrete_tone_4_interval</option>
-                        <option value="disc-tone-5">Discrete_tone_5_interval</option>
-                        <option value="disc-color-2">Discrete_color_2_interval</option>
-                        <option value="disc-color-3">Discrete_color_3_interval</option>
-                        <option value="disc-color-4">Discrete_color_4_interval</option>
-                        <option value="disc-color-5">Discrete_color_5_interval</option>
-                        <option value="cont-color-1">Continuous_color_1_interval</option>
-                        <option value="cont-color-2">Continuous_color_2_interval</option>
-                        <option value="cont-color-3">Continuous_color_3_interval</option>
-                        <option value="cont-color-4">Continuous_color_4_interval</option>
-                        <option value="cont-color-5">Continuous_color_5_interval</option>
-                        <option value="cont-tone-2">Continuous_tone_2_interval</option>
-                        <option value="cont-tone-3">Continuous_tone_3_interval</option>
-                        <option value="cont-tone-4">Continuous_tone_4_interval</option>
-                        <option value="cont-tone-5">Continuous_tone_5_interval</option>
+                        <option value="0">Discrete_tone_2_interval</option>
+                        <option value="1">Discrete_tone_3_interval</option>
+                        <option value="2">Discrete_tone_4_interval</option>
+                        <option value="3">Discrete_tone_5_interval</option>
+                        <option value="4">Discrete_color_2_interval</option>
+                        <option value="5">Discrete_color_3_interval</option>
+                        <option value="6">Discrete_color_4_interval</option>
+                        <option value="7">Discrete_color_5_interval</option>
+                        <option value="8">Continuous_color_1_interval</option>
+                        <option value="9">Continuous_color_2_interval</option>
+                        <option value="10">Continuous_color_3_interval</option>
+                        <option value="11">Continuous_color_4_interval</option>
+                        <option value="12">Continuous_color_5_interval</option>
+                        <option value="13">Continuous_tone_2_interval</option>
+                        <option value="14">Continuous_tone_3_interval</option>
+                        <option value="15">Continuous_tone_4_interval</option>
+                        <option value="16">Continuous_tone_5_interval</option>
                     </select>
                 </div>
 
                 <hr/> <!-- Divisor horizontal -->
                 
-                <button class="boton">Create combination maps</button> 
-                <button class="boton">Create all individual maps</button>
+                <button class="boton" id="create-combination-maps">Create combination maps</button> 
+                <button class="boton" id="create-all-individual-maps">Create all individual maps</button>
             </div> <!-- Fin del contenido de la pestaña "Compounds" -->
                 
             <div id="XRD" class="pestana-content"> <!-- Contenido de la pestaña "XRD" -->
