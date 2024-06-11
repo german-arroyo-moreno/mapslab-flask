@@ -15,8 +15,8 @@
                 <div class="modal-body"> <!-- Contenido del modal (información) -->
                     <h5>General information</h5>
                     <p>XMapsLab v1.0.0 28.08.23</p>
-                    <p>Created by Domingo Martín <a href="mailto:dmartin.ugr.es">(dmartin@ugr.es)</a></p>
-                    <p>This application is part of a research project. All the information is at: <a href="https://xmapslab.org">https://xmapslab.org</a></p>
+                    <p>Apache License 2.0, Version 2.0 January 2004. <a href="http://www.apache.org/licenses/">http://www.apache.org/licenses/</a></p>
+                    <p>This application is part of a research project. All the information is at: <a href="https://calipso.ugr.es/xmapslab.org/">https://calipso.ugr.es/xmapslab.org/</a></p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Finish</button>
@@ -200,26 +200,28 @@
 
             <div id="Layers" class="pestana-content"> <!-- Contenido de la pestaña "Layers" -->
                 <h3>Layers</h3>
+                <!--
                 <div class="layers" id="layer-selector">
-                    <div class="layers-botones" id="layers-botones"> <!-- Filas de botones de las capas / layers -->
+                    <div class="layers-botones" id="layers-botones"> <!- Filas de botones de las capas / layers ->
                         <strong>View</strong>
                         <div class="fila" id="fila-capa1">
                             <button>1</button>
-                            <button id="ButtonLayer1"> <!-- onclick="clickCheckLayer('Layer1')"-->
+                            <button id="ButtonLayer1"> <!- onclick="clickCheckLayer('Layer1')"->
                                 <i class="fa fa-eye" id="Layer1"></i>
                             </button>
                         </div>
         
-                    </div> <!-- Fin de las filas de botones de las capas / layers -->
+                    </div> <!- Fin de las filas de botones de las capas / layers ->
 
-                    <div class="layers-nombre"> <!-- Nombre de las capas (7 seleccionables) -->
+                    <div class="layers-nombre"> <!- Nombre de las capas (7 seleccionables) ->
                         <strong>Name</strong>
                         <select size="7" class="select" id="layers-nombre"> 
                             <option value="layer0" class="layers-nombreopt">vis_visible_0</option>
                         </select>
                     </div>
-                </div> <!-- Fin de las capas (botones + nombres elegibles) -->
-
+                </div> <!- Fin de las capas (botones + nombres elegibles) ->
+                -->
+                <!--
                 <div class="panel">
                     <div class="centered boton form-control">
                         <label for="slide-transparency" class="form-label">Transparency</label>
@@ -231,8 +233,9 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="centered border border-secondary" id="color-mixing"> <!-- Subpanel de Color Mixing -->
+                -->
+                <!--
+                <div class="centered border border-secondary" id="color-mixing"> <!- Subpanel de Color Mixing ->
                     <label class="form-label">Color mixing</label>
                     <div class="panel">
                         <div class="centered boton form-control">
@@ -267,9 +270,10 @@
                             </select>
                         </div>
                     </div>
-                </div> <!-- Fin de subpanel Color Mixing -->
-
-                <div class="centered border border-secondary" id="difference-gaussians" style="display: block"> <!-- Subpanel de Difference of Gaussians -->
+                </div> <!- Fin de subpanel Color Mixing ->
+                -->
+                <!--
+                <div class="centered border border-secondary" id="difference-gaussians" style="display: block"> <!- Subpanel de Difference of Gaussians ->
                     <div class="panel">
                         <input type="checkbox" id="pixel-transparency" value=""/>
                         <label for="pixel-transparency">Pixel transparency</label>
@@ -310,25 +314,29 @@
                             </div>
                         </div>
                     </div>
-                </div> <!-- Fin de subpanel de Difference of Gaussians -->
+                </div> <!- Fin de subpanel de Difference of Gaussians ->
 
-                <hr/> <!-- Divisor horizontal -->
-                
+                <hr/> <!- Divisor horizontal ->
+                -->
+                <!--
                 <div class="panel">
                     <select class="boton form-control" id="add-aux-layers">
                         <option value="add-layers" class="">Add auxiliary layers</option>
                         <option value="diff-gauss">Difference of Gaussians</option>
                     </select>
                 </div>
-                
+                -->
+                <!--
                 <button class="boton" id="remove-selected-layer">Remove selected layer</button> 
                 <button class="boton" id="remove-all-layers">Remove all layers</button>
+                -->
             </div> <!-- Fin del contenido de la pestaña "Layers" -->
             
             <div id="XRF" class="pestana-content"> <!-- Contenido de la pestaña "XRF" -->
                 <h3>XRF</h3>
-                <p>Elements</p>
+                <!--<p>Elements</p>-->
                 <form action="" method="get">
+                    <!--
                     <select class="select select-elements" id="select-elements" multiple required>
                         <option value="As" class="">As</option>
                         <option value="Ba" class="">Ba</option>
@@ -417,17 +425,19 @@
                             <option value="16">Continuous_tone_5_interval</option>
                         </select>
                     </div>
+                    -->
                 </form>
-
-                <hr/> <!-- Divisor horizontal -->
+                <!--
+                <hr/> <!- Divisor horizontal ->
 
                 <button class="boton" id="create-some-maps">Create some maps</button> 
                 <button class="boton" id="create-all-maps">Create all the maps</button>
+                -->
             </div> <!-- Fin del contenido de la pestaña "XRF" -->
             
             <div id="Compounds" class="pestana-content"> <!-- Contenido de la pestaña "Compounds" -->
                 <h3>Compounds</h3>
-
+                <!--
                 <select class="select select-compounds" multiple id="select-compounds">
                     <option value="cad-red">Cadmium_red</option>
                     <option value="cad-yellow">Cadmium_yellow</option>
@@ -484,10 +494,11 @@
                     </select>
                 </div>
 
-                <hr/> <!-- Divisor horizontal -->
+                <hr/> <!- Divisor horizontal ->
                 
                 <button class="boton" id="create-combination-maps">Create combination maps</button> 
                 <button class="boton" id="create-all-individual-maps">Create all individual maps</button>
+                -->
             </div> <!-- Fin del contenido de la pestaña "Compounds" -->
                 
             <div id="XRD" class="pestana-content"> <!-- Contenido de la pestaña "XRD" -->

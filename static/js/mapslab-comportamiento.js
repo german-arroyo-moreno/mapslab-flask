@@ -193,6 +193,31 @@ class jsonStatus {
         console.log('El front le he enviado al server la modificación: ', modificacion);
     }
 
+    static async createJson_layer(buttonLayerId){
+        // Get the buttons and the values of the json file
+        var jsObjectLayerButton = {}, jsObjectLayerName = {};
+        jsObjectLayerButton = botonesJson[1].Container[0].components;
+        jsObjectLayerName = botonesJson[1].Container[0].values;
+
+        // Add new button and value to json array
+        jsObjectLayerButton.push(
+            {
+                "buttonlayerid": "ButtonLayer" + buttonLayerId,
+                "status": "invisible",
+                "default": "invisible"
+            });
+        jsObjectLayerName.push(
+            {
+                "valueid": "layer" + (buttonLayerId - 1),
+                "status":"not clicked",
+                "default": "not clicked"
+            });
+
+        // Send it to the server and MODIFY json in JS
+        botonesJson[1].Container[0].components[jsObjectLayerButton.length - 1] = await myButtonEvt("/receive", jsObjectLayerButton[jsObjectLayerButton.length - 1]);
+        botonesJson[1].Container[0].values[jsObjectLayerName.length - 1] = await myButtonEvt("/receive", jsObjectLayerName[jsObjectLayerName.length - 1]);
+    }
+
     static async FilaPosition_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, buttonid) {
         console.log("Detecto que el botón.status es éste:", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber].status);
         // Modificar el JSON cargado al principio de la app que generaba los botones HTML
@@ -423,7 +448,7 @@ function createHtmlSelectorCapa () {
                                     <strong>View</strong>
                                     <div class="fila" id="fila-capa1">
                                         <button>1</button>
-                                        <button> <!-- Añadir cuando se elimine html original id="ButtonLayer1"-->
+                                        <button id="ButtonLayer1"> <!-- Añadir cuando se elimine html original id="ButtonLayer1"-->
                                             <i class="fa fa-eye" id="Layer1"></i>
                                         </button>
                                     </div>
@@ -432,7 +457,7 @@ function createHtmlSelectorCapa () {
                                 <div class="layers-nombre"> <!-- Nombre de las capas (7 seleccionables) -->
                                     <strong>Name</strong>
                                     <select size="7" class="select" id="layers-nombre"> 
-                                        <option value="layer0" class="layers-nombreopt">vis_visible_0</option>
+                                        <option value="layer0" class="layers-nombreopt">base_0</option>
                                     </select>
                                 </div>
                             </div> <!-- Fin de las capas (botones + nombres elegibles) -->`;
@@ -480,7 +505,7 @@ function createHtmlSelect (element) {
     if (element.name !== undefined) {
         newSelect +=           `<label for="${element.selectid}" class="form-label">${element.name}</label>`;
     }
-    newSelect +=               `<select id="${element.selectid}" class="form-control" ${element.ownclass==undefined ? "" : element.ownclass}" `;
+    newSelect +=               `<select id="${element.selectid}" class="form-control ${element.ownclass==undefined ? "" : element.ownclass}" `;
     if (element.type.includes("multiple")) {
         newSelect += `multiple`;
     }
@@ -594,7 +619,7 @@ async function appendAllElements() {
     } 
 }
 // Llamada a la función para que cree todos los botones del menú de la derecha automáticamente con los datos del JSON
-appendAllElements();
+//appendAllElements(); // It will be called before creating the buttons
 
 ////////////////////////////////////////////////////////////////////////////////////
 /////////       3.FUNCIONES PARA CADA PESTAÑA (EN ORDEN)      //////////////////////
@@ -684,13 +709,11 @@ function clickCheckLayer(layer) {
 /************************************************ */
 // PESTAÑA LAYERS: Deslizador de transparencia y su cajita del número
 //Slider Transparency y su cajita de información (input numérico)
-var sliderTransparency = document.getElementById("slide-transparency");
-var transparencyValue = document.getElementById("transparency-value");
 
 //Al introducir un número en la caja de input, aplicar opacidad y reflejar en barra
-transparencyValue.oninput = function () {
+function transparencySliderInput() {
     // Mostrar valor en deslizador
-    sliderTransparency.value = this.value;
+    document.getElementById("slide-transparency").value = document.getElementById("transparency-value").value;
 
     // Obtener capa seleccionada 
     var layerSelector = document.getElementById("layers-nombre");
@@ -699,10 +722,10 @@ transparencyValue.oninput = function () {
     var layerNumber = obtainNumberLayer(layerSelector.value);
 
     // Asociar opacidad a la capa
-    materials[layerNumber].opacity = (1 - this.value); //Opacidad es lo contrario a transparencia
+    materials[layerNumber].opacity = (1 - document.getElementById("transparency-value").value); //Opacidad es lo contrario a transparencia
 };
 //Asociar opacidad del selector a la capa seleccionada + Mostrar valor en cajita numérica
-sliderTransparency.oninput = function() {
+function transparencySliderValue() {
     // Obtener capa seleccionada
     var layerSelector = document.getElementById("layers-nombre");
 
@@ -710,27 +733,25 @@ sliderTransparency.oninput = function() {
     var layerNumber = obtainNumberLayer(layerSelector.value);
 
     // Asociar opacidad a la capa
-    materials[layerNumber].opacity = (1 - this.value); //Opacidad es lo contrario a transparencia
-    console.log(this.value);
+    materials[layerNumber].opacity = (1 - document.getElementById("slide-transparency").value); //Opacidad es lo contrario a transparencia
+    console.log(document.getElementById("slide-transparency").value);
 
     // Mostrar valor numérico en la cajita del input
-    transparencyValue.value = this.value;
+    document.getElementById("transparency-value").value = document.getElementById("slide-transparency").value;
 };
 
 /************************************************ */
 // PESTAÑA LAYERS: Mostrar última opacidad asignada en el marcador al seleccionar capa
-var minThreshold = document.getElementById("slide-min-threshold");
-var maxThreshold = document.getElementById("slide-max-threshold");
-document.getElementById("layers-nombre").onchange = function () {
+function showLayerProperties() {
     // Extraer nº capa
-    var layerNumber = obtainNumberLayer(this.value); // comenzando en 0
+    var layerNumber = obtainNumberLayer(document.getElementById("layers-nombre").value); // comenzando en 0
 
     // Asociar opacidad de la capa al valor del deslizador
-    sliderTransparency.value = (1 - materials[layerNumber].opacity);
+    document.getElementById("slide-transparency").value = (1 - materials[layerNumber].opacity);
     console.log('layerNumber al seleccionar es:', layerNumber);
 
     // Mostrar valor numérico en la cajita del input
-    transparencyValue.value = sliderTransparency.value;
+    document.getElementById("transparency-value").value = document.getElementById("slide-transparency").value;
 
     // Si es la 1ª capa (la nº 0), oculta los parámetros del panel Color mixing y menú izquierda
     var panelColorMixing = document.getElementById("color-mixing");
@@ -749,46 +770,12 @@ document.getElementById("layers-nombre").onchange = function () {
         // Redibujar barra de color de esta capa con este elemento
         colorBar(arrayLayers[layerNumber].element, layerNumber);        
     }
-};
+}
 
 /************************************************ */
 // PESTAÑA LAYERS: Subpanel de Difference of Gaussians
 //Concordancia entre el input de un número con su valor en la barra de deslizamiento
-//Gaussian Threshold
-var gaussianThresholdValue = document.getElementById("gaussian-threshold-value");
-var sliderGaussianThreshold = document.getElementById("gaussian-threshold");
-sliderGaussianThreshold.value = 250;
-gaussianThresholdValue.oninput = function () {
-   sliderGaussianThreshold.value = this.value;
-};
 
-sliderGaussianThreshold.oninput = function () {
-    gaussianThresholdValue.value = this.value;
-};
-
-//Big gaussian size
-var bigGaussianValue = document.getElementById("big-gaussian-value");
-var sliderBigGaussian = document.getElementById("big-gaussian-size");
-sliderBigGaussian.value = 25;
-bigGaussianValue.oninput = function () {
-    sliderBigGaussian.value = this.value;
-}; 
-
-sliderBigGaussian.oninput = function () {
-    bigGaussianValue.value = this.value;
-};
-
-//Small gaussian size
-var smallGaussianValue = document.getElementById("small-gaussian-value");
-var sliderSmallGaussian = document.getElementById("small-gaussian-size");
-sliderSmallGaussian.value = 13;
-smallGaussianValue.oninput = function () {
-    sliderSmallGaussian.value = this.value;
-}; 
-
-sliderSmallGaussian.oninput = function () {
-    smallGaussianValue.value = this.value;
-};
 
 /************************************************ */
 // PESTAÑA LAYERS: Botón de Remove Selected Layer
@@ -812,21 +799,19 @@ function removeLayer (index) {
 
 /************************************************ */
 // PESTAÑA LAYERS: Botón de Remove All Layers
-document.getElementById("remove-all-layers").onclick = function () {
+function removeAllLayers () {
     // Eliminar los nombres de las capas que no sean el fondo (capa 0)
     let selectLayers = document.getElementById("layers-nombre");
-    console.log('length de selectLayers', selectLayers.options.length);
 
     // Recorrer todas las opciones en sentido inverso (índice se actualiza al borrar)
     for (var i = (selectLayers.options.length - 1); i > 0; i--) {
         removeLayer(i);
-        console.log("item borrado: ", i);
     }
 };
 
 /************************************************ */
 // PESTAÑA XRF: Botón Create Some Maps
-function addNewLayerButtons (element) {
+async function addNewLayerButtons (element) {
     //If está todo el formulario de la pestaña XRF relleno y señalado:
     //console.warning("Es obligatorio rellenar todas las opciones del formulario");
 
@@ -890,6 +875,9 @@ function addNewLayerButtons (element) {
 
     // Crear botones añadiéndolos debajo de los anteriores
     document.getElementById("layers-botones").appendChild(newRowHtml);  
+    
+    // Add layer in JSON file // Añadir capa en el JSON
+    jsonStatus.createJson_layer(lastValueNumber + 2);
 
     return newLayernameText;
 }
@@ -1269,20 +1257,16 @@ colorBar("Ca", 0);
 document.getElementById("ok-color").onclick = colorBar;
 
 
+/****************************** */
+
 // DETECCIÓN DE EVENTOS DE CADA BOTÓN / ELEMENTO PARA NOTIFICAR AL SERVIDOR
-// Detectar si los botones de la aplicación han sido clicados y actualizar al servidor
 
 /****************************** */
-// PESTAÑA POSITIONS: EVENTOS DE SUS ELEMENTOS / BOTONES
-// Botón valid
-document.getElementById("valid-boton").addEventListener("click", function () {
-    var tabNumber = 0;          // El botón Valid se encuentra en Pestaña Positions, la 0 en el JSON
-    var buttonOrderNumber = 0;  // Posición del botón Valid en el orden de aparición de botones de cada pestaña (aparece el primero)
-    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "valid-boton");
 
-    clickCheckPositions();
-});
 
+
+/****************************** */
+// FUNCIONES COMUNES PARA LOS DETECTORES DE EVENTOS
 //Función para extraer el número entero del nombre de una capa (auxiliar para otras funciones)
 function obtainNumberPositionId(string) {
     // Extraer nº position del id de su botón
@@ -1290,27 +1274,6 @@ function obtainNumberPositionId(string) {
     return Number(stringNumber);        // Formato int
 }
 
-// Todos los elementos fila positions. Al clicar el segundo botón (el que contiene el icono) de la fila se identifica qué posición es
-document.querySelectorAll("#Positions > #positions > .fila button:nth-child(2)").forEach(function(element) {
-    //addEventListener sólo para el botón que se ha clicado dentro del conjunto de botones posibles de todas las filas de posiciones
-    element.addEventListener("click", function() {
-        console.log('he clicado la posición tal', this.id);
-        var tabNumber = 0;          // El panel de positions se encuentra en Pestaña Positions, la 0 en el JSON
-        var buttonOrderNumber = 1;  // Posición del panel positions en el orden de aparición de cada pestaña (comienza en 0)
-        var buttonIdNumber = obtainNumberPositionId(this.id) - 1; // Obtener el '6' de ButtonPosition6
-        jsonStatus.FilaPosition_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, this.id);
-    });
-});
-
-// Botón Update Data de la pestaña Positions
-document.getElementById("update-boton").addEventListener("click", function() {
-    var tabNumber = 0;          // El botón Update Data se encuentra en Pestaña Positions, la 0 en el JSON
-    var buttonOrderNumber = 3;  // Posición del botón Update en el orden de aparición de cada pestaña del JSON (comienza en 0)
-    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "update-boton");
-});
-
-/****************************** */
-// FUNCIONES COMUNES PARA LOS DETECTORES DE EVENTOS
 // Función para SELECTORES MÚLTIPLES 
 function getSelectedOptions(sel) {
     var opts = [], opt;
@@ -1342,308 +1305,382 @@ function getSelectedOption(sel) {
 function replaceSpaces(str) {
     return str.split(' ').join('_');
 }
+// Define and link events to its buttons only after buttons were generated by async function // Asignar eventos a los botones una vez hayan sido generados
+// This declaration implies calling the function appendAllElements()
+appendAllElements().then(function defineAllButtonEvents () {
+    // Detectar si los botones de la aplicación han sido clicados y actualizar al servidor
+    /****************************** */
+    // PESTAÑA POSITIONS: EVENTOS DE SUS ELEMENTOS / BOTONES
+    // Botón valid
+    document.getElementById("valid-boton").addEventListener("click", function () {
+        var tabNumber = 0;          // El botón Valid se encuentra en Pestaña Positions, la 0 en el JSON
+        var buttonOrderNumber = 0;  // Posición del botón Valid en el orden de aparición de botones de cada pestaña (aparece el primero)
+        jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "valid-boton");
 
+        clickCheckPositions();
+    });
 
-/****************************** */
-// PESTAÑA LAYERS: EVENTOS DE SUS ELEMENTOS / BOTONES
-// BOTONES DE VISIBILIDAD DEL SELECTOR DE CAPAS, PESTAÑA LAYERS
-// document.getElementById("ButtonLayer").addEventListener("click", function() {
+    // Todos los elementos fila positions. Al clicar el segundo botón (el que contiene el icono) de la fila se identifica qué posición es
+    document.querySelectorAll("#Positions > #positions > .fila button:nth-child(2)").forEach(function(element) {
+        //addEventListener sólo para el botón que se ha clicado dentro del conjunto de botones posibles de todas las filas de posiciones
+        element.addEventListener("click", function() {
+            console.log('he clicado la posición tal', this.id);
+            var tabNumber = 0;          // El panel de positions se encuentra en Pestaña Positions, la 0 en el JSON
+            var buttonOrderNumber = 1;  // Posición del panel positions en el orden de aparición de cada pestaña (comienza en 0)
+            var buttonIdNumber = obtainNumberPositionId(this.id) - 1; // Obtener el '6' de ButtonPosition6
+            jsonStatus.FilaPosition_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, this.id);
+        });
+    });
 
-// document.querySelectorAll("#Layers > #layer-selector > #layers-botones > .fila button:nth-child(2)").forEach(function(element) {
-// document.querySelectorAll('[id^="ButtonLayer"]').forEach(function(element) {
-document.querySelector("#Layers > #layer-selector > #layers-botones").addEventListener("click", function(evt) {
-    // e.target was the clicked element
-    //addEventListener sólo para el botón que se ha clicado dentro del conjunto de botones posibles
-    if (evt.target && (evt.target.id.startsWith("ButtonLayer") || evt.target.id.startsWith("Layer"))) {
-        var tabNumber = 1;          // El panel de selector-capa se encuentra en Pestaña Layers, la 1 en el JSON
-        var buttonOrderNumber = 0;  // Posición del panel selector en el orden de aparición de cada pestaña (comienza en 0)
-        if (evt.target.id.startsWith("ButtonLayer")) {
-            var layerId = evt.target.firstElementChild.id;  // Obtener Layer5
-        } else {
-            var layerId = evt.target.id; 
+    // Botón Update Data de la pestaña Positions
+    document.getElementById("update-boton").addEventListener("click", function() {
+        var tabNumber = 0;          // El botón Update Data se encuentra en Pestaña Positions, la 0 en el JSON
+        var buttonOrderNumber = 3;  // Posición del botón Update en el orden de aparición de cada pestaña del JSON (comienza en 0)
+        jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "update-boton");
+    });
+
+    /****************************** */
+    // PESTAÑA LAYERS: EVENTOS DE SUS ELEMENTOS / BOTONES
+    // BOTONES DE VISIBILIDAD DEL SELECTOR DE CAPAS, PESTAÑA LAYERS
+    document.querySelector("#Layers > #layer-selector > #layers-botones").addEventListener("click", function(evt) {
+        // e.target was the clicked element
+        //addEventListener sólo para el botón que se ha clicado dentro del conjunto de botones posibles
+        if (evt.target && (evt.target.id.startsWith("ButtonLayer") || evt.target.id.startsWith("Layer"))) {
+            var tabNumber = 1;          // El panel de selector-capa se encuentra en Pestaña Layers, la 1 en el JSON
+            var buttonOrderNumber = 0;  // Posición del panel selector en el orden de aparición de cada pestaña (comienza en 0)
+            if (evt.target.id.startsWith("ButtonLayer")) {
+                var layerId = evt.target.firstElementChild.id;  // Obtener Layer5
+            } else {
+                var layerId = evt.target.id; 
+            }
+            var buttonIdNumber = obtainNumberLayer(layerId) - 1; // Obtener el '6' de Layer6
+            jsonStatus.FilaSelectorCapa_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, evt.target.id);
         }
-        var buttonIdNumber = obtainNumberLayer(layerId) - 1; // Obtener el '6' de Layer6
-        jsonStatus.FilaSelectorCapa_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, evt.target.id);
-    }
-});
+    });
 
-// SELECTOR INDIVIDUAL DE CAPAS (seleccionar sólo nombre de capas)
-document.getElementById("layers-nombre").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 0; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
-});
+    // SELECTOR INDIVIDUAL DE CAPAS (seleccionar sólo nombre de capas)
+    document.getElementById("layers-nombre").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 0; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
 
-// INPUT DEL SLIDER TRAANSPARENCY, PESTAÑA LAYERS
-document.getElementById("transparency-value").addEventListener("input", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 1; // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
-    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
-});
+        // Update user interface with layer properties
+        showLayerProperties();
+    });
 
-// SLIDER CON INPUT DE TRANSPARENCY, PESTAÑA LAYERS
-document.getElementById("slide-transparency").addEventListener("change", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 1; // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
-    var slider_value = this.value;
-    jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value);
-});
+    // INPUT DEL SLIDER TRAANSPARENCY, PESTAÑA LAYERS
+    document.getElementById("transparency-value").addEventListener("input", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 1; // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+        jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
 
-// SLIDER SIN INPUT DE MAX THRESHOLD
-document.getElementById("slide-min-threshold").addEventListener("change", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 2; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 0;   // Nº orden dentro de los elementos del PANEL en el JSON
-    var slider_value = this.value;
-    jsonStatus.SliderWithoutInput_onchange(tabNumber, elementOrderNumber, panelOrderNumber, slider_value);
-});
+        // Modify value of slider and number (they're synchronized)
+        transparencySliderInput();
+    });
 
-// SLIDER SIN INPUT DE MAX THRESHOLD
-document.getElementById("slide-max-threshold").addEventListener("change", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 2; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
-    var slider_value = this.value;
-    jsonStatus.SliderWithoutInput_onchange(tabNumber, elementOrderNumber, panelOrderNumber, slider_value);
-});
+    // SLIDER CON INPUT DE TRANSPARENCY, PESTAÑA LAYERS
+    document.getElementById("slide-transparency").addEventListener("change", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 1; // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+        var slider_value = this.value;
+        jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value);
 
-// SELECTOR INDIVIDUAL DE DATA TYPE PRINT, PESTAÑA LAYERS
-document.getElementById("data-type").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 2;  // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this, panelOrderNumber);
-});
+        // Modify value of slider and number (they're synchronized)
+        transparencySliderValue();
+    });
 
-// CHECKBOX DE PIXEL TRANSPARENCY
-document.getElementById("pixel-transparency").addEventListener("change", function () {
-    var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 0;   // Nº orden dentro de los elementos del PANEL en el JSON
-    jsonStatus.Checkbox_onchange(tabNumber, elementOrderNumber, panelOrderNumber);
-});
+    // SLIDER SIN INPUT DE MAX THRESHOLD
+    document.getElementById("slide-min-threshold").addEventListener("change", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 2; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 0;   // Nº orden dentro de los elementos del PANEL en el JSON
+        var slider_value = this.value;
+        jsonStatus.SliderWithoutInput_onchange(tabNumber, elementOrderNumber, panelOrderNumber, slider_value);
+    });
 
-// INPUT DEL SLIDER GAUSSIAN THRESHOLD
-document.getElementById("gaussian-threshold-value").addEventListener("input", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
-    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
-});
+    // SLIDER SIN INPUT DE MAX THRESHOLD
+    document.getElementById("slide-max-threshold").addEventListener("change", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 2; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
+        var slider_value = this.value;
+        jsonStatus.SliderWithoutInput_onchange(tabNumber, elementOrderNumber, panelOrderNumber, slider_value);
+    });
 
-// SLIDER CON INPUT DE GAUSSIAN THRESHOLD
-document.getElementById("gaussian-threshold").addEventListener("change", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
-    var slider_value = this.value;
-    jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
-});
+    // SELECTOR INDIVIDUAL DE DATA TYPE PRINT, PESTAÑA LAYERS
+    document.getElementById("data-type").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 2;  // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this, panelOrderNumber);
+    });
 
-// INPUT DEL SLIDER BIG GAUSSIAN SIZE
-document.getElementById("big-gaussian-value").addEventListener("input", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
-    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
-});
+    // CHECKBOX DE PIXEL TRANSPARENCY
+    document.getElementById("pixel-transparency").addEventListener("change", function () {
+        var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 0;   // Nº orden dentro de los elementos del PANEL en el JSON
+        jsonStatus.Checkbox_onchange(tabNumber, elementOrderNumber, panelOrderNumber);
+    });
 
-// SLIDER CON INPUT DE BIG GAUSSIAN SIZE
-document.getElementById("big-gaussian-size").addEventListener("change", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
-    var slider_value = this.value;
-    jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
-});
+    // INPUT DEL SLIDER GAUSSIAN THRESHOLD
+    document.getElementById("gaussian-threshold-value").addEventListener("input", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
+        jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
 
-// INPUT DEL SLIDER SMALL GAUSSIAN SIZE
-document.getElementById("small-gaussian-value").addEventListener("input", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 3;   // Nº orden dentro de los elementos del PANEL en el JSON
-    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
-});
+        // Modify its slider value
+        document.getElementById("gaussian-threshold").value = this.value;
+    });
 
-// SLIDER CON INPUT DE SMALL GAUSSIAN SIZE
-document.getElementById("small-gaussian-size").addEventListener("change", function() {
-    var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
-    var panelOrderNumber = 3;   // Nº orden dentro de los elementos del PANEL en el JSON
-    var slider_value = this.value;
-    jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
-});
+    // SLIDER CON INPUT DE GAUSSIAN THRESHOLD
+    document.getElementById("gaussian-threshold").addEventListener("change", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 1;   // Nº orden dentro de los elementos del PANEL en el JSON
+        var slider_value = this.value;
+        jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
 
-// SELECTOR INDIVIDUAL INTERPOLATION TYPE
-document.getElementById("add-aux-layers").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
-    var elementOrderNumber = 5; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
-});
+        // Set default value
+        // this.value = 250;
 
-// BOTÓN REMOVE SELECTED LAYER DE LA PESTAÑA LAYERS
-document.getElementById("remove-selected-layer").addEventListener("click", function() {
-    var tabNumber = 1;          // El botón Remove Selected Layer se encuentra en Pestaña Layers, la 1 en el JSON (comienza en 0)
-    var buttonOrderNumber = 6;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
-    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-selected-layer");
+        // Modify its input value
+        document.getElementById("gaussian-threshold-value").value = this.value;
+    });
 
-    // Seleccionar el índice y nombre de la capa seleccionada
-    var removedIndex = document.getElementById("layers-nombre").selectedIndex; //selectedIndex es dinámico, se reindexa al borrar una opción
-    let removedLayerName = document.getElementById("layers-nombre").options[removedIndex].text;
+    // INPUT DEL SLIDER BIG GAUSSIAN SIZE
+    document.getElementById("big-gaussian-value").addEventListener("input", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
+        jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
 
-    // // Get the path of the layer image to be removed
-    // for (let i = 0; i < cache_image_path.length; i++) {
-    //     if (cache_image_path[i].layerName === removedLayerName) {
-    //         var removedLayerPath =  cache_image_path[i].layerStaticPath;
-    //     }
-    // }
+        // Modify its slider value
+        document.getElementById("big-gaussian-size").value = this.value;
+    });
 
-    // Informar al servidor para que elimine archivo de imagen de capa eliminada. No se espera respuesta
-    // fetch("/delete_layer", {headers: {"Content-Type": "application/json"}, body: JSON.stringify(removedLayerPath), credentials: "include"});
+    // SLIDER CON INPUT DE BIG GAUSSIAN SIZE
+    document.getElementById("big-gaussian-size").addEventListener("change", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 2;   // Nº orden dentro de los elementos del PANEL en el JSON
+        var slider_value = this.value;
+        jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
 
-    // Delete layer from the cache
-    console.log('cache antes del filtro de delete', cache_image_path);
-    cache_image_path = cache_image_path.filter(cache_image_path => cache_image_path.layerName !== removedLayerName);
-    console.log('cache ha quedaado así despues del filtro de delete', cache_image_path, 'nombre buscado', removedLayerName, removedLayerPath);
+        // Set default value
+        // this.value = 25;
 
-    // Eliminar botones y nombre de la interfaz asociados a esa capa
-    removeLayer(removedIndex);    
-});
+        // Modify its input value
+        document.getElementById("big-gaussian-value").value = this.value;
+    });
 
-// BOTÓN REMOVE SELECTED LAYER DE LA PESTAÑA LAYERS
-document.getElementById("remove-all-layers").addEventListener("click", function() {
-    var tabNumber = 1;          // El botón Remove Selected Layer se encuentra en Pestaña Layers, la 1 en el JSON (comienza en 0)
-    var buttonOrderNumber = 7;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
-    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-all-layers");
-});
+    // INPUT DEL SLIDER SMALL GAUSSIAN SIZE
+    document.getElementById("small-gaussian-value").addEventListener("input", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 3;   // Nº orden dentro de los elementos del PANEL en el JSON
+        jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, this);
 
-/****************************** */
-// PESTAÑA XRF: EVENTOS DE SUS ELEMENTOS / BOTONES
-// SELECTOR MÚLTIPLE DE ELEMENTS DE XRF
-document.getElementById("select-elements").addEventListener("change", function() {
-    var selectedOptions = getSelectedOptions(this);
-    var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
-    var elementOrderNumber = 0;  // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, this);
-});
+        // Modify its slider value
+        document.getElementById("small-gaussian-size").value = this.value;
+    });
 
-// VIEW NAME TEXT INPUT DE XRF
-document.getElementById("view-name-xrf").addEventListener("blur", function() {
-    var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
-    var elementOrderNumber = 1; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
-});
+    // SLIDER CON INPUT DE SMALL GAUSSIAN SIZE
+    document.getElementById("small-gaussian-size").addEventListener("change", function() {
+        var tabNumber = 1;          // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del PANEL que contiene este elemento en el JSON
+        var panelOrderNumber = 3;   // Nº orden dentro de los elementos del PANEL en el JSON
+        var slider_value = this.value;
+        jsonStatus.SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber);
 
-// SELECTOR INDIVIDUAL INTERPOLATION TYPE
-document.getElementById("interpolation").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
-    var elementOrderNumber = 2; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
-});
+        // Set default value
+        // this.value = 13;
 
-// CHECKBOX NORMALIZATION
-document.getElementById("normalization").addEventListener("change", function () {
-    var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Checkbox_onchange(tabNumber, elementOrderNumber);
-});
+        // Modify its input value
+        document.getElementById("small-gaussian-value").value = this.value;
+    });
 
-// SELECTOR INDIVIDUAL POS.NORMALIZATION
-document.getElementById("pos-normalization").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
-    var elementOrderNumber = 4; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
-});
+    // SELECTOR INDIVIDUAL INTERPOLATION TYPE
+    document.getElementById("add-auxiliary-layers").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 1;      // Pestaña Layers en el JSON, empezando en 0
+        var elementOrderNumber = 5; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+    });
 
-// SELECTOR INDIVIDUAL PROBE DE XRF
-document.getElementById("probe-xrf").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
-    var elementOrderNumber = 5; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
-});
+    // BOTÓN REMOVE SELECTED LAYER DE LA PESTAÑA LAYERS
+    document.getElementById("remove-selected-layer").addEventListener("click", function() {
+        var tabNumber = 1;          // El botón Remove Selected Layer se encuentra en Pestaña Layers, la 1 en el JSON (comienza en 0)
+        var buttonOrderNumber = 6;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+        jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-selected-layer");
 
-// SELECTOR INDIVIDUAL PALETTE DE XRF
-document.getElementById("palette-xrf").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
-    var elementOrderNumber = 6; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
-});
+        // Seleccionar el índice y nombre de la capa seleccionada
+        var removedIndex = document.getElementById("layers-nombre").selectedIndex; //selectedIndex es dinámico, se reindexa al borrar una opción
+        let removedLayerName = document.getElementById("layers-nombre").options[removedIndex].text;
 
-// BOTÓN CREATE SOME MAPS DE LA PESTAÑA XRF
-document.getElementById("create-some-maps").addEventListener("click", function() {
-    var tabNumber = 2;          // El botón Create Some Maps de XRF se encuentra en Pestaña XRF, la 2 en el JSON (comienza en 0)
-    var buttonOrderNumber = 8;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
-    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-some-maps");
+        // // Get the path of the layer image to be removed
+        // for (let i = 0; i < cache_image_path.length; i++) {
+        //     if (cache_image_path[i].layerName === removedLayerName) {
+        //         var removedLayerPath =  cache_image_path[i].layerStaticPath;
+        //     }
+        // }
 
-    // Obtener todos los elementos seleccionados (uno o múltiples elementos seleccionados)
-    var collection = document.getElementById("select-elements").selectedOptions;
+        // Informar al servidor para que elimine archivo de imagen de capa eliminada. No se espera respuesta
+        // fetch("/delete_layer", {headers: {"Content-Type": "application/json"}, body: JSON.stringify(removedLayerPath), credentials: "include"});
 
-    // Crear una nueva capa por cada elemento seleccionado en la interfaz
-    for (var i = 0; i < collection.length; i++) {
-        // Inform the server, generate temp image, create buttons of layer in UI and save it in cache dictionary
-        addNewLayer(collection[i].value);
-    }
-});
+        // Delete layer from the cache
+        console.log('cache antes del filtro de delete', cache_image_path);
+        cache_image_path = cache_image_path.filter(cache_image_path => cache_image_path.layerName !== removedLayerName);
+        // console.log('cache ha quedaado así despues del filtro de delete', cache_image_path, 'nombre buscado', removedLayerName, removedLayerPath);
 
-// BOTÓN CREATE SOME MAPS DE LA PESTAÑA XRF
-document.getElementById("create-all-maps").addEventListener("click", function() {
-    var tabNumber = 2;          // El botón Create All Maps de XRF se encuentra en Pestaña XRF, la 2 en el JSON (comienza en 0)
-    var buttonOrderNumber = 9;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
-    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-all-maps");
-});
+        // Eliminar botones y nombre de la interfaz asociados a esa capa
+        removeLayer(removedIndex);    
+    });
 
-/****************************** */
-// PESTAÑA COMPOUNDS: EVENTOS DE SUS ELEMENTOS / BOTONES
-// SELECTOR MÚLTIPLE DE COMPOUNDS
-document.getElementById("select-compounds").addEventListener("change", function() {
-    var selectedOptions = getSelectedOptions(this);
-    var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
-    var elementOrderNumber = 0;  // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, this);
-});
+    // BOTÓN REMOVE SELECTED LAYER DE LA PESTAÑA LAYERS
+    document.getElementById("remove-all-layers").addEventListener("click", function() {
+        var tabNumber = 1;          // El botón Remove Selected Layer se encuentra en Pestaña Layers, la 1 en el JSON (comienza en 0)
+        var buttonOrderNumber = 7;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+        jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-all-layers");
 
-// VIEW NAME TEXT INPUT DE COMPOUNDS
-document.getElementById("view-name-compounds").addEventListener("input", function() {
-    var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
-    var elementOrderNumber = 1; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
-});
+        // Remove all layers from the UI
+        removeAllLayers();
+    });
 
-// SELECTOR INDIVIDUAL PROBE DE COMPOUNDS
-document.getElementById("probe-compounds").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
-    var elementOrderNumber = 2; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
-});
+    /****************************** */
+    // PESTAÑA XRF: EVENTOS DE SUS ELEMENTOS / BOTONES
+    // SELECTOR MÚLTIPLE DE ELEMENTS DE XRF
+    document.getElementById("select-elements").addEventListener("change", function() {
+        var selectedOptions = getSelectedOptions(this);
+        var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
+        var elementOrderNumber = 0;  // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, this);
+    });
 
-// SELECTOR INDIVIDUAL PALETTE DE COMPOUNDS
-document.getElementById("palette-compounds").addEventListener("change", function() {
-    var selectedOption = getSelectedOption(this);
-    var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
-    var elementOrderNumber = 3; // Nº orden del elemento en la pestaña en el JSON
-    jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
-});
+    // VIEW NAME TEXT INPUT DE XRF
+    document.getElementById("view-name-xrf").addEventListener("blur", function() {
+        var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
+        var elementOrderNumber = 1; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
+    });
 
-// BOTÓN CREATE COMBINATION MAPS DE LA PESTAÑA COMPOUNDS
-document.getElementById("create-combination-maps").addEventListener("click", function() {
-    var tabNumber = 3;          // El botón Create Combination Maps de Compounds se encuentra en Pestaña Compounds, la 3 en el JSON (comienza en 0)
-    var buttonOrderNumber = 5;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
-    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-combination-maps");
-});
+    // SELECTOR INDIVIDUAL INTERPOLATION TYPE
+    document.getElementById("interpolation").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
+        var elementOrderNumber = 2; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+    });
 
-// BOTÓN CREATE ALL INDIVIDUAL MAPS DE LA PESTAÑA COMPOUNDS
-document.getElementById("create-all-individual-maps").addEventListener("click", function() {
-    var tabNumber = 3;          // El botón Create All individual Maps de Compounds se encuentra en Pestaña Compounds, la 3 en el JSON (comienza en 0)
-    var buttonOrderNumber = 6;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
-    jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-all-individual-maps");
+    // CHECKBOX NORMALIZATION
+    document.getElementById("normalization").addEventListener("change", function () {
+        var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Checkbox_onchange(tabNumber, elementOrderNumber);
+    });
+
+    // SELECTOR INDIVIDUAL POS.NORMALIZATION
+    document.getElementById("pos-normalization").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 2;      // Pestaña XRF en el JSON, empezando en 0
+        var elementOrderNumber = 4; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+    });
+
+    // SELECTOR INDIVIDUAL PROBE DE XRF
+    document.getElementById("probe-xrf").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
+        var elementOrderNumber = 5; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+    });
+
+    // SELECTOR INDIVIDUAL PALETTE DE XRF
+    document.getElementById("palette-xrf").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 2;      // Pestaña Compounds en el JSON, empezando en 0
+        var elementOrderNumber = 6; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+    });
+
+    // BOTÓN CREATE SOME MAPS DE LA PESTAÑA XRF
+    document.getElementById("create-some-maps").addEventListener("click", function() {
+        var tabNumber = 2;          // El botón Create Some Maps de XRF se encuentra en Pestaña XRF, la 2 en el JSON (comienza en 0)
+        var buttonOrderNumber = 8;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+        jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-some-maps");
+
+        // Obtener todos los elementos seleccionados (uno o múltiples elementos seleccionados)
+        var collection = document.getElementById("select-elements").selectedOptions;
+
+        // Crear una nueva capa por cada elemento seleccionado en la interfaz
+        for (var i = 0; i < collection.length; i++) {
+            // Inform the server, generate temp image, create buttons of layer in UI and save it in cache dictionary
+            addNewLayer(collection[i].value);
+        }
+    });
+
+    // BOTÓN CREATE SOME MAPS DE LA PESTAÑA XRF
+    document.getElementById("create-all-maps").addEventListener("click", function() {
+        var tabNumber = 2;          // El botón Create All Maps de XRF se encuentra en Pestaña XRF, la 2 en el JSON (comienza en 0)
+        var buttonOrderNumber = 9;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+        jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-all-maps");
+
+        // Crear una nueva capa para TODOS los elementos en la interfaz
+        for (var i = 0; i < document.getElementById("select-elements").length; i++) {
+            // Inform the server, generate temp image, create buttons of layer in UI and save it in cache dictionary
+            addNewLayer(document.getElementById("select-elements")[i].value);
+        }
+    });
+
+    /****************************** */
+    // PESTAÑA COMPOUNDS: EVENTOS DE SUS ELEMENTOS / BOTONES
+    // SELECTOR MÚLTIPLE DE COMPOUNDS
+    document.getElementById("select-compounds").addEventListener("change", function() {
+        var selectedOptions = getSelectedOptions(this);
+        var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
+        var elementOrderNumber = 0;  // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, this);
+    });
+
+    // VIEW NAME TEXT INPUT DE COMPOUNDS
+    document.getElementById("view-name-compounds").addEventListener("input", function() {
+        var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
+        var elementOrderNumber = 1; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.TextInput_oninput(tabNumber, elementOrderNumber, undefined, this);
+    });
+
+    // SELECTOR INDIVIDUAL PROBE DE COMPOUNDS
+    document.getElementById("probe-compounds").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
+        var elementOrderNumber = 2; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+    });
+
+    // SELECTOR INDIVIDUAL PALETTE DE COMPOUNDS
+    document.getElementById("palette-compounds").addEventListener("change", function() {
+        var selectedOption = getSelectedOption(this);
+        var tabNumber = 3;      // Pestaña Compounds en el JSON, empezando en 0
+        var elementOrderNumber = 3; // Nº orden del elemento en la pestaña en el JSON
+        jsonStatus.Select_onchange(tabNumber, elementOrderNumber, selectedOption, this);
+    });
+
+    // BOTÓN CREATE COMBINATION MAPS DE LA PESTAÑA COMPOUNDS
+    document.getElementById("create-combination-maps").addEventListener("click", function() {
+        var tabNumber = 3;          // El botón Create Combination Maps de Compounds se encuentra en Pestaña Compounds, la 3 en el JSON (comienza en 0)
+        var buttonOrderNumber = 5;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+        jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-combination-maps");
+    });
+
+    // BOTÓN CREATE ALL INDIVIDUAL MAPS DE LA PESTAÑA COMPOUNDS
+    document.getElementById("create-all-individual-maps").addEventListener("click", function() {
+        var tabNumber = 3;          // El botón Create All individual Maps de Compounds se encuentra en Pestaña Compounds, la 3 en el JSON (comienza en 0)
+        var buttonOrderNumber = 6;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
+        jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "create-all-individual-maps");
+    });
 });
 
 async function addNewLayer (selectedElement) {

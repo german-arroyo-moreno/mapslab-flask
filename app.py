@@ -92,9 +92,8 @@ def main_app(id):
 
 # Devolver objeto User a partir de string con su ID almacenado
 @login_manager.user_loader
-def load_user(user_id):
+def load_user(user_id): # It has to receive a string!
     for user in users:
-        print('Tipos de user.id y user_id por parámetro: ', type(str(user.id)), type(user_id))
         if str(user.id) == user_id: # string #id
             return user
     return None
@@ -703,7 +702,6 @@ def get_output_image_name(parameters):
     output_image_name = parameters["Output_name"] + "_" + parameters["Element_name"] + "_" + "RGB" + "_" + "c123p12" + "_N" + normalization_yesno + \
                         "_" + parameters["position_normalization"].rstrip(parameters["position_normalization"][-1]) + "_P" + parameters["probe"] +  \
                         "_NP" + "100" + ".png" # for images
-    print("adivino que el output name va a ser:", output_image_name)
     return str(output_image_name)
 
 # Auxiliary function to add and convert new parameters to original string
@@ -762,7 +760,7 @@ def exec_server_parameters(parameters):
 
     os.system(param)
 
-#Load only once in app
+# Delete images from static folder
 def delete_static_images():
     try:
         # Get a list of all files in /static/images folder # Obtener una lista de todos los archivos en la carpeta /static/images
@@ -777,6 +775,7 @@ def delete_static_images():
     except OSError as error:
         print(f"Error Type: {error}.\n Images in static folder not found")
 
+#Load only once in app
 with app.app_context():
     #logout_user()  # Pop previous users sessions # Error if working outside of request context
     delete_static_images()
