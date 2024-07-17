@@ -28,6 +28,8 @@ PROJECTS_DIR = './projects/project_'
 PROJECT_FILES_CSV = 'proj_files.csv'
 PROJECT_FILES_FIELDNAMES = ['file_id', 'file_name']
 
+USERS_DIR = './users/user_'
+
 JSON_LOCATION = './static/data/json/botones.json'
 STATIC_IMAGES_DIR = './static/images'
 
@@ -86,8 +88,22 @@ def open_project():
     return render_template('open-create.html', obras=projects, reader_users=readers_of_shown_projects, authors=authors_of_shown_projects, author_projects=author_projects)
 
 @app.route("/app/<id>")
-#@login_required
+@login_required
 def main_app(id):
+    '''
+    # Check if user directory exists
+    if not os.path.isdir(USERS_DIR + current_user.id):
+        return jsonify({'error': 'Directorio no encontrado'}), 404
+
+    try:
+        new_proj_folder = PROJECTS_DIR + str(id_new_project)
+        os.mkdir(new_proj_folder)
+
+    except FileExistsError as error:
+        print(f"Error Type: {error}.\n Project with id number {id_new_project} already exists")
+    except FileNotFoundError as error:
+        print(f"Error Type: {error}.\n Project folder not found")
+    '''
     return render_template('main-app.html', project_id=id)
 
 # Devolver objeto User a partir de string con su ID almacenado
@@ -184,9 +200,23 @@ def get_projects_authors_readers():
 @app.route("/receive", methods = ['POST', 'GET'])
 def receiver():
     data = request.get_json(force=True)
-    data["Al servidor ha llegado"] = "este JSON"
-    print(data)
+    print('json recibido en servidor', data)
+    '''
+    # If user folder doesn't exist, create it and copy the json file inside it
+    if not os.path.isdir(USERS_DIR + current_user.id):
+        try:
+            os.mkdir(USERS_DIR + current_user.id)
+            copy_file(JSON_LOCATION, USERS_DIR + current_user.id + '/botones_' + current_user.id + '.json')
 
+        except FileNotFoundError as error:
+            print(f"Error Type: {error}.\n User folder not found")
+
+    # Overwrite the json file inside the user folder with the new json received from the client
+    with open(USERS_DIR + current_user.id + '/botones_' + current_user.id + '.json', "w") as user_buttons_json:
+        json.dump(data, user_buttons_json)
+
+    print('data dumpeada en archivo', (USERS_DIR + current_user.id + '/botones_' + current_user.id + '.json:'), data)
+    '''
     if not request.is_json:
         print('No reconoce que sea application/json archivo ')
     else:
@@ -644,6 +674,8 @@ def exec_server():
     # If the image was already generated and is in the cache
     else:
         parameters["temp_filename_path"] = cache.get(output_image_name)
+
+        # Register 
 
     # Send back transformed data to user 
     return jsonify(parameters)

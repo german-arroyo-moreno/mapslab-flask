@@ -167,8 +167,9 @@ class jsonStatus {
         }
 
         // Enviar al servidor nuevo JSON modificado - parcialmente en el json de cambios
-        let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber]);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        var elementoJson = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber]);
+        console.log('El front le he enviado al server la modificación: ', elementoJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
     }
 
     static async Checkbox_onchange(tabNumber, elementOrderNumber, panelOrderNumber) {
@@ -189,8 +190,9 @@ class jsonStatus {
         }
         console.log(botonesJson[tabNumber].Container[elementOrderNumber]);
         // Enviar al servidor nuevo JSON modificado
-        let modificacion = await myButtonEvt("/receive", elementoJson);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        elementoJson = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', elementoJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
     }
 
     static async createJson_layer(buttonLayerId){
@@ -234,8 +236,9 @@ class jsonStatus {
         clickCheckPosition(posNumber);      // Esta función requiere pasarle formato 'Position4'
 
         // Enviar al servidor nuevo JSON modificado
-        let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber]);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        var elementoJson = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber]);
+        console.log('El front le he enviado al server la modificación: ', elementoJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
     }
 
     static async FilaSelectorCapa_onclick(tabNumber, buttonOrderNumber, buttonIdNumber, buttonid) {
@@ -257,8 +260,25 @@ class jsonStatus {
         clickCheckLayer(layNumber);         // Esta función requiere pasarle formato 'Layer4'
 
         // Enviar al servidor nuevo JSON modificado
-        let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber]);
-        console.log('El front le he enviado al server la modificación por presionar botón de filacapa: ', modificacion);
+        var elementoJson = await myButtonEvt("/receive", botonesJson[tabNumber].Container[buttonOrderNumber].components[buttonIdNumber]);
+        console.log('El front le he enviado al server la modificación por presionar botón de filacapa: ', elementoJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
+    }
+
+    static async removeJson_layer(buttonLayerId){
+        // Get the buttons and the values of the json file
+        var jsObjectLayerButton = botonesJson[1].Container[0].components;
+        var jsObjectLayerName = botonesJson[1].Container[0].values;
+        console.log('Qué elemento del array eliminar', buttonLayerId);
+
+        // Remove button and value from json array
+        jsObjectLayerButton = jsObjectLayerButton.slice(buttonLayerId - 1, 1);
+        console.log('jsonObjectLayerButton tras slice', jsObjectLayerButton);
+        jsObjectLayerName = jsObjectLayerName.slice(buttonLayerId - 1, 1);
+
+        // Send it to the server and MODIFY json in JS
+        botonesJson[1].Container[0].components[jsObjectLayerButton.length - 1] = await myButtonEvt("/receive", jsObjectLayerButton[jsObjectLayerButton.length - 1]);
+        botonesJson[1].Container[0].values[jsObjectLayerName.length - 1] = await myButtonEvt("/receive", jsObjectLayerName[jsObjectLayerName.length - 1]);
     }
 
     static async SelectMultiple_onchange(tabNumber, elementOrderNumber, selectedOptions, selectObject) {
@@ -276,8 +296,9 @@ class jsonStatus {
         }
 
         // Enviar modificación JSON al servidor del COMPONENTE SELECT COMPLETO
-        let modificacion = await myButtonEvt("/receive", botonesJson[tabNumber].Container[elementOrderNumber]);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        var elementoJson = await myButtonEvt("/receive", botonesJson[tabNumber].Container[elementOrderNumber]);
+        console.log('El front le he enviado al server la modificación: ', elementoJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
 
         // Actualizar elemento HTML
         // Realmente clicar una opción aún no tiene un efecto inmediato
@@ -300,14 +321,19 @@ class jsonStatus {
         }
         // Sólo la opción seleccionada se marca a clicado
         elementoJson.values[selectedOption].status = "clicked";
-        
 
         // Actualizar elemento HTML
         selectObject.options[selectedOption].selected = "selected";
 
-        // Enviar modificación JSON al servidor del COMPONENTE SELECT COMPLETO
-        let modificacion = await myButtonEvt("/receive", elementoJson);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        // Enviar modificación de JSON al servidor con COMPONENTE SELECT actualizado
+        if (panelOrderNumber == undefined) {
+            botonesJson[tabNumber].Container[elementOrderNumber] = elementoJson;
+        } else {
+            botonesJson[tabNumber].Container[elementOrderNumber].components[panelOrderNumber] = elementoJson;
+        }
+        botonesJson = await myButtonEvt("/receive", [...botonesJson]);
+        console.log('El front le he enviado al server la modificación: ', botonesJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
     }
 
     static async SliderAndInput_onchange(tabNumber, elementOrderNumber, slider_value, panelOrderNumber) {
@@ -322,8 +348,9 @@ class jsonStatus {
         // ...Restaurar valores en slider + input...
 
         // Enviar al servidor nuevo JSON modificado
-        let modificacion = await myButtonEvt("/receive", elementoJson);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        elementoJson = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', elementoJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
     }
 
     static async SliderWithoutInput_onchange(tabNumber, elementOrderNumber, panelOrderNumber, slider_value) {
@@ -336,8 +363,9 @@ class jsonStatus {
         // ...Restaurar valores en slider...
 
         // Enviar al servidor nuevo JSON modificado
-        let modificacion = await myButtonEvt("/receive", elementoJson);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        elementoJson = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', elementoJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
     }
 
     static async TextInput_oninput(tabNumber, elementOrderNumber, panelOrderNumber, inputObject) {
@@ -353,8 +381,9 @@ class jsonStatus {
         // Si estaba conectado a un slider de tipo slider-and-input, cambiar valor de su slider también
 
         // Enviar al servidor nuevo JSON modificado
-        let modificacion = await myButtonEvt("/receive", elementoJson);
-        console.log('El front le he enviado al server la modificación: ', modificacion);
+        elementoJson = await myButtonEvt("/receive", elementoJson);
+        console.log('El front le he enviado al server la modificación: ', elementoJson);
+        console.log('Cómo va el json entero', [...botonesJson]);
     }
 }
 
@@ -780,7 +809,51 @@ function showLayerProperties() {
 /************************************************ */
 // PESTAÑA LAYERS: Botón de Remove Selected Layer
 // Función auxiliar que elimina la capa del índice indicado
-function removeLayer (index) {
+function removeLayer (removedIndex) {
+    // Seleccionar el índice y nombre de la capa seleccionada
+    // var removedIndex = document.getElementById("layers-nombre").selectedIndex; //selectedIndex es dinámico, se reindexa al borrar una opción
+    let removedLayerName = document.getElementById("layers-nombre").options[removedIndex].text;
+
+    // // Get the path of the layer image to be removed
+    // for (let i = 0; i < cache_image_path.length; i++) {
+    //     if (cache_image_path[i].layerName === removedLayerName) {
+    //         var removedLayerPath =  cache_image_path[i].layerStaticPath;
+    //     }
+    // }
+
+    // Informar al servidor para que elimine archivo de imagen de capa eliminada. No se espera respuesta
+    // fetch("/delete_layer", {headers: {"Content-Type": "application/json"}, body: JSON.stringify(removedLayerPath), credentials: "include"});
+
+    // Delete layer from the cache
+    console.log('cache antes del filtro de delete', cache_image_path);
+    cache_image_path = cache_image_path.filter(cache_image_path => cache_image_path.layerName !== removedLayerName);
+    console.log('cache ha quedaado así despues del filtro de delete', cache_image_path, 'nombre buscado', removedLayerName);//, removedLayerPath);
+
+    removeLayerButtons(removedIndex);
+    removeLayerImage(removedIndex);
+}
+
+function removeLayerImage (removedIndex) {
+    // Delete 1 layer image from visualization with Three.js
+    arrayLayers.slice(removedIndex, 1);
+    materials[removedIndex].transparent = true;
+    var texture = materials[removedIndex].map;
+    texture.dispose();
+    materials.slice(removedIndex + 1, 1);
+    materials[removedIndex].dispose();
+
+    // Remove one layer from BufferGeometry array group
+    plano.clearGroups();
+    for (let i = 0; i < materials.length; i++) {
+        plano.addGroup(0, Infinity, i);
+    }
+
+    // Add again new mesh to the scene
+    mesh3 = new THREE.Mesh( plano, materials );
+    scene.add( mesh3 );
+}
+
+function removeLayerButtons (index) {
     // Eliminar el nombre de la capa seleccionada
     var selectLayers = document.getElementById("layers-nombre");
     selectLayers.remove(index);
@@ -795,6 +868,9 @@ function removeLayer (index) {
     // Eliminar los botones asociados a la capa eliminada
     var botonesCapa = document.getElementById("layers-botones").children.item(`${index + 1}`); // Los botones no se reindexan
     botonesCapa.remove();
+
+    // Remove button from JSON
+    jsonStatus.removeJson_layer(index);
 }
 
 /************************************************ */
@@ -1517,26 +1593,8 @@ appendAllElements().then(function defineAllButtonEvents () {
         var buttonOrderNumber = 6;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
         jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-selected-layer");
 
-        // Seleccionar el índice y nombre de la capa seleccionada
+        // Eliminar botones y nombre de la interfaz asociados a esa capa, la imagen de visualización y de Three.js y de la caché
         var removedIndex = document.getElementById("layers-nombre").selectedIndex; //selectedIndex es dinámico, se reindexa al borrar una opción
-        let removedLayerName = document.getElementById("layers-nombre").options[removedIndex].text;
-
-        // // Get the path of the layer image to be removed
-        // for (let i = 0; i < cache_image_path.length; i++) {
-        //     if (cache_image_path[i].layerName === removedLayerName) {
-        //         var removedLayerPath =  cache_image_path[i].layerStaticPath;
-        //     }
-        // }
-
-        // Informar al servidor para que elimine archivo de imagen de capa eliminada. No se espera respuesta
-        // fetch("/delete_layer", {headers: {"Content-Type": "application/json"}, body: JSON.stringify(removedLayerPath), credentials: "include"});
-
-        // Delete layer from the cache
-        console.log('cache antes del filtro de delete', cache_image_path);
-        cache_image_path = cache_image_path.filter(cache_image_path => cache_image_path.layerName !== removedLayerName);
-        // console.log('cache ha quedaado así despues del filtro de delete', cache_image_path, 'nombre buscado', removedLayerName, removedLayerPath);
-
-        // Eliminar botones y nombre de la interfaz asociados a esa capa
         removeLayer(removedIndex);    
     });
 
@@ -1546,7 +1604,7 @@ appendAllElements().then(function defineAllButtonEvents () {
         var buttonOrderNumber = 7;  // Nº orden de elemento en la pestaña en el JSON (comienza en 0)
         jsonStatus.Button_onclick(tabNumber, buttonOrderNumber, "remove-all-layers");
 
-        // Remove all layers from the UI
+        // Remove all layers from the UI (buttons and images)
         removeAllLayers();
     });
 
